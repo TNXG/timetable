@@ -39,7 +39,7 @@ export function issueUrl(info: FeedbackInfo): string {
     `系统猜测：${info.system ? SYSTEM_LABEL[info.system] : '未知'}`,
     `版本：${info.version || '未知'}`,
     '',
-    '（可补充：页面截图、课表结构说明）',
+    '（可补充：页面截图、课表结构说明；内置浏览器右上「更多 → 导出页面调试包」得到的 .html 文件请发到 Shuakami@sdjz.wiki）',
   ].join('\n')
   const q = new URLSearchParams({ title: `教务导入未识别：${page}`, body, labels: 'edu-import' })
   return `https://github.com/${REPO}/issues/new?${q.toString()}`

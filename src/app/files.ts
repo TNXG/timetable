@@ -44,17 +44,22 @@ export function currentIcs(): { text: string; name: string } | null {
 export async function shareIcs(snap: Snapshot | null = store.snapshot()): Promise<boolean> {
   const f = snap ? icsOf(snap) : null
   if (!f) return false
+  await shareText(f, ICS_MIME)
+  return true
+}
+
+/** 任意文本文件走系统分享面板；浏览器里直接下载 */
+export async function shareText(f: { text: string; name: string }, mime: string): Promise<void> {
   if (!filesSupported()) {
-    const blob = new Blob([f.text], { type: ICS_MIME })
+    const blob = new Blob([f.text], { type: mime })
     const a = document.createElement('a')
     a.href = URL.createObjectURL(blob)
     a.download = f.name
     a.click()
     URL.revokeObjectURL(a.href)
-    return true
+    return
   }
-  await TtFiles.share({ text: f.text, name: f.name, mime: ICS_MIME })
-  return true
+  await TtFiles.share({ text: f.text, name: f.name, mime })
 }
 
 function isCalendarText(text: string | undefined): text is string {

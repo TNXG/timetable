@@ -1399,7 +1399,7 @@ export function DateSheet({ value, title = '日期', onPick, onClose }: { value:
       header={<SheetHead title={title} sub={`${Number(d.slice(0, 4))}年${Number(d.slice(5, 7))}月${Number(d.slice(8))}日 ${WD[weekdayOf(d)]}`} trail={<SheetClose onClick={() => dismiss.current?.()} />} />}
       footer={<div className="px-5 pt-2"><PrimaryButton onClick={() => { onPick(d); dismiss.current?.() }}>确定</PrimaryButton></div>}
     >
-      <Calendar value={d} onChange={setD} />
+      <Calendar value={d} onChange={(x) => { setD(x); onPick(x) }} />
     </Sheet>
   )
 }

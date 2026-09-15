@@ -56,7 +56,7 @@ const deep = (c, p = 88) => `color-mix(in srgb, ${c} ${p}%, var(--mix))`
 const row = (name, loc, time, color, now) => `
   <div class="row" style="background:${tint(color, 8)}${now ? `;border-color:${color}` : ''}">
     <i class="bar" style="background:${color}"></i>
-    <div class="grow"><div class="name"${now ? ` style="color:${deep(color, 72)}"` : ''}>${name}</div>${loc ? `<div class="loc">${loc}</div>` : ''}</div>
+    <div class="grow"><div class="name">${name}</div>${loc ? `<div class="loc">${loc}</div>` : ''}</div>
     ${time ? `<div class="time">${time}</div>` : ''}
   </div>`
 const head = (sub, day = '14', wd = '周二') => `<div class="head"><span class="day">${day}</span><span class="wd">${wd}</span>${sub ? `<span class="sub">${sub}</span>` : ''}</div>`
@@ -89,7 +89,7 @@ const views = {
       <div class="head" style="gap:0"><span class="wk">第 7 周</span><span class="dt">10月14日</span></div>
       <div class="wds">${wd.map((w, i) => `<div class="${i === 1 ? 'on' : ''}">${w}</div>`).join('')}</div>
       <div class="grid">${cols.map((col) => `<div class="col">${col.map(([c, n, t, l, now]) => `
-        <div class="cell" style="background:${tint(c, 8)}${now ? `;border-color:${c}` : ''}">
+        <div class="cell" style="background:${tint(c, now ? 16 : 8)}${now ? `;border-color:${c}` : ''}">
           <div class="n" style="color:${deep(c, 88)}">${n}</div><div class="t">${t}</div><div class="l">${l}</div>
         </div>`).join('')}</div>`).join('')}</div>
     </div>`

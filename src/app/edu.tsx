@@ -6,13 +6,15 @@ import type { RuleManifest } from '../domain/rules'
 import { parseHtml } from '../domain/importers/html'
 import { SYSTEM_LABEL, detectSystem, hostOf, isTimetablePage, scrubUrl, type EduSystemId } from '../domain/edu/systems'
 import { schoolByUrl, searchSchools, urlFromQuery, type School } from '../domain/edu/schools'
-import { zfTermOptions, type ProbeResult } from '../domain/edu/scripts'
+import { zfTermOptions, type PageCapture, type ProbeResult } from '../domain/edu/scripts'
 import { parseZfKbList, termLabel, type ZfTerm } from '../domain/edu/zhengfang'
 import { LATEST_RELEASE_API, RELEASES_URL, isNewer, issueUrl } from '../domain/edu/release'
+import { DEBUG_MIME, buildDebugPackage } from '../domain/edu/debug'
 import { edu, nativeEdu, type EduNav } from './edu-browser'
+import { shareText } from './files'
 import { EDU_RULE, keepEduSession, setEduBrowserOpen, type EduSyncSource } from './edu-sync'
 import { haptic, nativeToast } from './widgets'
-import { BackButton, FADE, Loader, Page, PrimaryButton, Row, SLIDE, Sheet, SheetClose, SheetHead, TopBar, dockStyle, tint } from './ui'
+import { ActionSheet, BackButton, FADE, Loader, Page, PrimaryButton, Row, SLIDE, Sheet, SheetClose, SheetHead, TopBar, dockStyle, tint } from './ui'
 
 /* 教务导入：选学校 → 内置浏览器里自己登录、打开课表页 → 读当前页 → 预览（复用 ImportRunPage）。
    浏览器会话按学校独立，默认离开时清掉，开了保持登录的学校才保留；只在用户点「导入」后读取当前页面 / 同源课表接口。 */
@@ -25,6 +27,9 @@ export interface EduFailInfo {
   system: EduSystemId | null
   /** 点导入时页面的正文文字；给「让 AI 转换」用 */
   text: string
+  /** 点导入时的页面快照；给「导出页面调试包」用 */
+  capture: PageCapture | null
+  probe: ProbeResult | null
 }
 
 /* ---------------- 最近使用 ---------------- */
@@ -177,6 +182,12 @@ function EduTermSheet({ zf, onClose, onPick }: { zf: NonNullable<ProbeResult['zf
   )
 }
 
+/** 页面调试包：当前页面原样导成一个 .html 走系统分享，给未识别、不出导入按钮的页面排查 */
+async function shareDebug(capture: PageCapture, system: EduSystemId | null, probe: ProbeResult | null) {
+  const version = await appVersion()
+  await shareText(buildDebugPackage({ capture, system, probe, version }), DEBUG_MIME)
+}
+
 /* ---------------- 内置浏览器 ---------------- */
 
 /** 系统返回键：先让页面自己后退，退不了再离开 */
@@ -251,6 +262,7 @@ export function EduBrowserPage({ school, active, onBack, onImport, onFail }: {
   const [opened, setOpened] = useState(false)
   const [busy, setBusy] = useState(false)
   const [sheet, setSheet] = useState(false)
+  const [menu, setMenu] = useState(false)
   /** 离场时学校页面的定格图；'' 表示已离场但没拿到图 */
   const [shot, setShot] = useState<string | null>(null)
   const hole = useRef<HTMLDivElement>(null)
@@ -311,7 +323,7 @@ export function EduBrowserPage({ school, active, onBack, onImport, onFail }: {
         top: a.top,
         bottom: Math.max(0, window.innerHeight - a.bottom),
         keep: b ? [{ x: b.left, y: b.top, w: b.width, h: b.height }] : [],
-        interactive: opened && !sheet && active && !departed,
+        interactive: opened && !sheet && !menu && active && !departed,
       })
     }
     send()
@@ -320,7 +332,7 @@ export function EduBrowserPage({ school, active, onBack, onImport, onFail }: {
     ro.observe(h)
     if (p) ro.observe(p)
     return () => ro.disconnect()
-  }, [opened, sheet, showPill, active, departed])
+  }, [opened, sheet, menu, showPill, active, departed])
 
   /* 还没到课表页时不摆胶囊，首次加载完成后用一条 toast 提示去向 */
   const hinted = useRef(false)
@@ -393,14 +405,13 @@ export function EduBrowserPage({ school, active, onBack, onImport, onFail }: {
   }, [goBack])
 
   const fail = async () => {
-    let text = ''
-    try {
-      text = await edu.pageText()
-    } catch {
-      /* 页面读不到正文：AI 转换项不显示 */
-    }
+    const [text, capture, probe] = await Promise.all([
+      edu.pageText().catch(() => ''),
+      edu.capture().catch(() => null),
+      edu.probe().catch(() => null),
+    ])
     await leave()
-    onFail({ url: nav.url, system: sys, text })
+    onFail({ url: nav.url, system: sys, text, capture, probe })
   }
 
   /* 预览页自带底色盖在上方，学校页面继续留在下面：预览页退回时从它上面滑开 */
@@ -432,6 +443,15 @@ export function EduBrowserPage({ school, active, onBack, onImport, onFail }: {
       await fail()
     } finally {
       setBusy(false)
+    }
+  }
+
+  const exportDebug = async () => {
+    try {
+      const [capture, probe] = await Promise.all([edu.capture(), edu.probe().catch(() => null)])
+      await shareDebug(capture, sys, probe)
+    } catch (e) {
+      nativeToast(e instanceof Error && e.message ? e.message : '页面读不到')
     }
   }
 
@@ -477,6 +497,13 @@ export function EduBrowserPage({ school, active, onBack, onImport, onFail }: {
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style={{ stroke: 'var(--c-ink)' }} strokeWidth="2.4" strokeLinecap="round"><path d="M20 12a8 8 0 1 1-2.3-5.7M20 4v5h-5" /></svg>
             )}
           </button>
+          <button
+            onClick={() => setMenu(true)}
+            aria-label="更多"
+            className="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-(--c-surface) transition-transform duration-150 active:scale-[.92]"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" style={{ fill: 'var(--c-ink)' }}><circle cx="5" cy="12" r="2" /><circle cx="12" cy="12" r="2" /><circle cx="19" cy="12" r="2" /></svg>
+          </button>
         </div>
 
         {/* 透明洞：原生 WebView 在下面显示学校页面；离场时换成它的定格图 */}
@@ -505,6 +532,25 @@ export function EduBrowserPage({ school, active, onBack, onImport, onFail }: {
 
         {sheet && ready.kind === 'zf' && (
           <EduTermSheet zf={ready.zf} onClose={() => setSheet(false)} onPick={(t) => void importZf(t)} />
+        )}
+        {menu && (
+          <ActionSheet
+            title={hostOf(nav.url)}
+            onClose={() => setMenu(false)}
+            groups={[[
+              {
+                title: '导出页面调试包',
+                value: '.html',
+                icon: <><path d="M12 3v12" /><path d="m7 10 5 5 5-5" /><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" /></>,
+                onClick: () => void exportDebug(),
+              },
+              {
+                title: '反馈这个页面',
+                icon: <><path d="M4 21V5a2 2 0 0 1 2-2h13l-3 4 3 4H6" /></>,
+                onClick: () => void appVersion().then((version) => openExternal(issueUrl({ url: nav.url, system: sys, version }))),
+              },
+            ]]}
+          />
         )}
       </div>
     </Page>
@@ -611,6 +657,16 @@ export function EduFailPage({ info, onBack, onAi }: { info: EduFailInfo; onBack:
             {text && <Row title="让 AI 转换" desc="把页面文字连同 Prompt 交给 AI" onClick={() => onAi(text)} />}
             {update && <Row title="更新到最新版本" desc="新版本可能已支持这个页面" onClick={() => openExternal(update)} />}
             <Row title="反馈这个页面" desc="只提交页面地址、系统猜测和版本号" onClick={() => openExternal(issueUrl({ url: info.url, system: info.system, version }))} />
+            {info.capture && (
+              <Row
+                title="导出页面调试包"
+                desc="当前页面的 HTML，一个 .html 文件"
+                onClick={() => {
+                  const c = info.capture
+                  if (c) void shareDebug(c, info.system, info.probe).catch(() => nativeToast('导出失败'))
+                }}
+              />
+            )}
           </div>
         </div>
 

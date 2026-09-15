@@ -4,6 +4,7 @@ import { detectSystem, hostOf, isTimetablePage, scrubUrl } from '../edu/systems'
 import { schoolByUrl, schoolCount, searchSchools, urlFromQuery } from '../edu/schools'
 import { wrapRun, zfTermOptions } from '../edu/scripts'
 import { isNewer, issueUrl } from '../edu/release'
+import { buildDebugPackage } from '../edu/debug'
 import { parseHtml } from '../importers/html'
 
 describe('正方新版课表解析', () => {
@@ -164,5 +165,38 @@ describe('非正方系统兜底：页面表格通用解析', () => {
     const out = parseHtml('<html><body><form><input name="u"><input name="p"></form></body></html>', { mode: 'grid' })
     expect(out.courses).toHaveLength(0)
     expect(out.diagnostics[0].code).toBe('NO_TABLE')
+  })
+})
+
+describe('页面调试包', () => {
+  const capture = {
+    url: 'https://jw.example.edu.cn/kb.html?ticket=abc',
+    title: '课表',
+    charset: 'GBK',
+    contentType: 'text/html',
+    readyState: 'complete',
+    userAgent: 'UA',
+    html: '<html><body>璇峰所鍀诲綽绯荤粺 -- <script>x</script></body></html>',
+    frames: [
+      { src: 'f.html', name: 'main', url: 'https://jw.example.edu.cn/f.html', charset: 'GBK', html: '<html><body><script>y</script></body></html>', error: '' },
+      { src: 'https://other/x', name: '', url: '', charset: '', html: null, error: 'SecurityError' },
+    ],
+  }
+
+  it('主文档原样保留，元信息进头部注释，子框架挂在 text/plain 脚本块里', () => {
+    const { text, name } = buildDebugPackage({ capture, system: 'qiangzhi', probe: { url: capture.url, title: '课表', table: false, zf: null }, version: '1.4.75', now: new Date(2026, 8, 15, 9, 5) })
+    expect(name).toBe('timetable-debug-jw.example.edu.cn-20260915-0905.html')
+    expect(text.startsWith('<!--')).toBe(true)
+    expect(text).toContain(capture.html)
+    expect(text).toContain('"charset": "GBK"')
+    expect(text).toContain('"ticket=abc"'.slice(1, -1))
+    expect(text).toContain('"code": "NO_TABLE"')
+    expect(text).toContain('data-timetable-debug-frame="0"')
+    expect(text).toContain('<\\/script>')
+    expect(text).toContain('"error":"SecurityError"')
+    expect(text).not.toContain('data-timetable-debug-frame="1"')
+    // 头部注释里不能出现 "--"，否则注释提前结束
+    const head = text.slice(0, text.indexOf('-->'))
+    expect(head.slice(4)).not.toContain('--')
   })
 })

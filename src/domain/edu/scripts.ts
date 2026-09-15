@@ -50,6 +50,40 @@ return list.map(function (c) { return { kcmc: c.kcmc, xm: c.xm, cdmc: c.cdmc, xq
 /** 当前页面 HTML，给通用表格解析 */
 export const PAGE_HTML_JS = `return document.documentElement.outerHTML;`
 
+/** 页面调试包用：主文档与同源子框架的 HTML、编码、文档类型 */
+export interface PageCapture {
+  url: string
+  title: string
+  charset: string
+  contentType: string
+  readyState: string
+  userAgent: string
+  html: string
+  frames: { src: string; name: string; url: string; charset: string; html: string | null; error: string }[]
+}
+
+export const PAGE_CAPTURE_JS = `
+var out = {
+  url: location.href, title: document.title, charset: document.characterSet || '', contentType: document.contentType || '',
+  readyState: document.readyState, userAgent: navigator.userAgent,
+  html: document.documentElement ? document.documentElement.outerHTML : '', frames: []
+};
+var fs = document.querySelectorAll('iframe,frame');
+for (var i = 0; i < fs.length; i++) {
+  var f = fs[i];
+  var item = { src: f.getAttribute('src') || '', name: f.getAttribute('name') || f.id || '', url: '', charset: '', html: null, error: '' };
+  try {
+    var d = f.contentDocument;
+    if (d) {
+      item.url = d.location.href; item.charset = d.characterSet || '';
+      item.html = d.documentElement ? d.documentElement.outerHTML : '';
+    } else item.error = 'no document';
+  } catch (e) { item.error = String((e && e.message) || e); }
+  out.frames.push(item);
+}
+return out;
+`
+
 /** 当前页面可见文字，给「让 AI 转换」 */
 export const PAGE_TEXT_JS = `return (document.body && document.body.innerText) || '';`
 

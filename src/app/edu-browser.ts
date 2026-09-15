@@ -1,5 +1,5 @@
 import { Capacitor, registerPlugin, type PluginListenerHandle } from '@capacitor/core'
-import { PAGE_HTML_JS, PAGE_TEXT_JS, PROBE_JS, wrapRun, zfFetchJs, type ProbeResult } from '../domain/edu/scripts'
+import { PAGE_CAPTURE_JS, PAGE_HTML_JS, PAGE_TEXT_JS, PROBE_JS, wrapRun, zfFetchJs, type PageCapture, type ProbeResult } from '../domain/edu/scripts'
 import type { ZfKb } from '../domain/edu/zhengfang'
 import { uid } from '../domain/store'
 
@@ -183,4 +183,6 @@ export const edu = {
   zfFetch: (xnm: string, xqm: string) => run<ZfKb[]>(zfFetchJs(xnm, xqm)),
   pageHtml: () => run<string>(PAGE_HTML_JS),
   pageText: () => run<string>(PAGE_TEXT_JS),
+  /** 调试包：主文档与同源子框架的 HTML 及编码信息 */
+  capture: () => run<PageCapture>(PAGE_CAPTURE_JS),
 }
