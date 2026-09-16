@@ -385,7 +385,7 @@ export function ComposeOverlay({
 
 /* ---------------- 相机 ---------------- */
 
-const CircleBtn = ({ children, onClick, size = 36 }: { children: React.ReactNode; onClick?: () => void; size?: number }) => (
+export const CircleBtn = ({ children, onClick, size = 36 }: { children: React.ReactNode; onClick?: () => void; size?: number }) => (
   <button
     onClick={onClick}
     className="flex items-center justify-center rounded-full bg-white/12 transition-transform duration-150 active:scale-[.92]"
@@ -396,7 +396,7 @@ const CircleBtn = ({ children, onClick, size = 36 }: { children: React.ReactNode
 )
 
 /** 取景区在页面里的布局位置：用 offset 链累加，不受推入动画的 transform 影响 */
-function layoutRect(el: HTMLElement) {
+export function layoutRect(el: HTMLElement) {
   let x = 0
   let y = 0
   for (let e: HTMLElement | null = el; e; e = e.offsetParent as HTMLElement | null) {

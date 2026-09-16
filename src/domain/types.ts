@@ -22,6 +22,8 @@ export interface Semester {
   totalWeeks: number
   timeGrid: TimeSlot[]
   vacations: (DateRange & { name: string })[]
+  /** 全国法定节假日不排课；省略视为开启 */
+  holidays?: boolean
   examWeeks: number[] // 周次
 }
 

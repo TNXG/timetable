@@ -28,6 +28,7 @@ import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.camera.core.CameraSelector;
+import androidx.camera.core.ImageAnalysis;
 import androidx.camera.core.ImageCapture;
 import androidx.camera.core.ImageCaptureException;
 import androidx.camera.core.ImageProxy;
@@ -48,6 +49,13 @@ import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
 import com.getcapacitor.annotation.Permission;
 import com.getcapacitor.annotation.PermissionCallback;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.BinaryBitmap;
+import com.google.zxing.DecodeHintType;
+import com.google.zxing.MultiFormatReader;
+import com.google.zxing.PlanarYUVLuminanceSource;
+import com.google.zxing.Result;
+import com.google.zxing.common.HybridBinarizer;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -55,7 +63,10 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -85,11 +96,17 @@ public class TtCamera extends Plugin {
     private ImageCapture capture;
     private androidx.camera.core.Camera camera;
     private int lensFacing = CameraSelector.LENS_FACING_BACK;
+    /** 扫码模式：预览旁挂一路 ImageAnalysis 解二维码，识别结果以 scan 事件推给页面 */
+    private boolean scanMode;
+    private String lastScan;
+    private long lastScanAt;
     private ExecutorService io;
+    private ExecutorService analysis;
 
     @Override
     public void load() {
         io = Executors.newSingleThreadExecutor();
+        analysis = Executors.newSingleThreadExecutor();
         // 提前初始化 CameraX，进相机页时少等几百毫秒
         ProcessCameraProvider.getInstance(getContext());
     }
@@ -172,6 +189,8 @@ public class TtCamera extends Plugin {
         }
         String position = call.getString("position", "back");
         lensFacing = "front".equals(position) ? CameraSelector.LENS_FACING_FRONT : CameraSelector.LENS_FACING_BACK;
+        scanMode = Boolean.TRUE.equals(call.getBoolean("scan", false));
+        lastScan = null;
         final int x = dp(call.getDouble("x", 0d));
         final int y = dp(call.getDouble("y", 0d));
         final int w = dp(call.getDouble("width", 0d));
@@ -251,12 +270,22 @@ public class TtCamera extends Plugin {
                 }
                 Preview preview = new Preview.Builder().build();
                 preview.setSurfaceProvider(previewView.getSurfaceProvider());
-                capture = new ImageCapture.Builder()
-                        .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
-                        .setTargetResolution(new Size(1440, 1920))
-                        .build();
                 CameraSelector selector = new CameraSelector.Builder().requireLensFacing(lensFacing).build();
-                camera = provider.bindToLifecycle((LifecycleOwner) getActivity(), selector, preview, capture);
+                if (scanMode) {
+                    capture = null;
+                    ImageAnalysis analyzer = new ImageAnalysis.Builder()
+                            .setTargetResolution(new Size(1280, 720))
+                            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                            .build();
+                    analyzer.setAnalyzer(analysis, this::decodeFrame);
+                    camera = provider.bindToLifecycle((LifecycleOwner) getActivity(), selector, preview, analyzer);
+                } else {
+                    capture = new ImageCapture.Builder()
+                            .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
+                            .setTargetResolution(new Size(1440, 1920))
+                            .build();
+                    camera = provider.bindToLifecycle((LifecycleOwner) getActivity(), selector, preview, capture);
+                }
                 if (call != null) {
                     JSObject o = new JSObject();
                     o.put("position", lensFacing == CameraSelector.LENS_FACING_FRONT ? "front" : "back");
@@ -266,6 +295,55 @@ public class TtCamera extends Plugin {
                 if (call != null) call.reject(e.getMessage());
             }
         }, ContextCompat.getMainExecutor(getContext()));
+    }
+
+    /* ---------------- 扫码 ---------------- */
+
+    private final MultiFormatReader reader = new MultiFormatReader();
+    {
+        Map<DecodeHintType, Object> hints = new EnumMap<>(DecodeHintType.class);
+        hints.put(DecodeHintType.POSSIBLE_FORMATS, EnumSet.of(BarcodeFormat.QR_CODE));
+        hints.put(DecodeHintType.TRY_HARDER, Boolean.TRUE);
+        reader.setHints(hints);
+    }
+
+    /** 只取 Y 平面做亮度源；解不出就丢帧，正常解出后 1.5s 内同一内容不重复上报 */
+    private void decodeFrame(@NonNull ImageProxy image) {
+        try {
+            ImageProxy.PlaneProxy plane = image.getPlanes()[0];
+            ByteBuffer buf = plane.getBuffer();
+            int w = image.getWidth();
+            int h = image.getHeight();
+            int stride = plane.getRowStride();
+            byte[] y = new byte[stride * h];
+            buf.rewind();
+            buf.get(y, 0, Math.min(y.length, buf.remaining()));
+            PlanarYUVLuminanceSource src = new PlanarYUVLuminanceSource(y, stride, h, 0, 0, w, h, false);
+            Result r;
+            try {
+                r = reader.decodeWithState(new BinaryBitmap(new HybridBinarizer(src)));
+            } catch (Exception miss) {
+                try {
+                    r = reader.decodeWithState(new BinaryBitmap(new HybridBinarizer(src.invert())));
+                } catch (Exception miss2) {
+                    return;
+                }
+            } finally {
+                reader.reset();
+            }
+            String text = r.getText();
+            if (text == null || text.isEmpty()) return;
+            long now = System.currentTimeMillis();
+            if (text.equals(lastScan) && now - lastScanAt < 1500) return;
+            lastScan = text;
+            lastScanAt = now;
+            JSObject o = new JSObject();
+            o.put("text", text);
+            notifyListeners("scan", o);
+        } catch (Exception ignored) {
+        } finally {
+            image.close();
+        }
     }
 
     /**

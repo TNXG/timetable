@@ -4,6 +4,7 @@ import { flushSync } from 'react-dom'
 import { App as CapApp } from '@capacitor/app'
 import type { Course, Occurrence, Semester, SessionRule, Task, OverrideKind, WidgetStyle } from '../domain/types'
 import { addDays, diffDays, fmtDuration, fmtMinutes, inVacation, weekOf, weekdayOf, dateOf } from '../domain/dates'
+import { holidaysBetween } from '../domain/holidays'
 import { maskHasWeek, maskToWeeks } from '../domain/weeks'
 import { firstClassDate, occurrencesOn, occurrencesInWeek, type Snapshot } from '../domain/engine'
 import { diffImport, normalize } from '../domain/importer'
@@ -11,6 +12,7 @@ import type { NormalizedCourse, RuleOutput } from '../domain/importer'
 import { runRule, type RuleManifest, type RuleInputKind, DEFAULT_CSV_MAPPING } from '../domain/rules'
 import { fetchUrl } from '../domain/importers/url'
 import { AI_IMPORT_PROMPT } from '../domain/ai-prompt'
+import { ScanPage } from './scan'
 import { uid, type SemesterArchive, type Store, type State } from '../domain/store'
 import { store, useStore } from './store'
 import { defaultSemester, extendGrid, guessSemesterName, isDefaultGrid, mondayOf, nowMinutes, semesterEnded, termEnd, todayStr } from './semester'
@@ -1129,7 +1131,7 @@ const KIND_HINT: Record<RuleInputKind, string> = {
 type ImportStage = 'input' | 'preview'
 
 /* 规则列表（内页）：选中一条直接进导入流程 */
-function ImportPage({ onBack, onManual, onEditRule, onRun, onAi, onEdu }: { onBack: () => void; onManual: () => void; onEditRule: (r: RuleManifest | 'new') => void; onRun: (ruleId: string) => void; onAi: () => void; onEdu: () => void }) {
+function ImportPage({ onBack, onManual, onEditRule, onRun, onAi, onEdu, onScan }: { onBack: () => void; onManual: () => void; onEditRule: (r: RuleManifest | 'new') => void; onRun: (ruleId: string) => void; onAi: () => void; onEdu: () => void; onScan: () => void }) {
   const state = useStore()
   const rules = [...state.savedRules].sort((a, b) => a.createdAt - b.createdAt)
 
@@ -1141,6 +1143,7 @@ function ImportPage({ onBack, onManual, onEditRule, onRun, onAi, onEdu }: { onBa
         <div className="mt-6 divide-y divide-(--c-surface2) overflow-hidden rounded-[16px] bg-(--c-surface)">
           <Row title="从教务系统导入" badge="推荐" onClick={onEdu} />
           <Row title="导入课表文件" onClick={() => onRun('builtin-ics')} />
+          <Row title="扫码导入" onClick={onScan} />
         </div>
 
         <div className="mt-6 text-[12.5px] font-semibold text-(--c-ink3)">规则</div>
@@ -2220,9 +2223,11 @@ function SemesterSettings({ sem, onBack, onNew, onArchive, onLogin }: { sem: Sem
   const [name, setName] = useState(sem.name)
   const [date, setDate] = useState(sem.startDate)
   const [weeks, setWeeks] = useState(sem.totalWeeks)
+  const [holidays, setHolidays] = useState(sem.holidays !== false)
   const start = mondayOf(date)
   const ended = semesterEnded({ startDate: start, totalWeeks: weeks })
   const archives = [...state.archives].reverse()
+  const hols = holidaysBetween(start, termEnd({ startDate: start, totalWeeks: weeks }))
 
   return (
     <SubPage title="学期" sub={ended ? `已结束，共 ${weeks} 周` : `第 ${Math.max(1, currentWeek(start))} 周，共 ${weeks} 周`} onBack={onBack}>
@@ -2230,6 +2235,13 @@ function SemesterSettings({ sem, onBack, onNew, onArchive, onLogin }: { sem: Sem
         <Field k="名称"><TextInput value={name} onChange={(e) => setName(e.target.value)} /></Field>
         <Field k="开学" sub={`第 1 周 ${md(start)} 周一`}><DateInput value={date} onChange={setDate} /></Field>
         <Field k="总周数"><TextInput type="number" min={1} max={64} value={weeks} onChange={(e) => setWeeks(Number(e.target.value))} /></Field>
+        <div className="flex items-center px-4 py-3.5">
+          <div className="min-w-0 flex-1">
+            <div className="text-[14px] font-bold">法定节假日不排课</div>
+            <div className="mt-0.5 text-[12px] font-medium text-(--c-ink4)">{hols.length > 0 ? hols.map((h) => `${h.name} ${md(h.start)}${h.start !== h.end ? `–${md(h.end)}` : ''}`).join('，') : '学期内无法定节假日'}</div>
+          </div>
+          <Switch on={holidays} onChange={setHolidays} />
+        </div>
       </div>
 
       <div className="mt-2.5 overflow-hidden rounded-[16px] bg-(--c-surface)">
@@ -2257,6 +2269,7 @@ function SemesterSettings({ sem, onBack, onNew, onArchive, onLogin }: { sem: Sem
               name: name.trim() || sem.name,
               startDate: start,
               totalWeeks: Math.min(64, Math.max(1, weeks)),
+              holidays,
             })
             onBack()
           }}
@@ -2403,6 +2416,7 @@ type Route =
   | { k: 'todoReview'; photos: CapturedPhoto[]; courseId?: string }
   | { k: 'manual' }
   | { k: 'import' }
+  | { k: 'scan' }
   | { k: 'importRun'; ruleId: string; text?: string; auto?: boolean }
   | { k: 'aiImport'; attach?: string }
   | { k: 'eduSchool' }
@@ -2758,8 +2772,11 @@ export default function RealApp() {
             onRun={(ruleId) => push({ k: 'importRun', ruleId })}
             onAi={() => push({ k: 'aiImport' })}
             onEdu={() => push({ k: 'eduSchool' })}
+            onScan={() => push({ k: 'scan' })}
           />
         )
+      case 'scan':
+        return <ScanPage key={key} onBack={pop} onResult={(ruleId, text) => replaceTop({ k: 'importRun', ruleId, text })} />
       case 'aiImport':
         return <AiImportPage key={key} attach={r.attach} onBack={pop} onNext={(text) => push({ k: 'importRun', ruleId: 'builtin-json', text })} />
       case 'eduSchool':

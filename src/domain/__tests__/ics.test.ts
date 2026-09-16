@@ -19,6 +19,7 @@ const sem: Semester = {
     { index: 4, start: 655, end: 700 },
   ],
   vacations: [],
+  holidays: false,
   examWeeks: [],
 }
 const course = { id: 'c1', semesterId: 's1', name: '高等数学', teacher: '王立群', teacherPhone: '13800138000', color: '#4FA3A1', identityKey: 'k', hidden: false, source: 'import' as const }

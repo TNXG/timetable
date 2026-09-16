@@ -1,14 +1,14 @@
 import { Capacitor, CapacitorHttp } from '@capacitor/core'
 import type { RuleInputKind } from '../rules'
- 
+
 /* URL 导入：抓取内容并嗅探类型。原生端走 CapacitorHttp（无 CORS 限制），
    Web 端走 fetch（受目标站 CORS 约束，失败时提示改用粘贴）。 */
- 
+
 export interface FetchedInput {
   text: string
   kind: RuleInputKind
 }
- 
+
 export function sniffKind(text: string, contentType = ''): RuleInputKind {
   const t = text.trimStart()
   if (/text\/calendar/i.test(contentType) || t.startsWith('BEGIN:VCALENDAR')) return 'ics'
@@ -16,7 +16,25 @@ export function sniffKind(text: string, contentType = ''): RuleInputKind {
   if (/text\/html/i.test(contentType) || /^<!doctype html|^<html|<table/i.test(t)) return 'html'
   return 'csv'
 }
- 
+
+/** 内置规则 id 与输入类型一一对应 */
+export function builtinRuleFor(kind: RuleInputKind): string {
+  return `builtin-${kind === 'script' ? 'csv' : kind}`
+}
+
+/**
+ * 扫码结果：链接则抓取内容再嗅探；直接嵌入的 JSON / .ics 文本原样交给对应规则。
+ * 其它内容不是课表，返回 null。
+ */
+export async function resolveScan(text: string): Promise<FetchedInput | null> {
+  const t = text.trim()
+  if (!t) return null
+  if (/^https?:\/\//i.test(t)) return fetchUrl(t)
+  if (t.startsWith('{') || t.startsWith('[')) return { text: t, kind: 'json' }
+  if (t.startsWith('BEGIN:VCALENDAR')) return { text: t, kind: 'ics' }
+  return null
+}
+
 export async function fetchUrl(url: string): Promise<FetchedInput> {
   if (!/^https?:\/\//i.test(url)) throw new Error('链接需要以 http(s):// 开头')
   if (Capacitor.isNativePlatform()) {

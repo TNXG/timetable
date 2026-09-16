@@ -1,4 +1,5 @@
 import type { LocalDate, Minutes, Semester } from './types'
+import { statutoryHoliday } from './holidays'
 
 /* 本地日期工具：全部基于 'YYYY-MM-DD' 字符串与本地历法，不引入时区。 */
 
@@ -38,9 +39,11 @@ export function dateOf(sem: Semester, week: number, weekday: number): LocalDate 
   return addDays(sem.startDate, (week - 1) * 7 + (weekday - 1))
 }
 
+/** 学期自定义假期优先，其次全国法定节假日；`holidays: false` 的学期只看自定义假期 */
 export function inVacation(sem: Semester, d: LocalDate): string | null {
   for (const v of sem.vacations) if (d >= v.start && d <= v.end) return v.name
-  return null
+  if (sem.holidays === false) return null
+  return statutoryHoliday(d)
 }
 
 /** 时长：45 → 「45 分钟」，90 → 「1 小时 30 分钟」，120 → 「2 小时」 */

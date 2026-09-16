@@ -20,6 +20,7 @@ const sem: Semester = {
     { index: 4, start: 655, end: 700 },
   ],
   vacations: [],
+  holidays: false,
   examWeeks: [],
 }
 

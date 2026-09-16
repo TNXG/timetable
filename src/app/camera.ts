@@ -1,4 +1,4 @@
-import { Capacitor, registerPlugin } from '@capacitor/core'
+import { Capacitor, registerPlugin, type PluginListenerHandle } from '@capacitor/core'
 import type { TaskPhoto } from '../domain/types'
 import { uid } from '../domain/store'
 
@@ -23,7 +23,8 @@ export type PermissionStatus = 'granted' | 'denied' | 'blocked' | 'prompt'
 interface TtCameraPlugin {
   checkPermissions(): Promise<{ camera: PermissionStatus; photos: PermissionStatus }>
   requestPermission(o: { kind: 'camera' | 'photos' }): Promise<{ status: PermissionStatus }>
-  start(o: { position: 'back' | 'front'; x: number; y: number; width: number; height: number; delay: number }): Promise<{ position: 'back' | 'front' }>
+  start(o: { position: 'back' | 'front'; x: number; y: number; width: number; height: number; delay: number; scan?: boolean }): Promise<{ position: 'back' | 'front' }>
+  addListener(event: 'scan', fn: (e: { text: string }) => void): Promise<PluginListenerHandle>
   freeze(): Promise<{ frozen?: string }>
   stop(): Promise<void>
   switchCamera(): Promise<{ position: 'back' | 'front' }>
@@ -67,6 +68,42 @@ function webStop() {
   webStream?.getTracks().forEach((t) => t.stop())
   webStream = null
   webVideo = null
+  webScanStop()
+}
+
+/* 浏览器扫码：有 BarcodeDetector 就轮询视频帧，没有则不识别 */
+interface DetectedBarcode { rawValue: string }
+interface BarcodeDetectorLike { detect(src: CanvasImageSource): Promise<DetectedBarcode[]> }
+declare const BarcodeDetector: (new (o: { formats: string[] }) => BarcodeDetectorLike) | undefined
+
+let webScanTimer = 0
+let webScanHandlers: ((text: string) => void)[] = []
+
+function webScanStart() {
+  webScanStop()
+  if (typeof BarcodeDetector === 'undefined') return
+  const det = new BarcodeDetector({ formats: ['qr_code'] })
+  let last = ''
+  let lastAt = 0
+  const tick = async () => {
+    if (!webVideo || webVideo.readyState < 2) return
+    try {
+      const hits = await det.detect(webVideo)
+      const text = hits[0]?.rawValue ?? ''
+      if (!text) return
+      const now = Date.now()
+      if (text === last && now - lastAt < 1500) return
+      last = text
+      lastAt = now
+      for (const fn of webScanHandlers) fn(text)
+    } catch { /* 帧不可用，下一轮再试 */ }
+  }
+  webScanTimer = window.setInterval(() => void tick(), 250)
+}
+
+function webScanStop() {
+  if (webScanTimer) window.clearInterval(webScanTimer)
+  webScanTimer = 0
 }
 
 async function webCapture(): Promise<CapturedPhoto> {
@@ -136,9 +173,28 @@ export const camera = {
   },
 
   /** rect 是取景区在页面里的位置：原生预览叠在这块上方；delay 后才淡入（等页面推入动画走完） */
-  async start(position: 'back' | 'front', rect: { x: number; y: number; width: number; height: number }, delay = 0) {
-    if (!nativeCamera()) return webStart(position).then(() => undefined)
-    await TtCamera.start({ position, ...rect, delay })
+  async start(position: 'back' | 'front', rect: { x: number; y: number; width: number; height: number }, delay = 0, scan = false) {
+    if (!nativeCamera()) {
+      await webStart(position)
+      if (scan) webScanStart()
+      return
+    }
+    await TtCamera.start({ position, ...rect, delay, scan })
+  },
+
+  /** 扫码模式下每识别到一个二维码回调一次；返回取消函数 */
+  onScan(fn: (text: string) => void): () => void {
+    if (!nativeCamera()) {
+      webScanHandlers.push(fn)
+      return () => { webScanHandlers = webScanHandlers.filter((f) => f !== fn) }
+    }
+    const h = TtCamera.addListener('scan', (e) => fn(e.text))
+    return () => { void h.then((x) => x.remove()) }
+  },
+
+  /** 浏览器里能否识别二维码；原生端总是可以 */
+  canScan(): boolean {
+    return nativeCamera() || typeof BarcodeDetector !== 'undefined'
   },
 
   /**
