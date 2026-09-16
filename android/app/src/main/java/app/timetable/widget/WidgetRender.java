@@ -154,7 +154,11 @@ public final class WidgetRender {
         v.setTextViewText(R.id.w_sub, sub == null ? "" : sub);
     }
 
-    /** 一行课：底色是课程色 8% 铺在卡片底上；正在上的那节描一圈课程色边框，时间位换成剩余时长；课名始终用正文色，与原型 WRow 一致 */
+    /**
+     * 一行课：底色是课程色 8% 铺在卡片底上；正在上的那节描一圈课程色边框，时间位换成剩余时长；课名始终用正文色，与原型 WRow 一致。
+     * 边框由底层实心圆角（ring）+ 上层内缩 1.5dp 的实心圆角（bg）套出来，不用 stroke：
+     * 部分桌面对带 stroke 的 shape 做 setColorFilter 会整块填成实色。不在上课时 ring 与 bg 同色，看不出拼接。
+     */
     private static void row(Context ctx, RemoteViews v, Palette p, String prefix, int idx, Item it, boolean now, String time) {
         int rowId = id(ctx, prefix + idx);
         if (it == null) {
@@ -162,9 +166,9 @@ public final class WidgetRender {
             return;
         }
         v.setViewVisibility(rowId, View.VISIBLE);
-        v.setInt(id(ctx, prefix + idx + "_bg"), "setColorFilter", p.tint(it.color, 8));
-        v.setViewVisibility(id(ctx, prefix + idx + "_ring"), now ? View.VISIBLE : View.GONE);
-        v.setInt(id(ctx, prefix + idx + "_ring"), "setColorFilter", it.color);
+        int bg = p.tint(it.color, 8);
+        v.setInt(id(ctx, prefix + idx + "_bg"), "setColorFilter", bg);
+        v.setInt(id(ctx, prefix + idx + "_ring"), "setColorFilter", now ? it.color : bg);
         v.setInt(id(ctx, prefix + idx + "_bar"), "setColorFilter", it.color);
         v.setTextViewText(id(ctx, prefix + idx + "_name"), it.name);
         v.setTextColor(id(ctx, prefix + idx + "_name"), p.ink);
@@ -383,9 +387,9 @@ public final class WidgetRender {
                 }
                 boolean nowCell = it.startAt <= now && now < it.endAt;
                 v.setViewVisibility(id(ctx, cid), View.VISIBLE);
-                v.setInt(id(ctx, cid + "_bg"), "setColorFilter", p.tint(it.color, nowCell ? 16 : 8));
-                v.setViewVisibility(id(ctx, cid + "_ring"), nowCell ? View.VISIBLE : View.GONE);
-                v.setInt(id(ctx, cid + "_ring"), "setColorFilter", it.color);
+                int bg = p.tint(it.color, nowCell ? 16 : 8);
+                v.setInt(id(ctx, cid + "_bg"), "setColorFilter", bg);
+                v.setInt(id(ctx, cid + "_ring"), "setColorFilter", nowCell ? it.color : bg);
                 v.setTextViewText(id(ctx, cid + "_name"), it.name);
                 v.setTextColor(id(ctx, cid + "_name"), p.deepen(it.color, 88));
                 v.setTextViewText(id(ctx, cid + "_time"), it.start);
