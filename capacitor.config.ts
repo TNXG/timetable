@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli'
 
 const config: CapacitorConfig = {
-  appId: 'app.timetable',
+  appId: 'moe.tnxg.timetable',
   appName: '嘎嘎课程表',
   webDir: 'dist',
   backgroundColor: '#F7F7F6',
