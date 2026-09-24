@@ -137,7 +137,10 @@ class WidgetBridge : Plugin() {
         val selected = call.getInt("selected", -1)!!
         val items: Array<CharSequence>
         try {
-            val list: java.util.List<CharSequence> = arr.toList<CharSequence>()
+            val list = java.util.ArrayList<CharSequence>()
+            for (i in 0 until arr.length()) {
+                list.add(arr.getString(i))
+            }
             items = list.toTypedArray()
         } catch (e: org.json.JSONException) {
             call.reject("bad options")

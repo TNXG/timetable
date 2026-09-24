@@ -29,12 +29,12 @@ import java.util.concurrent.Executors
 @CapacitorPlugin(
         name = "TtCamera",
         permissions = [
-                @Permission(alias = "camera", strings = [Manifest.permission.CAMERA]),
+                Permission(alias = "camera", strings = [Manifest.permission.CAMERA]),
                 // 按 SDK 拆开：同一次请求里带上 manifest 已用 maxSdkVersion 裁掉的权限，Capacitor 会在回调里整个 reject
-                @Permission(alias = "photos", strings = [Manifest.permission.READ_EXTERNAL_STORAGE]),
-                @Permission(alias = "media", strings = ["android.permission.READ_MEDIA_IMAGES"]),
-                @Permission(alias = "media14", strings = ["android.permission.READ_MEDIA_IMAGES", "android.permission.READ_MEDIA_VISUAL_USER_SELECTED"]),
-                @Permission(alias = "save", strings = [Manifest.permission.WRITE_EXTERNAL_STORAGE]),
+                Permission(alias = "photos", strings = [Manifest.permission.READ_EXTERNAL_STORAGE]),
+                Permission(alias = "media", strings = ["android.permission.READ_MEDIA_IMAGES"]),
+                Permission(alias = "media14", strings = ["android.permission.READ_MEDIA_IMAGES", "android.permission.READ_MEDIA_VISUAL_USER_SELECTED"]),
+                Permission(alias = "save", strings = [Manifest.permission.WRITE_EXTERNAL_STORAGE]),
         ]
 )
 class TtCamera : Plugin() {
