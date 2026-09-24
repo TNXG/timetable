@@ -1,16 +1,13 @@
 name: Release
 
-# tag 推送发版；main 推送只编译不发版，用来预热缓存（Actions 缓存按 ref 隔离，tag 只能读到默认分支的）
+# 只有打 tag（v*）才触发发版；APK 按 ABI 出包（arm64-v8a / armeabi-v7a / x86_64）+ universal 全量包
 on:
   push:
-    branches:
-      - main
     tags:
       - 'v*'
 
 concurrency:
   group: release-${{ github.ref }}
-  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
 
 permissions:
   contents: write
@@ -26,20 +23,13 @@ jobs:
       - name: Extract version from tag
         id: version
         run: |
-          if [[ "$GITHUB_REF" != refs/tags/v* ]]; then
-            echo "version=0.0.0" >> $GITHUB_OUTPUT
-            echo "versionCode=1" >> $GITHUB_OUTPUT
-            echo "versionName=0.0.0-main" >> $GITHUB_OUTPUT
-            exit 0
-          fi
           VERSION=${GITHUB_REF#refs/tags/v}
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           # Calculate version code from tag (e.g., 1.4.2 -> 10402)
           MAJOR=$(echo $VERSION | cut -d. -f1)
           MINOR=$(echo $VERSION | cut -d. -f2)
           PATCH=$(echo $VERSION | cut -d. -f3)
-          VERSION_CODE=$((MAJOR * 10000 + MINOR * 100 + PATCH))
-          echo "versionCode=$VERSION_CODE" >> $GITHUB_OUTPUT
+          echo "versionCode=$((MAJOR * 10000 + MINOR * 100 + PATCH))" >> $GITHUB_OUTPUT
           echo "versionName=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Setup pnpm
@@ -74,14 +64,12 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
-        with:
-          cache-read-only: ${{ startsWith(github.ref, 'refs/tags/') }}
 
       - name: Decode keystore
         run: |
           echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > android/app/release.keystore
 
-      - name: Build release APK
+      - name: Build release APKs
         env:
           KEYSTORE_PATH: ${{ github.workspace }}/android/app/release.keystore
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
@@ -93,58 +81,71 @@ jobs:
           cd android
           ./gradlew assembleRelease
 
-      - name: Name APK
-        if: startsWith(github.ref, 'refs/tags/')
+      - name: Name APKs
         env:
           VERSION: ${{ steps.version.outputs.version }}
         run: |
           mkdir -p dist-apk
-          cp android/app/build/outputs/apk/release/app-release.apk "dist-apk/GagaTimetable-$VERSION.apk"
-          cp android/app/build/outputs/apk/release/app-release.apk dist-apk/GagaTimetable-android.apk
+          OUT=android/app/build/outputs/apk/release
+          cp "$OUT/app-arm64-v8a-release.apk"   "dist-apk/GagaTimetable-$VERSION-arm64-v8a.apk"
+          cp "$OUT/app-armeabi-v7a-release.apk" "dist-apk/GagaTimetable-$VERSION-armeabi-v7a.apk"
+          cp "$OUT/app-x86_64-release.apk"      "dist-apk/GagaTimetable-$VERSION-x86_64.apk"
+          cp "$OUT/app-universal-release.apk"   "dist-apk/GagaTimetable-$VERSION-universal.apk"
+          cp "$OUT/app-universal-release.apk"   dist-apk/GagaTimetable-android.apk
 
       - name: Write release notes
         if: startsWith(github.ref, 'refs/tags/')
         env:
           TAG: v${{ steps.version.outputs.version }}
+          VERSION: ${{ steps.version.outputs.version }}
           CODE: ${{ steps.version.outputs.versionCode }}
           REPO: ${{ github.repository }}
         run: |
-          APK=dist-apk/GagaTimetable-${TAG#v}.apk
-          SIZE=$(stat -c%s "$APK" | awk '{printf "%.1f", $1/1048576}')
-          SHA=$(sha256sum "$APK" | cut -d' ' -f1)
-          PREV=$(git describe --tags --abbrev=0 "$TAG^" 2>/dev/null || true)
-          {
-            echo "<a href=\"https://github.com/$REPO/releases/download/$TAG/GagaTimetable-${TAG#v}.apk\"><img src=\"https://raw.githubusercontent.com/$REPO/main/docs/download-android.svg\" alt=\"Download for Android\" /></a>"
-            echo
-            echo "<details>"
-            echo "<summary>APK 信息</summary>"
-            echo
-            echo "<table>"
-            echo "<tr><td>文件</td><td>GagaTimetable-${TAG#v}.apk</td></tr>"
-            echo "<tr><td>大小</td><td>${SIZE} MB</td></tr>"
-            echo "<tr><td>系统</td><td>Android 7.0+</td></tr>"
-            echo "<tr><td>versionCode</td><td>${CODE}</td></tr>"
-            echo "<tr><td>SHA-256</td><td><code>${SHA}</code></td></tr>"
-            echo "</table>"
-            echo "</details>"
-            echo
-            echo "### 变更"
-            echo
-            if [ -n "$PREV" ]; then
-              git log --format='- %s (%h)' "$PREV..$TAG"
-              echo
-              echo "**Full Changelog**: [$PREV...$TAG](https://github.com/$REPO/compare/$PREV...$TAG)"
-            else
-              git log --format='- %s (%h)' "$TAG"
-            fi
-          } > release-notes.md
+          VERSION="$VERSION" TAG="$TAG" CODE="$CODE" REPO="$REPO" node -e '
+            const { execSync } = require("node:child_process");
+            const { writeFileSync, statSync, readFileSync } = require("node:fs");
+            const { createHash } = require("node:crypto");
+            const version = process.env.VERSION, tag = process.env.TAG, code = process.env.CODE, repo = process.env.REPO;
+            const abis = ["arm64-v8a", "armeabi-v7a", "x86_64", "universal"];
+            const sha256 = (f) => createHash("sha256").update(require("node:fs").readFileSync(f)).digest("hex");
+            const row = (abi) => {
+              const f = `dist-apk/GagaTimetable-${version}-${abi}.apk`;
+              const size = (statSync(f).size / 1048576).toFixed(1);
+              return `<tr><td>${abi === "universal" ? "全量（不确定设备选这个）" : abi}</td><td>${size} MB</td><td><code>${sha256(f)}</code></td></tr>`;
+            };
+            const prev = (() => { try { return execSync(`git describe --tags --abbrev=0 "${tag}^" 2>/dev/null`).toString().trim(); } catch { return ""; } })();
+            const log = prev
+              ? execSync(`git log --format="- %s (%h)" "${prev}..${tag}"`).toString()
+              : execSync(`git log --format="- %s (%h)" "${tag}"`).toString();
+            const notes = [
+              `<a href="https://github.com/${repo}/releases/download/${tag}/GagaTimetable-${version}-universal.apk"><img src="https://raw.githubusercontent.com/${repo}/main/docs/download-android.svg" alt="Download for Android" /></a>`,
+              "",
+              "<details>",
+              "<summary>APK 信息</summary>",
+              "",
+              `<table><tr><td>versionCode</td><td>${code}</td></tr></table>`,
+              "<table><tr><th>ABI</th><th>大小</th><th>SHA-256</th></tr>",
+              ...abis.map(row),
+              "</table>",
+              "</details>",
+              "",
+              "### 变更",
+              "",
+              log,
+              prev ? `\n**Full Changelog**: [${prev}...${tag}](https://github.com/${repo}/compare/${prev}...${tag})` : "",
+              "",
+            ];
+            writeFileSync("release-notes.md", notes.join("\n"));
+          '
 
       - name: Create GitHub Release
-        if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            dist-apk/GagaTimetable-${{ steps.version.outputs.version }}.apk
+            dist-apk/GagaTimetable-${{ steps.version.outputs.version }}-arm64-v8a.apk
+            dist-apk/GagaTimetable-${{ steps.version.outputs.version }}-armeabi-v7a.apk
+            dist-apk/GagaTimetable-${{ steps.version.outputs.version }}-x86_64.apk
+            dist-apk/GagaTimetable-${{ steps.version.outputs.version }}-universal.apk
             dist-apk/GagaTimetable-android.apk
           name: v${{ steps.version.outputs.version }}
           body_path: release-notes.md
