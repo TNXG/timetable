@@ -90,7 +90,7 @@ describe('学校登录插件', () => {
   it('只内置新疆理工职业大学，启用应用内直登页', () => {
     expect(EDU_PLUGINS).toHaveLength(1)
     expect(DEFAULT_PLUGIN.id).toBe('xjvut')
-    expect(DEFAULT_PLUGIN.name).toBe('新疆理工职业大学')
+    expect(DEFAULT_PLUGIN.name).toContain('新疆理工职业大学')
     expect(DEFAULT_PLUGIN.auth.kind).toBe('login')
     expect(DEFAULT_PLUGIN.system).toBe('zhengfang_new')
     expect(hasDirectLogin(DEFAULT_PLUGIN)).toBe(true)

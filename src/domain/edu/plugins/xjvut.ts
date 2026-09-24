@@ -1,16 +1,25 @@
-import type { EduCookieJar, EduHttp, EduHttpRequest, EduHttpResult, EduLoginBegin, EduLoginFlow, EduPlugin } from '../plugin'
+import type { EduCookieJar, EduHttp, EduHttpRequest, EduHttpResult, EduKbFetch, EduLoginBegin, EduLoginFlow, EduPlugin } from '../plugin'
 import { applySetCookie, casErrorText, cookieHeaderValue, describeCasError, encryptCasPassword, extractExecution, parseCookieHeader } from '../cas'
+import { guessTerm, parseZfKbList, termLabel, zfTimeGrid, type ZfTerm } from '../zhengfang'
 
-/** 新疆理工职业大学：统一身份认证（CAS）直登 + 教务（正方新版）SSO。
- *  流程（docs/CAS_LOGIN.md）：CAS 表单登录拿 TGT → 带 TGT 访问课表页走一次 SSO，
- *  教务主机会发会话 Cookie（JSESSIONID、route）——连同 CAS 的 TGT 一起交给软件种进 Profile，
- *  浏览器打开就是课表页。全程原生 HTTP，不经 WebView；凭证只在当次登录的内存里用。 */
+/** 新疆理工职业大学：统一身份认证（CAS）直登 + 教务（正方新版）原生取课表。
+ *  流程（docs/CAS_LOGIN.md 第 5-6 步，2026-09 实测）：CAS 表单登录拿 TGT →
+ *  GET jw/sso/zfiotlogin?url=课表索引页（教务不认 CAS 跳转、表单也不吃 CAS 密码，
+ *  唯它拿 TGT 换 ticket → 内部 ticketlogin 以 uid+timestamp+verify 签发已认证教务会话）→
+ *  POST xskbcx_cxXsgrkb.html 拿课表 JSON。全程原生 HTTP 逐跳收 Cookie，不经 WebView；
+ *  凭证只在当次登录的内存里用一次。 */
 
 const CAS_ORIGIN = 'https://qyrz.xjvut.edu.cn'
 const CAS_LOGIN = `${CAS_ORIGIN}/cas/login`
 const JW_ORIGIN = 'https://jw.xjvut.edu.cn:6082'
-/** 带上会话 Cookie 就能访问的个人课表页；gnmkdm=N2151 = 学生个人课表 */
-const TIMETABLE_URL = `${JW_ORIGIN}/jwglxt/kbcx/xskbcx_cxXsgrkb.html?gnmkdm=N2151`
+/** 教务 SSO 入口：portal「学生课表查询」服务的 fwdz 就是它；gnmkdm=N2151 = 学生个人课表 */
+const SSO_JUMP = `${JW_ORIGIN}/sso/zfiotlogin?url=kbcx/xskbcx_cxXskbcxIndex.html?gnmkdm=N2151&layout=default`
+/** 个人课表数据接口：GET 是页面，POST 是 JSON */
+const KB_URL = `${JW_ORIGIN}/jwglxt/kbcx/xskbcx_cxXsgrkb.html?gnmkdm=N2151`
+/** SSO 成功的落点：课表索引页（学期下拉在这里） */
+const INDEX_RE = /xskbcx_cxXskbcxIndex\.html/
+/** 作息接口：POST xnm/xqm → 每节 jcmc/qssj/jssj（"10:00 - 10:45"） */
+const RJC_URL = `${JW_ORIGIN}/jwglxt/kbcx/xskbcx_cxRjc.html?gnmkdm=N2151`
 
 const UA = 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Mobile Safari/537.36'
 const HOST_ORIGIN: Record<string, string> = { [new URL(CAS_ORIGIN).host]: CAS_ORIGIN, [new URL(JW_ORIGIN).host]: JW_ORIGIN }
@@ -75,15 +84,56 @@ function jarsOut(): EduCookieJar[] {
   return out
 }
 
-/** CAS 会话活着的前提下，访问课表页完成教务 SSO；没接上（被踢回登录表单）给 null */
-async function reachTimetable(http: EduHttp): Promise<{ url: string } | null> {
-  const r = await follow(http, TIMETABLE_URL)
-  if (hostOf(r.url) !== new URL(JW_ORIGIN).host) return null
-  if (extractExecution(r.body)) return null
-  /* ticket 已被这次 SSO 用掉：去掉参数，浏览器带着会话 Cookie 打开干净地址 */
-  const u = new URL(r.url)
-  u.searchParams.delete('ticket')
-  return { url: u.toString() }
+/** 索引页里选中的学期：xnm/xqm 下拉的 selected 项；读不到给 null（调用方按月份猜） */
+function termFromIndex(html: string): ZfTerm | null {
+  const selectedIn = (id: string) => {
+    const seg = new RegExp(`<select[^>]*id="${id}"[\\s\\S]*?</select>`).exec(html)
+    if (!seg) return null
+    return /<option[^>]*value="([^"]*)"[^>]*selected/.exec(seg[0])?.[1] ?? null
+  }
+  const xnm = selectedIn('xnm')
+  const xqm = selectedIn('xqm')
+  return xnm && xqm ? { xnm, xqm } : null
+}
+
+/** 登录后原生拉课表（docs/CAS_LOGIN.md 第 5-6 步）：先走一遍 zfiotlogin 确保教务会话是活的
+ *  （TGT 活着就能换到已认证会话；死了链子停在 CAS 登录表单），读索引页选中的学期，
+ *  POST 拿 JSON 转规则输出。没接上或没有课给 null，页面退回浏览器兜底。 */
+async function fetchTimetable(http: EduHttp): Promise<EduKbFetch | null> {
+  const page = await follow(http, SSO_JUMP)
+  if (hostOf(page.url) !== new URL(JW_ORIGIN).host || !INDEX_RE.test(page.url)) return null
+  const term = termFromIndex(page.body) ?? guessTerm()
+  const r = await call(http, {
+    url: KB_URL,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest', Referer: page.url, Accept: 'application/json, text/javascript, */*; q=0.01' },
+    body: new URLSearchParams({ xnm: term.xnm, xqm: term.xqm, kzlx: 'ck', xsdm: '', kclbdm: '', kclxdm: '' }).toString(),
+  })
+  let json: unknown
+  try {
+    json = JSON.parse(r.body)
+  } catch {
+    return null
+  }
+  const out = { ...parseZfKbList(json), semester: { name: termLabel(term) } }
+  if (out.courses.length === 0) return null
+  out.timeGrid = zfTimeGrid(await rjc(http, term))
+  return { out, term, pageUrl: page.url }
+}
+
+/** 作息：日课表接口按学期给每节的起止钟点；失败不阻断导入（应用默认作息兜底） */
+async function rjc(http: EduHttp, term: ZfTerm): Promise<unknown> {
+  try {
+    const r = await call(http, {
+      url: RJC_URL,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest', Accept: 'application/json, text/javascript, */*; q=0.01' },
+      body: new URLSearchParams({ xnm: term.xnm, xqm: term.xqm }).toString(),
+    })
+    return JSON.parse(r.body)
+  } catch {
+    return undefined
+  }
 }
 
 /** 未登录：拿公钥（种下 _pv0CAS）并按需取验证码 */
@@ -119,13 +169,12 @@ export const flow: EduLoginFlow = {
       const had = parseCookieHeader((await cookie(origin)) ?? '')
       applySetCookie(jarFor(host), [...had].map(([k, v]) => `${k}=${v}`))
     }
-    const page = await follow(http, CAS_LOGIN)
-    if (!extractExecution(page.body)) {
-      /* CAS 还认得我们：走一次教务 SSO，活着就直进 */
-      const t = await reachTimetable(http)
-      if (t) return { kind: 'ready', url: t.url, jars: jarsOut() }
-      reset()
+    /* TGT 活着：zfiotlogin 一趟直接换到已认证教务会话，落在课表索引页 */
+    const ready = await follow(http, SSO_JUMP)
+    if (hostOf(ready.url) === new URL(JW_ORIGIN).host && INDEX_RE.test(ready.url)) {
+      return { kind: 'ready', url: ready.url, jars: jarsOut() }
     }
+    reset()
     return beginForm(http)
   },
 
@@ -152,12 +201,13 @@ export const flow: EduLoginFlow = {
       reset()
       return { kind: 'fail', message }
     }
-    const t = await reachTimetable(http)
-    if (!t) {
+    /* CAS 已登录：zfiotlogin 换已认证教务会话（JSESSIONID/route/rememberMe 都进瓶） */
+    const page = await follow(http, SSO_JUMP)
+    if (hostOf(page.url) !== new URL(JW_ORIGIN).host || !INDEX_RE.test(page.url)) {
       reset()
       return { kind: 'fail', message: '教务登录没接上，请重试' }
     }
-    return { kind: 'ok', url: t.url, jars: jarsOut() }
+    return { kind: 'ok', url: page.url, jars: jarsOut() }
   },
 
   /** 换一张验证码：同一会话的公钥/Cookie 不动 */
@@ -166,11 +216,13 @@ export const flow: EduLoginFlow = {
     const mime = (pick(img.headers, 'content-type')[0] ?? 'image/png').split(';')[0].trim()
     return `data:${mime};base64,${img.body}`
   },
+
+  fetchTimetable,
 }
 
 export const xjvut: EduPlugin = {
   id: 'xjvut',
-  name: '新疆理工职业大学',
+  name: '新疆理工职业大学 统一身份认证（CAS）',
   url: CAS_LOGIN,
   system: 'zhengfang_new',
   auth: { kind: 'login', flow },

@@ -145,7 +145,9 @@ export default function RealApp() {
     else push({ k: 'session', occ: o })
   }
 
-  /* 首次引导：完成条件、去向分发、清除后的重置 */
+  /* 首次引导：完成条件、去向分发、清除后的重置；登录导入成功会要求开学日期收尾 */
+  const requireDateRef = useRef<() => void>(() => {})
+  const [dateSignal, setDateSignal] = useState(0)
   const onboard = useOnboard({
     hasCourses: state.courses.length > 0,
     hasSemester: !!snap,
@@ -153,8 +155,9 @@ export default function RealApp() {
     resetToHome: backToTimetable,
     push,
     openEduLogin,
+    onRequireDate: () => setDateSignal((n) => n + 1),
   })
-  const { onboarded, onboardUnder, onboardDone, showOnboard, onboardBack, onOnboardDone, eraseDone } = onboard
+  const { onboarded, onboardUnder, onboardDone, showOnboard, onboardBack, onOnboardDone, markDone, eraseDone } = onboard
 
   /* 有课表、还没拿到日历权限：每次启动推一次「加进手机日历」，拿到后全自动 */
   const calAsked = useRef(false)
@@ -322,6 +325,9 @@ export default function RealApp() {
             <Onboarding
               backRef={onboardBack}
               onDone={onOnboardDone}
+              markDone={markDone}
+              dateSignal={dateSignal}
+              onRequireDate={(fn) => { requireDateRef.current = fn }}
             />
           </motion.div>
         )}

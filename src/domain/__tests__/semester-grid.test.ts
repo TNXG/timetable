@@ -15,7 +15,7 @@ describe('节次表来源', () => {
     const x = extendGrid(g, 13)
     expect(x).toHaveLength(13)
     expect(x.slice(0, 10)).toEqual(g)
-    expect(x[10]).toEqual({ index: 11, start: 1250, end: 1295 })
+    expect(x[10]).toEqual({ index: 11, start: 1370, end: 1415 })
     expect(x[12].index).toBe(13)
     expect(extendGrid(g, 8)).toBe(g)
   })

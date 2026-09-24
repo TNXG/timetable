@@ -13,7 +13,7 @@ import { normalize, type NormalizedCourse, type RuleOutput } from '../domain/imp
 import { uid } from '../domain/store'
 import { store } from './store'
 import { extendGrid, semesterEnded } from './semester'
-import { edu, eduProfile, nativeEdu, type EduBgNav } from './edu-browser'
+import { edu, eduProfile, eduVault, nativeEdu, type EduBgNav } from './edu-browser'
 
 export const EDU_RULE: RuleManifest = { id: 'builtin-edu', name: '教务系统', version: '1.0', input: 'json', createdAt: 0, updatedAt: 0 }
 
@@ -117,11 +117,14 @@ export function setEduSyncEnabled(on: boolean) {
   save({ ...s, enabled: on, failStreak: on ? 0 : s.failStreak })
 }
 
-/** 退出登录：删掉该学校的 WebView Profile 与记录 */
+/** 退出登录：删掉该学校的 WebView Profile、记录与保存的密码 */
 export async function logoutEduSync(): Promise<void> {
   const s = load()
   save(null)
-  if (s) await edu.clearProfile(s.school.url)
+  if (s) {
+    await edu.clearProfile(s.school.url)
+    await eduVault.clear(eduProfile(s.school.url))
+  }
 }
 
 /** 内置浏览器打开 / 离开这所学校时是否保留会话 */

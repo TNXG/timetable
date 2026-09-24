@@ -1,6 +1,6 @@
-<img src="docs/logo.png" width="140" alt="嘎嘎课程表" />
+<img src="docs/logo.png" width="140" alt="Koma" />
 
-# 嘎嘎课程表
+# Koma
 
 **你的课表，理应如此。**
 

@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli'
 
 const config: CapacitorConfig = {
   appId: 'moe.tnxg.timetable',
-  appName: '嘎嘎课程表',
+  appName: 'Koma',
   webDir: 'dist',
   backgroundColor: '#F7F7F6',
   android: {

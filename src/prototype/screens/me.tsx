@@ -155,7 +155,7 @@ export function AboutScreen() {
         <SubHead title="关于" />
         <div className="mt-10 flex flex-col items-center">
           <img src="/icon.png" alt="" className="h-[84px] w-[84px]" />
-          <div className="mt-4 text-[22px] font-extrabold tracking-[-.02em] text-(--c-ink)">嘎嘎课程表</div>
+          <div className="mt-4 text-[22px] font-extrabold tracking-[-.02em] text-(--c-ink)">Koma</div>
           <div className="mt-1 text-[12.5px] font-medium tabular-nums text-(--c-ink4)">1.4.78</div>
         </div>
         <div className="mt-8 px-5">

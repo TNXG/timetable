@@ -1,4 +1,4 @@
-import type { Diagnostic } from '../types'
+import type { Diagnostic, TimeSlot } from '../types'
 import type { RuleCourse, RuleOutput } from '../importer'
 import { parseWeekExpr, maskToWeeks } from '../weeks'
 
@@ -48,7 +48,8 @@ export function zcdToWeeks(zcd: string): { weeks: string; error?: string } {
   let mask = 0n
   let error: string | undefined
   for (const seg of segs) {
-    const r = parseWeekExpr(seg)
+    /* zf 的段有「第16周」这类带「第」的写法，引擎解析器不认，剥掉 */
+    const r = parseWeekExpr(seg.replace(/^第/, ''))
     if (r.error) error = r.error
     mask |= r.mask
   }
@@ -80,7 +81,24 @@ export function parseJcs(jcs: string): [number, number] | null {
 
 const clean = (v: unknown) => (typeof v === 'string' ? v.replace(/\s+/g, ' ').trim() : v == null ? '' : String(v))
 
-/** 接口 JSON（或其 kbList）→ 规则输出；不带作息：正方个人课表接口不给节次时间 */
+/** 日课表行（kbcx/xskbcx_cxRjc.html，POST xnm/xqm）→ 作息表：qssj 含整段 "10:00 - 10:45"（jssj 可能空着兜尾） */
+export function zfTimeGrid(rows: unknown): TimeSlot[] | undefined {
+  if (!Array.isArray(rows)) return undefined
+  const grid: TimeSlot[] = []
+  for (const row of rows) {
+    const r = (row ?? {}) as { jcmc?: unknown; qssj?: unknown; jssj?: unknown }
+    const index = Number(clean(r.jcmc))
+    const times = [...String(r.qssj ?? '').matchAll(/(\d{1,2}):(\d{2})/g), ...String(r.jssj ?? '').matchAll(/(\d{1,2}):(\d{2})/g)].map((m) => Number(m[1]) * 60 + Number(m[2]))
+    const start = times[0]
+    const end = times[times.length - 1]
+    if (!(index >= 1) || start == null || end == null || end <= start) continue
+    grid.push({ index, start, end })
+  }
+  if (grid.length === 0) return undefined
+  return grid.sort((a, b) => a.index - b.index)
+}
+
+/** 接口 JSON（或其 kbList）→ 规则输出；钟点不在本接口，来自 cxRjc（zfTimeGrid） */
 export function parseZfKbList(input: unknown): RuleOutput {
   const list: unknown[] = Array.isArray(input)
     ? input

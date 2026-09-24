@@ -7,6 +7,8 @@
  * 新学校加一个 plugins/<id>.ts 并登记进 EDU_PLUGINS 即可。
  */
 import type { EduSystemId } from './systems'
+import type { RuleOutput } from '../importer'
+import type { ZfTerm } from './zhengfang'
 import { xjvut } from './plugins/xjvut'
 
 /** 教务站入口与学校标识；保持登录、自动更新等记录也按这三项存 */
@@ -58,12 +60,21 @@ export type EduLoginOutcome =
   | { kind: 'ok'; url: string; jars: EduCookieJar[] }
   | { kind: 'fail'; message: string }
 
+/** 登录后原生拉到的课表：正方 JSON 转好的规则输出 + 当时选中的学期 + 落点页 */
+export interface EduKbFetch {
+  out: RuleOutput
+  term: ZfTerm
+  pageUrl: string
+}
+
 /** 学校专属的登录执行；插件是软件的一部分，只是把「这家学校怎么登」收拢在一个文件里 */
 export interface EduLoginFlow {
   begin(http: EduHttp, cookie: (url: string) => Promise<string | null>): Promise<EduLoginBegin>
   login(http: EduHttp, c: EduCredentials): Promise<EduLoginOutcome>
   /** 换一张验证码（同一会话的公钥/Cookie 不动）；没实现就整轮 begin */
   refreshCaptcha?(http: EduHttp): Promise<string | null>
+  /** 登录成功后用会话原生拉课表 JSON（正方学校实现）；没接上给 null，页面退回内置浏览器兜底 */
+  fetchTimetable?(http: EduHttp): Promise<EduKbFetch | null>
 }
 
 /** 登录方式：login = 应用内直登页（插件声明启用并给 flow）；webview = 内置浏览器里用户自己登录 */

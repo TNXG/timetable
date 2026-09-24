@@ -53,7 +53,7 @@ export type Route =
   | { k: 'manual' }
   | { k: 'eduLogin' }
   | { k: 'eduBrowser'; startUrl?: string }
-  | { k: 'eduPreview'; out: RuleOutput; src: EduSyncSource }
+  | { k: 'eduPreview'; out: RuleOutput; src: EduSyncSource; over?: boolean }
   | { k: 'eduFail'; info: EduFailInfo }
   | { k: 'import' }
   | { k: 'scan' }
@@ -196,7 +196,11 @@ export function renderRoute(r: Route, i: number, ctx: RouteCtx): ReactNode {
             key={key}
             plugin={DEFAULT_PLUGIN}
             onBack={pop}
-            onDone={(url) => replaceTop({ k: 'eduBrowser', startUrl: url })}
+            onDone={(kb, url) => {
+              /* 原生拉到课表：登录页原地换预览页；没拉到（会话或学期没接上）退回内置浏览器，此时已登录 */
+              if (kb) replaceTop({ k: 'eduPreview', out: kb.out, src: { school: DEFAULT_PLUGIN, pageUrl: kb.pageUrl, term: kb.term } })
+              else replaceTop({ k: 'eduBrowser', startUrl: url })
+            }}
           />
         )
       case 'eduBrowser':
@@ -207,13 +211,13 @@ export function renderRoute(r: Route, i: number, ctx: RouteCtx): ReactNode {
             startUrl={r.startUrl}
             active={i === stack.length - 1}
             onBack={pop}
-            onImport={(out, src) => push({ k: 'eduPreview', out, src })}
+            onImport={(out, src) => push({ k: 'eduPreview', out, src, over: true })}
             onFail={(info) => replaceTop({ k: 'eduFail', info })}
             onOther={() => replaceTop({ k: 'import' })}
           />
         )
       case 'eduPreview':
-        return <ImportRunPage key={key} rule={EDU_RULE} initialOut={r.out} overBrowser syncSource={r.src} onBack={pop} onDone={backToTimetable} />
+        return <ImportRunPage key={key} rule={EDU_RULE} initialOut={r.out} overBrowser={r.over === true} syncSource={r.src} onBack={pop} onDone={backToTimetable} />
       case 'eduFail':
         return <EduFailPage key={key} info={r.info} onBack={pop} />
       case 'import':

@@ -71,7 +71,7 @@ export function buildDebugPackage(input: DebugPackageInput): { text: string; nam
   }
 
   const parts: string[] = [
-    `<!--\n嘎嘎课程表 页面调试包\n${safeComment(JSON.stringify(meta, null, 2))}\n-->\n`,
+    `<!--\nKoma 页面调试包\n${safeComment(JSON.stringify(meta, null, 2))}\n-->\n`,
     capture.html,
     '\n',
   ]

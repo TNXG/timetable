@@ -79,6 +79,33 @@ interface TtEduPlugin {
 
 const TtEdu = registerPlugin<TtEduPlugin>('TtEdu')
 
+interface TtVaultPlugin {
+  set(o: { profile: string; username: string; password: string }): Promise<{ ok: boolean }>
+  get(o: { profile: string }): Promise<{ username: string | null; password: string | null }>
+  clear(o: { profile: string }): Promise<{ ok: boolean }>
+}
+
+const TtVault = registerPlugin<TtVaultPlugin>('TtVault')
+
+/** 保存的登录凭证（用户开了「保存密码」才有）；原生 Keystore 加密，密文按学校 Profile 存本机 */
+export interface EduSavedCred {
+  username: string
+  password: string
+}
+
+/** 凭证加密缓存的读写：关开关、退出登录即删；浏览器环境一律当作没有 */
+export const eduVault = {
+  /** 登录成功后写入；false = 本机没存成（异常），下次当作没存过 */
+  save: (profile: string, username: string, password: string): Promise<boolean> =>
+    nativeEdu() ? TtVault.set({ profile, username, password }).then((r) => r.ok, () => false) : Promise.resolve(false),
+  /** 登录页预填用；null = 没存过 */
+  load: (profile: string): Promise<EduSavedCred | null> =>
+    nativeEdu()
+      ? TtVault.get({ profile }).then((r) => (r.username && r.password ? { username: r.username, password: r.password } : null), () => null)
+      : Promise.resolve(null),
+  clear: (profile: string): Promise<void> => (nativeEdu() ? TtVault.clear({ profile }).then(() => {}, () => {}) : Promise.resolve()),
+}
+
 export const nativeEdu = () => Capacitor.getPlatform() === 'android'
 
 export const RUN_TIMEOUT = 20_000

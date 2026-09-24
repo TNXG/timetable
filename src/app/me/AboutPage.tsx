@@ -49,8 +49,8 @@ export function AboutPage({ onBack }: { onBack: () => void }) {
       <div className="flex-1 overflow-y-auto px-5 pb-6 [scrollbar-width:none]">
         <TopBar title="关于" onBack={onBack} />
         <div className="mt-10 flex flex-col items-center">
-          <img src="/icon.png" alt="嘎嘎课程表" className="h-[84px] w-[84px]" />
-          <div className="mt-4 text-[22px] font-extrabold tracking-[-.02em] text-(--c-ink)">嘎嘎课程表</div>
+          <img src="/icon.png" alt="Koma" className="h-[84px] w-[84px]" />
+          <div className="mt-4 text-[22px] font-extrabold tracking-[-.02em] text-(--c-ink)">Koma</div>
           {version && <div className="mt-1 text-[12.5px] font-medium tabular-nums text-(--c-ink4)">{version}</div>}
         </div>
         <div className="mt-8 rounded-[18px] bg-(--c-surface) px-4">

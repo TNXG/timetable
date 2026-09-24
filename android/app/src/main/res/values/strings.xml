@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">嘎嘎课程表</string>
-    <string name="title_activity_main">嘎嘎课程表</string>
+    <string name="app_name">Koma</string>
+    <string name="title_activity_main">Koma</string>
     <string name="package_name">moe.tnxg.timetable</string>
     <string name="custom_url_scheme">moe.tnxg.timetable</string>
     <string name="widget_today_label">今日课程</string>

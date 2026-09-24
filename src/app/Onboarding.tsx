@@ -1,19 +1,12 @@
-import { useMemo, useState, type MutableRefObject } from 'react'
+import { useEffect, useRef, useState, type MutableRefObject } from 'react'
 import { AnimatePresence } from 'motion/react'
-import { diffDays, fmtMinutes } from '../domain/dates'
-import { DEFAULT_DURATION, DURATION_STEP, MAX_DURATION, MAX_PERIODS, MIN_DURATION, MIN_PERIODS, generateGrid } from '../domain/schedule'
+import { diffDays } from '../domain/dates'
 import { store } from './store'
 import { defaultSemester, mondayOf, todayStr } from './semester'
-import { DateInput, Field, Page, PrimaryButton, Row, Stepper, TextAction, TimeSheet, TopBar, md } from './ui'
+import { DateInput, Field, Page, PrimaryButton, Row, TextAction, TopBar, md } from './ui'
+import { DEFAULT_PLUGIN } from '../domain/edu/plugin'
 
 const WEEKS = 20
-const DEFAULT_PERIODS = 10
-const DEFAULT_FIRST = 8 * 60
-
-/* 来源暂时只留教务系统登录导入，其余导入方式后续再恢复 */
-const SOURCES: [string, string][] = [
-  ['edu', '教务系统'],
-]
 
 /** 开学日期，落到所在周的周一 */
 export function StartDateField({ value, onChange }: { value: string; onChange: (d: string) => void }) {
@@ -42,8 +35,8 @@ function Step({ title, sub, onBack, footer, children }: { title: string; sub?: s
   )
 }
 
-/** 首次进入：开学日期 → 作息时间 → 课表来源，和应用内其他页面同一套推入 */
-export default function Onboarding({ onDone, initialStep = 0, backRef }: { onDone: (ruleId: string | null) => void; initialStep?: number; backRef?: MutableRefObject<() => boolean> }) {
+/** 首次进入：登录（默认学校，作息随导入自动带出）→ 开学日期收尾，和应用内其他页面同一套推入 */
+export default function Onboarding({ onDone, markDone, dateSignal, onRequireDate, initialStep = 0, backRef }: { onDone: (ruleId: string | null) => void; markDone: () => void; dateSignal: number; onRequireDate: (fn: () => void) => void; initialStep?: number; backRef?: MutableRefObject<() => boolean> }) {
   const [step, setStep] = useState(initialStep)
   if (backRef) {
     backRef.current = () => {
@@ -54,15 +47,32 @@ export default function Onboarding({ onDone, initialStep = 0, backRef }: { onDon
   }
   const [date, setDate] = useState(() => mondayOf(todayStr()))
   const start = mondayOf(date)
-  const [count, setCount] = useState(DEFAULT_PERIODS)
-  const [duration, setDuration] = useState(DEFAULT_DURATION)
-  const [first, setFirst] = useState(DEFAULT_FIRST)
-  const [pickFirst, setPickFirst] = useState(false)
-  const grid = useMemo(() => generateGrid(count, duration, first), [count, duration, first])
+  const pendingRule = useRef<'manual' | null>(null)
 
-  const finish = (ruleId: string | null) => {
-    store.setSemester({ ...defaultSemester(start), totalWeeks: WEEKS, timeGrid: grid })
+  /* 登录导入成功把课带回来后，跳到开学日期收尾 */
+  const requireRef = useRef<() => void>(() => {})
+  requireRef.current = () => setStep(2)
+  onRequireDate(() => requireRef.current())
+
+  useEffect(() => {
+    if (dateSignal > 0) setStep(2)
+  }, [dateSignal])
+
+  /** 开学日期继续：已导入的只改日期（作息/课程不动）；还没课的按去向交给后续页面 */
+  const continueDate = (ruleId: string | null) => {
+    if (store.state.courses.length > 0 && store.state.semester) {
+      store.setSemester({ ...store.state.semester, startDate: start })
+      markDone()
+      return
+    }
+    store.setSemester({ ...defaultSemester(start), totalWeeks: WEEKS })
     onDone(ruleId)
+  }
+
+  /** 稍后：默认学期先行，整份引导完成 */
+  const skip = () => {
+    store.setSemester({ ...defaultSemester(start), totalWeeks: WEEKS })
+    onDone(null)
   }
 
   return (
@@ -71,7 +81,7 @@ export default function Onboarding({ onDone, initialStep = 0, backRef }: { onDon
         <div className="flex flex-1 flex-col px-7 pt-[max(64px,calc(env(safe-area-inset-top)+34px))]">
           <img src="/mascot.png" alt="" className="h-[200px] w-[200px] self-center object-contain" />
           <div className="mt-auto pb-14">
-            <div className="text-[17px] font-bold tracking-[.02em] text-(--c-ink3)">嘎嘎课程表</div>
+            <div className="text-[17px] font-bold tracking-[.02em] text-(--c-ink3)">Koma</div>
             <h1 className="mt-3 text-[44px] leading-[1.15] font-extrabold tracking-[-.04em]">
               <span className="block text-(--c-ink)">你的课表，</span>
               <span className="block text-(--c-ink4)">理应如此。</span>
@@ -86,82 +96,31 @@ export default function Onboarding({ onDone, initialStep = 0, backRef }: { onDon
       <AnimatePresence>
         {step >= 1 && (
           <Step
-            key="start"
-            title="开学日期"
-            sub={`第 ${Math.max(1, currentWeek(start))} 周`}
+            key="login"
+            title="登录"
+            sub={DEFAULT_PLUGIN.name}
             onBack={() => setStep(0)}
-            footer={<PrimaryButton onClick={() => setStep(2)}>继续</PrimaryButton>}
-          >
-            <StartDateField value={date} onChange={setDate} />
-          </Step>
-        )}
-        {step >= 2 && (
-          <Step
-            key="schedule"
-            title="作息时间"
-            sub={`${count} 节 · ${fmtMinutes(grid[0].start)} – ${fmtMinutes(grid[grid.length - 1].end)}`}
-            onBack={() => setStep(1)}
-            footer={<PrimaryButton onClick={() => setStep(3)}>继续</PrimaryButton>}
-          >
-            <div className="rounded-[18px] bg-(--c-surface) px-4">
-              <div className="flex items-center py-3">
-                <span className="flex-1 text-[14px] font-semibold text-(--c-ink)">每天节数</span>
-                <Stepper value={count} unit="节" min={MIN_PERIODS} max={MAX_PERIODS} onChange={setCount} />
-              </div>
-              <div className="flex items-center border-t border-(--c-line2) py-3">
-                <span className="flex-1 text-[14px] font-semibold text-(--c-ink)">每节时长</span>
-                <Stepper value={duration} unit="分" min={MIN_DURATION} max={MAX_DURATION} step={DURATION_STEP} onChange={setDuration} />
-              </div>
-              <div className="flex items-center border-t border-(--c-line2) py-3">
-                <span className="flex-1 text-[14px] font-semibold text-(--c-ink)">第 1 节开始</span>
-                <button
-                  onClick={() => setPickFirst(true)}
-                  className="rounded-[10px] bg-(--c-surface2) px-3 py-1.5 text-[15px] font-bold tabular-nums text-(--c-ink) transition-transform duration-150 active:scale-[.96]"
-                >
-                  {fmtMinutes(first)}
-                </button>
-              </div>
-            </div>
-            <div className="mt-5 mb-6 grid grid-cols-2 gap-x-4 rounded-[18px] bg-(--c-surface) px-4 py-2">
-              {grid.map((t, i) => (
-                <div key={t.index} className={`flex items-center py-[7px] ${i >= 2 ? 'border-t border-(--c-line2)' : ''}`}>
-                  <span className="w-[24px] text-[12px] font-bold tabular-nums text-(--c-ink5)">{t.index}</span>
-                  <span className="text-[13px] font-semibold tabular-nums text-(--c-ink)">{fmtMinutes(t.start)}</span>
-                  <span className="mx-1.5 text-[12px] text-(--c-ink5)">–</span>
-                  <span className="text-[13px] font-medium tabular-nums text-(--c-ink4)">{fmtMinutes(t.end)}</span>
-                </div>
-              ))}
-            </div>
-            {pickFirst && (
-              <TimeSheet
-                value={fmtMinutes(first)}
-                title="第 1 节开始"
-                step={5}
-                onPick={(v) => { const [h, m] = v.split(':').map(Number); setFirst(h * 60 + m) }}
-                onClose={() => setPickFirst(false)}
-              />
-            )}
-          </Step>
-        )}
-        {step >= 3 && (
-          <Step
-            key="source"
-            title="课表来源"
-            onBack={() => setStep(2)}
             footer={
-              <div className="flex justify-center">
-                <TextAction tone="mute" onClick={() => finish(null)}>稍后</TextAction>
+              <div className="flex justify-center gap-8">
+                <TextAction tone="mute" onClick={() => { pendingRule.current = 'manual'; setStep(2) }}>手动添加</TextAction>
+                <TextAction tone="mute" onClick={skip}>稍后</TextAction>
               </div>
             }
           >
             <div className="divide-y divide-(--c-surface2) overflow-hidden rounded-[16px] bg-(--c-surface)">
-              {SOURCES.map(([id, t]) => (
-                <Row key={id} title={t} badge={id === 'edu' ? '推荐' : undefined} onClick={() => finish(id)} />
-              ))}
+              <Row title={DEFAULT_PLUGIN.name} badge="默认" onClick={() => onDone('edu')} />
             </div>
-            <div className="mt-5 divide-y divide-(--c-surface2) overflow-hidden rounded-[16px] bg-(--c-surface)">
-              <Row title="手动添加" onClick={() => finish('manual')} />
-            </div>
+          </Step>
+        )}
+        {step >= 2 && (
+          <Step
+            key="start"
+            title="开学日期"
+            sub={`第 ${Math.max(1, currentWeek(start))} 周`}
+            onBack={() => setStep(1)}
+            footer={<PrimaryButton onClick={() => continueDate(pendingRule.current)}>继续</PrimaryButton>}
+          >
+            <StartDateField value={date} onChange={setDate} />
           </Step>
         )}
       </AnimatePresence>

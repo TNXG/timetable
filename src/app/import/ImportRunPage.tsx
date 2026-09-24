@@ -68,8 +68,13 @@ export function ImportRunPage({ rule, initialText, initialOut, autoRun, overBrow
   const [busy, setBusy] = useState<'' | 'fetch' | 'parse'>('')
   const [error, setError] = useState('')
   const [out, setOut] = useState<RuleOutput | null>(initialOut ?? null)
-  const [useFileGrid, setUseFileGrid] = useState(false)
   const [sem] = useState<Semester>(() => store.state.semester ?? defaultSemester(mondayOf(todayStr())))
+  const [useFileGrid, setUseFileGrid] = useState(() => {
+    /* 直登预览（initialOut）自带动作息：和当前不同且来源可信就默认采用 */
+    const g = initialOut?.timeGrid
+    if (!g || g.length === 0) return false
+    return JSON.stringify(g) !== JSON.stringify(sem.timeGrid) && (!!initialOut.semester || isDefaultGrid(sem.timeGrid))
+  })
 
   /* 文件里的节次表：和当前不同才算“带了作息” */
   const fileGrid = useMemo(() => {
