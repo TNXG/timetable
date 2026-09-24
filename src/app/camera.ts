@@ -39,13 +39,13 @@ interface TtCameraPlugin {
   deleteFiles(o: { paths: string[] }): Promise<void>
 }
 
-const TtCamera = registerPlugin<TtCameraPlugin>('TtCamera')
+export const TtCamera = registerPlugin<TtCameraPlugin>('TtCamera')
 
 export const nativeCamera = () => Capacitor.getPlatform() === 'android'
 
 /* ---------------- 浏览器降级：预览走 getUserMedia，照片存成 data URL ---------------- */
 
-const webPhotos = new Map<string, string>()
+export const webPhotos = new Map<string, string>()
 let webStream: MediaStream | null = null
 let webVideo: HTMLVideoElement | null = null
 let webFacing: 'back' | 'front' = 'back'
@@ -106,18 +106,23 @@ function webScanStop() {
   webScanTimer = 0
 }
 
-async function webCapture(): Promise<CapturedPhoto> {
-  if (!webVideo) throw new Error('not-started')
-  const w = webVideo.videoWidth
-  const h = webVideo.videoHeight
+/** 把预览当前帧画到画布上；width 是目标宽度，高度按预览比例算 */
+function canvasStill(width: number, quality = 0.9): { data: string; width: number; height: number } | null {
+  if (!webVideo || !webVideo.videoWidth) return null
+  const height = Math.round(webVideo.videoHeight * (width / webVideo.videoWidth))
   const canvas = document.createElement('canvas')
-  canvas.width = w
-  canvas.height = h
-  canvas.getContext('2d')?.drawImage(webVideo, 0, 0, w, h)
-  const data = canvas.toDataURL('image/jpeg', 0.9)
+  canvas.width = width
+  canvas.height = height
+  canvas.getContext('2d')?.drawImage(webVideo, 0, 0, width, height)
+  return { data: canvas.toDataURL('image/jpeg', quality), width, height }
+}
+
+async function webCapture(): Promise<CapturedPhoto> {
+  const still = canvasStill(webVideo?.videoWidth ?? 0)
+  if (!still) throw new Error('not-started')
   const path = `web/${uid()}.jpg`
-  webPhotos.set(path, data)
-  return { path, uri: data, width: w, height: h }
+  webPhotos.set(path, still.data)
+  return { path, uri: still.data, width: still.width, height: still.height }
 }
 
 /** 浏览器里没有相册接口：用文件选择顶上，选中的图直接当结果 */
@@ -203,15 +208,10 @@ export const camera = {
    */
   async freeze(): Promise<string | null> {
     if (!nativeCamera()) {
-      if (!webVideo || !webVideo.videoWidth) return null
-      const w = 720
-      const h = Math.round(webVideo.videoHeight * (w / webVideo.videoWidth))
-      const canvas = document.createElement('canvas')
-      canvas.width = w
-      canvas.height = h
-      canvas.getContext('2d')?.drawImage(webVideo, 0, 0, w, h)
+      const still = canvasStill(720, 0.8)
+      if (!still) return null
       webStop()
-      return canvas.toDataURL('image/jpeg', 0.8)
+      return still.data
     }
     const r = await TtCamera.freeze()
     return r?.frozen ?? null
@@ -325,31 +325,5 @@ export const camera = {
   },
 }
 
-const srcCache = new Map<string, string>()
 
-/** 相对路径转 <img src>；原生下第一次要问一次插件 */
-export function photoSrc(path: string): string {
-  if (path.startsWith('data:')) return path
-  const web = webPhotos.get(path)
-  if (web) return web
-  return srcCache.get(path) ?? ''
-}
-
-export async function loadPhotoSrc(path: string): Promise<string> {
-  const cached = photoSrc(path)
-  if (cached) return cached
-  if (!nativeCamera()) return ''
-  try {
-    const r = await TtCamera.resolve({ path })
-    const src = r.uri ? Capacitor.convertFileSrc(r.uri) : ''
-    if (src) srcCache.set(path, src)
-    return src
-  } catch {
-    return ''
-  }
-}
-
-export function rememberPhoto(p: CapturedPhoto): TaskPhoto {
-  if (nativeCamera() && p.uri) srcCache.set(p.path, Capacitor.convertFileSrc(p.uri))
-  return { id: uid(), path: p.path, w: p.width, h: p.height, takenAt: Date.now() }
-}
+import { photoSrc } from './photo-src'

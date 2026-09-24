@@ -43,11 +43,24 @@ export interface EduBgNav {
   error?: string
 }
 
+/** 直登的原生 HTTP 响应：headers 保留服务端大小写与多值 */
+export interface EduHttpResult {
+  status: number
+  url: string
+  headers: Record<string, string[]>
+  body: string
+}
+
 interface TtEduPlugin {
   open(o: { url: string; profile?: string; keep?: boolean }): Promise<{ persistent: boolean }>
   close(o: { keep?: boolean }): Promise<void>
   profiles(): Promise<{ supported: boolean }>
   clearProfile(o: { profile: string }): Promise<{ ok: boolean }>
+  /** 直登用：一头一响应、不跟重定向（重定向由插件逐跳处理）；binary=true 时 body 为 base64 */
+  http(o: { url: string; method?: string; headers?: Record<string, string>; body?: string; binary?: boolean }): Promise<EduHttpResult>
+  /** 会话 Cookie 按网址种进学校 Profile */
+  setCookies(o: { profile: string; url: string; cookies: string[] }): Promise<{ ok: boolean }>
+  getCookies(o: { profile: string; url: string }): Promise<{ cookie: string | null }>
   bgOpen(o: { url: string; profile?: string }): Promise<void>
   bgEval(o: { js: string }): Promise<{ value: string }>
   bgClose(): Promise<void>
@@ -156,6 +169,13 @@ export const edu = {
   profiles: (): Promise<boolean> => (nativeEdu() ? TtEdu.profiles().then((r) => r.supported, () => false) : Promise.resolve(false)),
   clearProfile: (url: string): Promise<boolean> =>
     nativeEdu() ? TtEdu.clearProfile({ profile: eduProfile(url) }).then((r) => r.ok, () => false) : Promise.resolve(false),
+  /** 直登 HTTP：profile 由调用方给定（学校 Profile，不按请求地址推导） */
+  http: (req: { url: string; method?: string; headers?: Record<string, string>; body?: string; binary?: boolean }): Promise<EduHttpResult> =>
+    nativeEdu() ? TtEdu.http(req) : Promise.reject(new Error('仅在应用内可用')),
+  setCookies: (profile: string, url: string, cookies: string[]): Promise<boolean> =>
+    nativeEdu() ? TtEdu.setCookies({ profile, url, cookies }).then((r) => r.ok, () => false) : Promise.resolve(false),
+  getCookies: (profile: string, url: string): Promise<string | null> =>
+    nativeEdu() ? TtEdu.getCookies({ profile, url }).then((r) => r.cookie, () => null) : Promise.resolve(null),
   bgOpen: (url: string) => (nativeEdu() ? TtEdu.bgOpen({ url, profile: eduProfile(url) }) : Promise.reject(new Error('仅在应用内可用'))),
   bgClose: () => (nativeEdu() ? TtEdu.bgClose() : Promise.resolve()),
   onBgNav: (fn: (e: EduBgNav) => void): (() => void) => {

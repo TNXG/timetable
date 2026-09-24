@@ -39,7 +39,9 @@
 
 ### 安全
 
-不收集账号密码，不自动登录。教务导入走内置浏览器（`TtEdu`）：用户自己在学校页面登录；只在用户点「导入」时读当前页或调同源接口（教务页后自动读一次课程数量用于胶囊文案，不落库）；先预览再应用；只注入随应用打包的脚本，不下载执行远程脚本。浏览器 Cookie/存储按学校放在独立 WebView Profile（`edu-<host>`），与应用隔离，默认打开和离开时清空；用户开了「保持登录，自动更新课表」才保留该学校的会话（仅 Cookie/存储，不含账号密码），学期页「退出登录」一键删 Profile。自动更新（`src/app/edu-sync.ts`）只在不可见 WebView 里打开导入时的课表页、跑导入同一套脚本；不在登录页就标「需要重新登录」，不重试，连续三次失效自动关闭。不支持多 Profile 的老 WebView 不提供保持登录。其余导入只处理用户主动粘贴或选择的内容。
+凭证不落库、不上传。教务绑定 = 应用内直登页（学号/密码/验证码可选，`src/app/edu/EduLoginPage.tsx`）：登录页是软件的通用页面，学校插件声明是否启用（`auth.kind`）并实现登录流程（`auth.flow`，见 `src/domain/edu/plugins/xjvut.ts` 与 `docs/CAS_LOGIN.md`）——插件借软件的原生 HTTP 能力（`TtEdu.kt` 的 `http` 接口，一头一响应、不跟重定向）逐跳完成 CAS 登录与教务 SSO，把各主机的会话 Cookie 交给软件种进学校 Profile（`setCookies`/`getCookies`），浏览器打开即已登录、直接落在课表页；登录全程不经 WebView。凭证只在当次登录的内存里用一次，成功后留下的只有会话 Cookie。浏览器只在用户点「导入」时读当前页或调同源接口（教务页后自动读一次课程数量用于胶囊文案，不落库）；先预览再应用；只注入随应用打包的脚本，不下载执行远程脚本。浏览器 Cookie/存储按学校放在独立 WebView Profile（`edu-<host>`），与应用隔离，默认打开和离开时清空（直登刚建立的会话在浏览器打开期间保留，离开即清）；用户开了「保持登录，自动更新课表」才保留该学校的会话（仅 Cookie/存储，不含账号密码），学期页「退出登录」一键删 Profile。自动更新（`src/app/edu-sync.ts`）只在不可见 WebView 里打开导入时的课表页、跑导入同一套脚本；不在登录页就标「需要重新登录」，不重试，连续三次失效自动关闭。不支持多 Profile 的老 WebView 不提供保持登录（直登会话在当次仍可用）。其余导入只处理用户主动粘贴或选择的内容。
+
+学校登录是插件化的：`src/domain/edu/plugin.ts` 定义 `EduPlugin`（登录入口 + `auth: login | webview`，login 时带 `flow` 登录执行），一家学校一个插件文件放 `src/domain/edu/plugins/`；当前只内置新疆理工职业大学（`xjvut`）。页面识别与抓取脚本按教务系统区分（`systems.ts` / `scripts.ts`），与学校无关。
 
 ---
 
@@ -49,15 +51,19 @@
 
 | 改什么 | 去哪 |
 | --- | --- |
-| 路由栈、Tab、导入流程、AI 转换页 | `src/app/RealApp.tsx` |
-| 课程详情/编辑/冲突/变更/手动添加/搜索 | `src/app/pages.tsx` |
+| 路由栈、Tab、返回键 | `src/app/RealApp.tsx` |
+| 今天/周视图/日历面板、长按 | `src/app/home/`、`src/app/press.ts` |
+| 课程详情/编辑/冲突/变更/手动添加 | `src/app/course/` |
+| 搜索 | `src/app/search/` |
+| 导入（其他方式/AI 转换/规则/预览） | `src/app/import/` |
 | 首次引导 | `src/app/Onboarding.tsx` |
 | 公共组件、动效常量 | `src/app/ui.tsx` |
-| 原生桥（对话框、Toast、返回键、小组件） | `src/app/widgets.ts`、`android/.../WidgetBridge.java`、`MainActivity.java` |
+| 原生桥（对话框、Toast、返回键、小组件） | `src/app/widgets.ts`、`android/.../WidgetBridge.kt`、`MainActivity.kt` |
 | 周次/节次/冲突算法 | `src/domain/engine.ts`、`weeks.ts`、`dates.ts` |
 | 导入解析、诊断、normalize | `src/domain/importer.ts`、`importers/*`、`rules.ts` |
-| 教务导入（选学校/内置浏览器/未识别页） | `src/app/edu.tsx`、`src/app/edu-browser.ts`、`src/domain/edu/*`、`android/.../TtEdu.java` |
-| 教务保持登录 / 自动更新 | `src/app/edu-sync.ts`（状态、立即更新、回前台检查），`TtEdu.java` 的 profile / bg* 接口 |
+| 教务绑定（CAS 直登页/内置浏览器/未识别页） | `src/app/edu/`（直登页 `EduLoginPage.tsx`）、`src/app/edu-browser.ts`、`android/.../TtEdu.kt` |
+| 学校登录插件（默认=新疆理工职业大学） | `src/domain/edu/plugin.ts`、`src/domain/edu/plugins/`、`src/domain/edu/cas.ts`（解析/加密/Cookie 瓶） |
+| 教务保持登录 / 自动更新 | `src/app/edu-sync.ts`（状态、立即更新、回前台检查），`TtEdu.kt` 的 profile / bg* / http 接口 |
 | AI Prompt 文本 | `src/domain/ai-prompt.ts` |
 | Store、持久化、导入合并 | `src/domain/store.ts`、`persistence/` |
 | 桌面小组件 | `android/.../widget/`、`src/domain/widget-data.ts`、`tools/` |
@@ -66,6 +72,7 @@
 
 - Node 22，`npm ci`。
 - JDK 21：`export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64`。
+- 原生层是 Kotlin：`android/build.gradle` 带 `org.jetbrains.kotlin:kotlin-gradle-plugin:2.2.20`，新原生代码写 `.kt`，每个文件 ≤350 行。
 - Android SDK：`android/local.properties` 写 `sdk.dir=...`，**不要提交**。
 - Gradle 被限流时在 `~/.gradle/init.gradle` 加阿里云镜像。
 

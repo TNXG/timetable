@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Semester } from '../types'
-import { detectDelimiter, parseCsv, parseCsvRows } from '../importer'
+import { detectDelimiter, parseCsv, parseCsvRows } from '../importers/dsl'
 import { parseIcs, parseIcsDt, parseIcsEvents } from '../importers/ics'
 import { parseHtml } from '../importers/html'
 

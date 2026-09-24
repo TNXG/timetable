@@ -5,7 +5,7 @@
  */
 import { useSyncExternalStore } from 'react'
 import type { RuleManifest } from '../domain/rules'
-import type { School } from '../domain/edu/schools'
+import type { School } from '../domain/edu/plugin'
 import { detectSystem, isTimetablePage } from '../domain/edu/systems'
 import { parseZfKbList, termLabel, type ZfKb, type ZfTerm } from '../domain/edu/zhengfang'
 import { parseHtml } from '../domain/importers/html'

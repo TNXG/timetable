@@ -23,7 +23,7 @@
 
 ### 教务系统导入
 
-![选择学校、学校登录页、课表页一键导入、选学期、预览](docs/screenshots/group9.png)
+![学校登录页、课表页一键导入、选学期、预览](docs/screenshots/group9.png)
 
 ### 导入 / AI 转换 / 待办 / 我的
 

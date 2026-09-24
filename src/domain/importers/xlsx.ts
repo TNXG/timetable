@@ -1,7 +1,7 @@
 import * as XLSX from 'xlsx'
 import type { Diagnostic } from '../types'
-import type { CsvMapping, RuleCourse, RuleOutput } from '../importer'
-import { parseWeekday } from '../importer'
+import type { RuleCourse, RuleOutput } from '../importer'
+import { parseWeekday, type CsvMapping } from './dsl'
 import { parsePeriodRange } from '../weeks'
 
 /* Excel(.xlsx/.xls) 导入：第一个工作表按行读取，列映射同 CSV。 */

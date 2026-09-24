@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { animate } from 'motion/react'
-import { camera, loadPhotoSrc, photoSrc } from './camera'
+import { camera } from './camera'
+import { loadPhotoSrc, photoSrc } from './photo-src'
 import { haptic, nativeToast } from './widgets'
 import { ActionSheet, FADE, ICON, useBackClose } from './ui'
 

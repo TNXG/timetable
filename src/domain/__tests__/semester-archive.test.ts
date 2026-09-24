@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { Semester } from '../types'
-import { parseCsv, normalize } from '../importer'
+import { parseCsv } from '../importers/dsl'
+import { normalize } from '../importer'
 import { Store, hydrate, memoryPersistence, uid, type State } from '../store'
 import { describeSemester } from '../ics'
 import { guessSemesterName, semesterEnded, termEnd } from '../../app/semester'

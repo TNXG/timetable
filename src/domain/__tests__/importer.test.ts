@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { Semester } from '../types'
-import { parseCsv, parseJsonTable, normalize } from '../importer'
+import { parseCsv, parseJsonTable } from '../importers/dsl'
+import { normalize } from '../importer'
 import { Store, memoryPersistence, uid } from '../store'
 import { maskToWeeks } from '../weeks'
 

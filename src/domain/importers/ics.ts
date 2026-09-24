@@ -1,5 +1,6 @@
 import type { Diagnostic, Semester } from '../types'
-import { extractPhone, type RuleCourse, type RuleOutput } from '../importer'
+import type { RuleCourse, RuleOutput } from '../importer'
+import { extractPhone } from './dsl'
 import { weekOf, weekdayOf } from '../dates'
 import type { IcsSemester } from '../ics'
 

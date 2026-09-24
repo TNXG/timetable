@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { Semester } from '../types'
-import { parseCsv, normalize, pairRules, matchImport } from '../importer'
+import { parseCsv } from '../importers/dsl'
+import { normalize, pairRules, matchImport } from '../importer'
 import { Store, STATE_VERSION, hydrate, memoryPersistence, uid, type State } from '../store'
 import { occurrencesOn } from '../engine'
 import { weeksToMask } from '../weeks'

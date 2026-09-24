@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { guessTerm, parseJcs, parseZfKbList, termLabel, zcdToWeeks } from '../edu/zhengfang'
 import { detectSystem, hostOf, isTimetablePage, scrubUrl } from '../edu/systems'
-import { schoolByUrl, schoolCount, searchSchools, urlFromQuery } from '../edu/schools'
+import { DEFAULT_PLUGIN, EDU_PLUGINS, hasDirectLogin } from '../edu/plugin'
 import { wrapRun, zfTermOptions } from '../edu/scripts'
 import { isNewer, issueUrl } from '../edu/release'
 import { buildDebugPackage } from '../edu/debug'
@@ -86,22 +86,18 @@ describe('教务系统指纹', () => {
   })
 })
 
-describe('学校索引', () => {
-  it('内置索引非空，可按名字与网址搜索', () => {
-    expect(schoolCount()).toBeGreaterThan(1000)
-    const r = searchSchools('山东大学')
-    expect(r[0].name).toBe('山东大学')
-    expect(r[0].url).toMatch(/^https?:\/\//)
-    expect(searchSchools('sdu.edu.cn').length).toBeGreaterThan(0)
-    expect(searchSchools('')).toEqual([])
+describe('学校登录插件', () => {
+  it('只内置新疆理工职业大学，启用应用内直登页', () => {
+    expect(EDU_PLUGINS).toHaveLength(1)
+    expect(DEFAULT_PLUGIN.id).toBe('xjvut')
+    expect(DEFAULT_PLUGIN.name).toBe('新疆理工职业大学')
+    expect(DEFAULT_PLUGIN.auth.kind).toBe('login')
+    expect(DEFAULT_PLUGIN.system).toBe('zhengfang_new')
+    expect(hasDirectLogin(DEFAULT_PLUGIN)).toBe(true)
   })
 
-  it('输入网址时补协议；同主机可回查学校', () => {
-    expect(urlFromQuery('jwglxt.sdu.edu.cn/jwglxt')).toBe('http://jwglxt.sdu.edu.cn/jwglxt')
-    expect(urlFromQuery('https://a.b.edu.cn')).toBe('https://a.b.edu.cn')
-    expect(urlFromQuery('山东')).toBeNull()
-    const s = searchSchools('浙江大学')[0]
-    expect(schoolByUrl(s.url)?.name).toBe('浙江大学')
+  it('登录入口是新疆理工职业大学的统一身份认证', () => {
+    expect(DEFAULT_PLUGIN.url).toBe('https://qyrz.xjvut.edu.cn/cas/login')
   })
 })
 

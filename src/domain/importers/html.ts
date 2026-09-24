@@ -1,6 +1,6 @@
 import type { Diagnostic } from '../types'
-import type { RuleCourse, RuleOutput, CsvMapping } from '../importer'
-import { extractPhone, parseWeekday } from '../importer'
+import type { RuleCourse, RuleOutput } from '../importer'
+import { CsvMapping, extractPhone, parseWeekday } from './dsl'
 import { parsePeriodRange } from '../weeks'
  
 /* HTML 课表导入：不依赖 DOMParser，纯文本表格提取，Node/浏览器通用。

@@ -1,6 +1,6 @@
 import type { Diagnostic, Semester } from './types'
-import type { CsvMapping, RuleOutput } from './importer'
-import { parseCsv, parseJsonTable } from './importer'
+import type { RuleOutput } from './importer'
+import { parseCsv, parseJsonTable, type CsvMapping } from './importers/dsl'
 import { parseHtml, type HtmlOptions } from './importers/html'
 import { parseIcs } from './importers/ics'
 import { parseXlsx } from './importers/xlsx'

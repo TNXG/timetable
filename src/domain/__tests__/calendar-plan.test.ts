@@ -3,7 +3,8 @@ import type { Semester, Task } from '../types'
 import { defaultPrefs } from '../types'
 import type { Snapshot } from '../engine'
 import { weeksToMask } from '../weeks'
-import { EXAM_CALENDAR, TASK_CALENDAR, WEEK_CALENDAR, calendarsFor, courseCalendar, eventHash, planCalendar, summarize, type DesiredEvent } from '../calendar-plan'
+import { EXAM_CALENDAR, TASK_CALENDAR, WEEK_CALENDAR, calendarsFor, courseCalendar, planCalendar, type DesiredEvent } from '../calendar-plan'
+import { eventHash, summarize } from '../calendar-summary'
 
 /** 课程/作业/考试事件（不含每周一的「第 N 周」） */
 const noWeeks = (ev: DesiredEvent[]) => ev.filter((e) => e.kind !== 'week')

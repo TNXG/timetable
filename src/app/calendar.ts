@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from 'react'
 import { Capacitor, registerPlugin } from '@capacitor/core'
-import { EXAM_CALENDAR, TASK_CALENDAR, WEEK_CALENDAR, calendarsFor, eventHash, isCourseCalendar, planCalendar, summarize, type CalendarEventBody, type CalendarSpec, type CalendarSummary, type DesiredEvent } from '../domain/calendar-plan'
+import { EXAM_CALENDAR, TASK_CALENDAR, WEEK_CALENDAR, calendarsFor, isCourseCalendar, planCalendar, type CalendarEventBody, type CalendarSpec, type DesiredEvent } from '../domain/calendar-plan'
+import { eventHash, summarize, type CalendarSummary } from '../domain/calendar-summary'
 import { dateOf, fromDate } from '../domain/dates'
 import { DEFAULT_COURSE_COLOR } from '../domain/palette'
 import { store } from './store'

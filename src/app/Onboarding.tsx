@@ -10,13 +10,9 @@ const WEEKS = 20
 const DEFAULT_PERIODS = 10
 const DEFAULT_FIRST = 8 * 60
 
+/* 来源暂时只留教务系统登录导入，其余导入方式后续再恢复 */
 const SOURCES: [string, string][] = [
   ['edu', '教务系统'],
-  ['ai', '让 AI 转换'],
-  ['builtin-json', 'JSON'],
-  ['builtin-xlsx', 'Excel'],
-  ['builtin-ics', '日历'],
-  ['builtin-csv', 'CSV'],
 ]
 
 /** 开学日期，落到所在周的周一 */
