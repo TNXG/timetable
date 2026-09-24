@@ -150,7 +150,7 @@ fun importFromMediaStore(context: Context, id: String): JSObject {
     try {
         FileOutputStream(dst).use { os ->
             val buf = ByteArray(64 * 1024)
-            var n: Int
+            var n: Int = 0
             while (input != null && input.read(buf).also { n = it } > 0) os.write(buf, 0, n)
         }
     } finally {
@@ -234,7 +234,7 @@ fun saveImageToMediaStore(context: Context, f: File, albumName: String) {
             cr.openOutputStream(uri).use { out ->
                 if (out == null) throw Exception("open")
                 val buf = ByteArray(64 * 1024)
-                var n: Int
+                var n: Int = 0
                 while (input.read(buf).also { n = it } > 0) out.write(buf, 0, n)
             }
         }

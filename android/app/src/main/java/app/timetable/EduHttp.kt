@@ -63,7 +63,7 @@ internal object EduHttp {
             conn.disconnect()
             call.resolve(o)
         } catch (e: Exception) {
-            call.reject(String.valueOf(e.message))
+            call.reject(e.message ?: "null")
         }
     }
 
@@ -95,7 +95,7 @@ internal object EduHttp {
             o.put("ok", true)
             call.resolve(o)
         } catch (e: Exception) {
-            call.reject(String.valueOf(e.message))
+            call.reject(e.message ?: "null")
         }
     }
 
@@ -112,7 +112,7 @@ internal object EduHttp {
             o.put("cookie", cookie)
             call.resolve(o)
         } catch (e: Exception) {
-            call.reject(String.valueOf(e.message))
+            call.reject(e.message ?: "null")
         }
     }
 }

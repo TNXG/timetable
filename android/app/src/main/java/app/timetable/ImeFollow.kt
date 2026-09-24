@@ -105,8 +105,9 @@ internal class ImeFollow private constructor(webView: WebView) {
                         f.send(if (visible) now.getInsets(WindowInsetsCompat.Type.ime()).bottom else 0)
                     }
                     // 弹出动画结束：把压着没发的 insets 重新分发，WebView 这一帧才缩到键盘之上
-                    if (wasDeferring && f.lastInsets != null) {
-                        ViewCompat.dispatchApplyWindowInsets(content, f.lastInsets)
+                    val pending = f.lastInsets
+                    if (wasDeferring && pending != null) {
+                        ViewCompat.dispatchApplyWindowInsets(content, pending)
                     }
                 }
             })
@@ -116,7 +117,7 @@ internal class ImeFollow private constructor(webView: WebView) {
 
     /** imePx：键盘当前占屏幕底部的像素；页面收到的是扣掉 basePad 后的 CSS px */
     private fun send(imePx: Int) {
-        val kb = max(0, imePx - basePad)
+        val kb = maxOf(0, imePx - basePad)
         if (kb == lastSent) return
         lastSent = kb
         val js = String.format(Locale.US, "window.__ttIme&&window.__ttIme(%.2f)", kb / density)

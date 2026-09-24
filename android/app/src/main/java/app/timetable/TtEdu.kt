@@ -38,7 +38,7 @@ class TtEdu : Plugin() {
     /** 透明区域（设备像素，相对 WebView 顶/底） */
     internal var frameTop = -1
     internal var frameBottom = 0
-    internal val keep = ArrayList<int[]>()
+    internal val keep = ArrayList<IntArray>()
     internal var interactive = true
     internal var routing = false
     internal var transparent = false
@@ -110,7 +110,7 @@ class TtEdu : Plugin() {
             var ok = false
             if (profile != null && !profile.isEmpty() && multiProfile()) {
                 try {
-                    ok = ProfileStore.getInstance().deleteProfile(profile)
+                    ok = androidx.webkit.ProfileStore.getInstance().deleteProfile(profile)
                 } catch (ignored: Exception) {
                 }
             }
@@ -267,11 +267,11 @@ class TtEdu : Plugin() {
     /** 透明区域与其中保留给页面自己的矩形，单位 CSS px；interactive=false 时触摸一律留在页面（抽屉打开时） */
     @PluginMethod
     fun frame(call: PluginCall) {
-        val top = call.getDouble("top", -1.0)
-        val bottom = call.getDouble("bottom", 0.0)
+        val top = call.getDouble("top", -1.0) ?: -1.0
+        val bottom = call.getDouble("bottom", 0.0) ?: 0.0
         val inter = call.getBoolean("interactive", true) == true
         val arr = call.getArray("keep")
-        val rects = ArrayList<int[]>()
+        val rects = ArrayList<IntArray>()
         if (arr != null) {
             try {
                 for (i in 0 until arr.length()) {

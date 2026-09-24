@@ -28,14 +28,14 @@ import java.util.concurrent.Executors
  */
 @CapacitorPlugin(
         name = "TtCamera",
-        permissions = {
+        permissions = [
                 @Permission(alias = "camera", strings = [Manifest.permission.CAMERA]),
                 // 按 SDK 拆开：同一次请求里带上 manifest 已用 maxSdkVersion 裁掉的权限，Capacitor 会在回调里整个 reject
                 @Permission(alias = "photos", strings = [Manifest.permission.READ_EXTERNAL_STORAGE]),
                 @Permission(alias = "media", strings = ["android.permission.READ_MEDIA_IMAGES"]),
                 @Permission(alias = "media14", strings = ["android.permission.READ_MEDIA_IMAGES", "android.permission.READ_MEDIA_VISUAL_USER_SELECTED"]),
                 @Permission(alias = "save", strings = [Manifest.permission.WRITE_EXTERNAL_STORAGE]),
-        }
+        ]
 )
 class TtCamera : Plugin() {
 
@@ -62,8 +62,7 @@ class TtCamera : Plugin() {
 
     /* ---------------- 权限 ---------------- */
 
-    @PluginMethod
-    fun checkPermissions(call: PluginCall) = call.resolve(permissionStatus(context))
+    override fun checkPermissions(call: PluginCall) = call.resolve(permissionStatus(context))
 
     @PluginMethod
     fun requestPermission(call: PluginCall) {
@@ -99,11 +98,11 @@ class TtCamera : Plugin() {
         lensFacing = if ("front" == position) CameraSelector.LENS_FACING_FRONT else CameraSelector.LENS_FACING_BACK
         scanMode = call.getBoolean("scan", false) == true
         lastScan = null
-        val x = dp(call.getDouble("x", 0.0))
-        val y = dp(call.getDouble("y", 0.0))
-        val w = dp(call.getDouble("width", 0.0))
-        val h = dp(call.getDouble("height", 0.0))
-        val revealAt = System.currentTimeMillis() + call.getInt("delay", 0)
+        val x = dp(call.getDouble("x", 0.0) ?: 0.0)
+        val y = dp(call.getDouble("y", 0.0) ?: 0.0)
+        val w = dp(call.getDouble("width", 0.0) ?: 0.0)
+        val h = dp(call.getDouble("height", 0.0) ?: 0.0)
+        val revealAt = System.currentTimeMillis() + (call.getInt("delay", 0) ?: 0)
 
         activity!!.runOnUiThread {
             try {
@@ -207,7 +206,7 @@ class TtCamera : Plugin() {
     /** 双指缩放：传目标倍率，按镜头能力夹紧后返回实际倍率 */
     @PluginMethod
     fun setZoom(call: PluginCall) {
-        val ratio = call.getDouble("ratio", 1.0)
+        val ratio = call.getDouble("ratio", 1.0) ?: 1.0
         activity!!.runOnUiThread {
             val cam = camera
             if (cam == null) {
@@ -268,7 +267,7 @@ class TtCamera : Plugin() {
             call.reject("no-permission")
             return
         }
-        runIo(call) { listRecentImages(context, call.getInt("limit", 60), call.getInt("page", 0)) }
+        runIo(call) { listRecentImages(context, call.getInt("limit", 60) ?: 60, call.getInt("page", 0) ?: 0) }
     }
 
     @PluginMethod
@@ -283,7 +282,7 @@ class TtCamera : Plugin() {
 
     @PluginMethod
     fun importData(call: PluginCall) {
-        val data = call.getString("data", "")
+        val data = call.getString("data", "") ?: ""
         val comma = data.indexOf(',')
         if (comma < 0) {
             call.reject("bad-data")

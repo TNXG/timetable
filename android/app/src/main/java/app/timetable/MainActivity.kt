@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.os.SystemClock
 
 import androidx.core.splashscreen.SplashScreen
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 
 import com.getcapacitor.BridgeActivity
 
@@ -15,7 +16,7 @@ class MainActivity : BridgeActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // 只用系统开屏（纯背景色），一直挡到 WebView 画完首帧再撤，中间不出现空白页
-        val splash: SplashScreen = SplashScreen.installSplashScreen(this)
+        val splash: SplashScreen = installSplashScreen(this)
         val start = SystemClock.uptimeMillis()
         splash.setKeepOnScreenCondition { !WidgetBridge.webReady && SystemClock.uptimeMillis() - start < SPLASH_MAX_MS }
         registerPlugin(WidgetBridge::class.java)

@@ -200,7 +200,7 @@ class BarcodeFrameDecoder {
             buf.rewind()
             buf.get(y, 0, Math.min(y.size, buf.remaining()))
             val src = PlanarYUVLuminanceSource(y, stride, h, 0, 0, w, h, false)
-            val r: Result
+            var r: Result
             try {
                 r = reader.decodeWithState(BinaryBitmap(HybridBinarizer(src)))
             } catch (miss: Exception) {

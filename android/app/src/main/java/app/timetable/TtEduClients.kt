@@ -55,7 +55,7 @@ internal fun profileHeader(profile: String): Boolean {
  * （含 POST 登录后的 302）取消掉，换成带 {@link TtEdu#navHeaders} 的重发；应用自己 loadUrl 的导航 WebView 不会再回调，
  * 不会递归。非 http(s) 协议一律吞掉（不外跳）。
  */
-internal class NavHeaderClient(private val reissue: Boolean) : WebViewClient() {
+internal open class NavHeaderClient(private val reissue: Boolean) : WebViewClient() {
     /** 连续重发的重定向次数；非重定向导航或页面完成时归零 */
     private var redirects = 0
 

@@ -120,7 +120,7 @@ class TtFiles : Plugin() {
             activity!!.startActivity(Intent.createChooser(send, null))
             call.resolve()
         } catch (e: Exception) {
-            call.reject(String.valueOf(e.message))
+            call.reject(e.message ?: "null")
         }
     }
 
