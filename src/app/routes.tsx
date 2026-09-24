@@ -10,7 +10,6 @@ import type { RuleOutput } from '../domain/importer'
 import { uid } from '../domain/store'
 import { DEFAULT_PLUGIN, hasDirectLogin } from '../domain/edu/plugin'
 import type { CapturedPhoto } from './camera'
-import { ChangePage } from './course/ChangePage'
 import { ConflictPage } from './course/ConflictPage'
 import { CourseDetailPage } from './course/CourseDetailPage'
 import { CourseEditPage } from './course/CourseEditPage'
@@ -29,7 +28,9 @@ import { RuleEditorPage } from './import/RuleEditorPage'
 import { EDU_RULE, type EduSyncSource } from './edu-sync'
 import { CalendarIntroPage, NotifPrefPage, PrefPickPage, type PrefKey } from './reminder'
 import { WidgetPage } from './widget'
-import { HistoryPage, TrashPage, CoursesPage } from './me/Library'
+import { CoursesPage } from './me/Library'
+import { EduStatusPage } from './me/EduStatus'
+import { CompleteInfoPage, missingInfo } from './me/CompleteInfo'
 import { ArchivePage, NewSemesterPage, SemesterSettings } from './me/Semester'
 import { ProfilePage, type PhotoTarget } from './me/ProfilePage'
 import { StatsPage } from './me/StatsPage'
@@ -45,7 +46,6 @@ export type Route =
   | { k: 'courseEdit'; course: Course }
   | { k: 'session'; occ: Occurrence }
   | { k: 'conflict'; occ: Occurrence }
-  | { k: 'changes'; courseId?: string }
   | { k: 'todoDetail'; task: Task }
   | { k: 'todoCamera'; courseId?: string; taskId?: string }
   | { k: 'todoPicker'; courseId?: string; taskId?: string }
@@ -55,6 +55,7 @@ export type Route =
   | { k: 'eduBrowser'; startUrl?: string }
   | { k: 'eduPreview'; out: RuleOutput; src: EduSyncSource; over?: boolean }
   | { k: 'eduFail'; info: EduFailInfo }
+  | { k: 'eduStatus' }
   | { k: 'import' }
   | { k: 'scan' }
   | { k: 'importRun'; ruleId: string; text?: string; auto?: boolean }
@@ -64,8 +65,7 @@ export type Route =
   | { k: 'newSemester' }
   | { k: 'archive'; id: string }
   | { k: 'schedule' }
-  | { k: 'history' }
-  | { k: 'trash' }
+  | { k: 'completeInfo' }
   | { k: 'courses' }
   | { k: 'notif' }
   | { k: 'calendarIntro' }
@@ -127,7 +127,6 @@ export function renderRoute(r: Route, i: number, ctx: RouteCtx): ReactNode {
             course={r.course}
             snap={snap}
             onBack={pop}
-            onChanges={() => push({ k: 'changes', courseId: r.course.id })}
             onEdit={() => push({ k: 'courseEdit', course: r.course })}
             composing={compose?.courseId === r.course.id}
             onCapture={(kind) => openCapture(kind, r.course.id)}
@@ -150,8 +149,6 @@ export function renderRoute(r: Route, i: number, ctx: RouteCtx): ReactNode {
         return <EditSessionPage key={key} occ={r.occ} snap={snap} onBack={pop} />
       case 'conflict':
         return <ConflictPage key={key} occ={r.occ} snap={snap} onBack={pop} onCourse={openCourseById} />
-      case 'changes':
-        return <ChangePage key={key} courseId={r.courseId} onBack={pop} />
       case 'todoDetail':
         return (
           <TaskDetailPage
@@ -217,7 +214,18 @@ export function renderRoute(r: Route, i: number, ctx: RouteCtx): ReactNode {
           />
         )
       case 'eduPreview':
-        return <ImportRunPage key={key} rule={EDU_RULE} initialOut={r.out} overBrowser={r.over === true} syncSource={r.src} onBack={pop} onDone={backToTimetable} />
+        return (
+          <ImportRunPage
+            key={key}
+            rule={EDU_RULE}
+            initialOut={r.out}
+            overBrowser={r.over === true}
+            syncSource={r.src}
+            onBack={pop}
+            /* 教务导入应用完：缺什么补什么（开学日期/称呼），都齐了直接回课表 */
+            onDone={r.src && missingInfo(store.state.prefs) ? () => replaceTop({ k: 'completeInfo' }) : backToTimetable}
+          />
+        )
       case 'eduFail':
         return <EduFailPage key={key} info={r.info} onBack={pop} />
       case 'import':
@@ -251,10 +259,10 @@ export function renderRoute(r: Route, i: number, ctx: RouteCtx): ReactNode {
         return <NewSemesterPage key={key} sem={snap.semester} onBack={pop} onDone={() => setStack([{ k: hasDirectLogin(DEFAULT_PLUGIN) ? 'eduLogin' : 'eduBrowser' }])} />
       case 'schedule':
         return <SchedulePage key={key} sem={snap.semester} onBack={pop} />
-      case 'history':
-        return <HistoryPage key={key} onBack={pop} />
-      case 'trash':
-        return <TrashPage key={key} onBack={pop} />
+      case 'completeInfo':
+        return <CompleteInfoPage key={key} onDone={backToTimetable} />
+      case 'eduStatus':
+        return <EduStatusPage key={key} onBack={pop} onLogin={() => push({ k: 'eduLogin' })} />
       case 'notif':
         return <NotifPrefPage key={key} onBack={pop} onPick={(pref) => push({ k: 'notifPick', pref })} />
       case 'calendarIntro':
@@ -270,7 +278,7 @@ export function renderRoute(r: Route, i: number, ctx: RouteCtx): ReactNode {
       case 'photoPick':
         return <PickerPage key={key} single onBack={pop} onDone={(ps) => { applyPhoto(r.target, ps); pop() }} />
       case 'stats':
-        return <StatsPage key={key} onBack={pop} onCourse={(c) => push({ k: 'course', course: c })} onChanges={() => push({ k: 'changes' })} onTodo={() => { setStack([]); setTab(2) }} />
+        return <StatsPage key={key} onBack={pop} onCourse={(c) => push({ k: 'course', course: c })} onTodo={() => { setStack([]); setTab(2) }} />
       case 'erase':
         return <ErasePage key={key} onBack={pop} onDone={eraseDone} />
       case 'about':

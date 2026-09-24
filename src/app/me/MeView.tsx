@@ -6,18 +6,20 @@ import { useStore } from '../store'
 import { semesterEnded, todayStr } from '../semester'
 import { taskLeadsText } from '../reminder'
 import { THEME_LABEL, useTheme } from '../theme'
+import { statusText, useEduSync } from '../edu-sync'
 import { Chevron, TopVeil, md, useVeilOpacity } from '../ui'
 import { usePhotoSrc } from './photo'
 
-export type MePage = 'semester' | 'schedule' | 'history' | 'trash' | 'courses' | 'import' | 'share' | 'changes' | 'notif' | 'widget' | 'theme' | 'profile' | 'stats' | 'about' | 'erase'
+export type MePage = 'semester' | 'schedule' | 'courses' | 'import' | 'share' | 'notif' | 'widget' | 'theme' | 'profile' | 'stats' | 'about' | 'erase'
 
 
 export function MeView({ onPage }: { onPage: (p: MePage) => void }) {
   const state = useStore()
   const theme = useTheme()
   const sem = state.semester
-  const trashCount = state.courses.filter((c) => c.removedByImport).length
   const live = state.courses.filter((c) => !c.removedByImport)
+  const eduSync = useEduSync()
+  const eduStatus = eduSync ? statusText(eduSync) : { text: '未登录', danger: false }
   const week = sem ? weekOf(sem, todayStr()) : 0
   const homework = state.tasks.filter((t) => t.kind === 'homework')
 
@@ -26,7 +28,7 @@ export function MeView({ onPage }: { onPage: (p: MePage) => void }) {
       ['学期', sem ? (semesterEnded(sem) ? `${sem.name}，已结束` : `${sem.name}，第 ${Math.max(0, Math.min(sem.totalWeeks, week))} / ${sem.totalWeeks} 周`) : '未设置', 'semester'],
       ['作息时间', '', 'schedule'],
       ['课程', `${live.length} 门`, 'courses'],
-      ['导入课表', '', 'import'],
+      ['导入课表', eduStatus.text, 'import'],
       ['分享课表', '', 'share'],
     ]],
     ['提醒', [
@@ -35,11 +37,6 @@ export function MeView({ onPage }: { onPage: (p: MePage) => void }) {
     ]],
     ['外观', [
       ['主题', THEME_LABEL[theme], 'theme'],
-    ]],
-    ['记录', [
-      ['变更记录', `${state.changes.length + state.overrides.length} 条`, 'changes'],
-      ['导入历史', `${state.batches.length} 次`, 'history'],
-      ['回收站', trashCount > 0 ? `${trashCount} 门` : '空', 'trash'],
     ]],
     ['高级', [
       ['关于', '', 'about'],
@@ -83,7 +80,7 @@ export function MeView({ onPage }: { onPage: (p: MePage) => void }) {
 
         <div className="px-5">
           <button onClick={() => onPage('stats')} className="flex w-full rounded-[18px] bg-(--c-surface) px-4 py-3.5 transition-opacity active:opacity-60">
-            {[[String(live.length), '门课'], [String(state.overrides.length), '次调整'], [String(homework.length), '项作业']].map(([n, l], i) => (
+            {[[String(live.length), '门课'], [String(homework.length), '项作业']].map(([n, l], i) => (
               <div key={l} className={`flex-1 ${i ? 'border-l border-(--c-surface2)' : ''}`}>
                 <div className="text-center text-[17px] font-extrabold tabular-nums text-(--c-ink)">{n}</div>
                 <div className="mt-0.5 text-center text-[11px] font-semibold text-(--c-ink4)">{l}</div>

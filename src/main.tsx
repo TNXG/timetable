@@ -21,7 +21,7 @@ async function boot() {
       document.head.appendChild(s)
     }
     const { default: Onboarding } = await import('./app/Onboarding')
-    root.render(<Onboarding initialStep={Number(onboardStep)} onDone={() => {}} markDone={() => {}} dateSignal={0} onRequireDate={() => {}} />)
+    root.render(<Onboarding initialStep={Number(onboardStep)} onDone={() => {}} />)
     return
   }
   const { default: RealApp } = await import('./app/RealApp')

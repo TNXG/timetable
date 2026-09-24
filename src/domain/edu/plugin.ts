@@ -65,6 +65,8 @@ export interface EduKbFetch {
   out: RuleOutput
   term: ZfTerm
   pageUrl: string
+  /** 学生姓名（xsxx.XM），登录页拿来替换界面上的默认称呼 */
+  studentName: string
 }
 
 /** 学校专属的登录执行；插件是软件的一部分，只是把「这家学校怎么登」收拢在一个文件里 */

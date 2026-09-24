@@ -8,20 +8,18 @@ import { searchStickers, stickerFor, stickerOf } from '../../domain/stickers'
 import { Sticker, stickerTilt, useStickersOn } from '../Sticker'
 import { store, useStore } from '../store'
 import { nowMinutes, todayStr } from '../semester'
-import { haptic, nativeToast } from '../widgets'
-import { Card, ICON, MenuRow, Page, Sheet, SheetClose, SheetHead, TextInput, TopBar, WD_SHORT, md, tint } from '../ui'
+import { Card, Page, Sheet, SheetClose, SheetHead, TextInput, TopBar, WD_SHORT, md, tint } from '../ui'
 import { CourseTasks } from '../todo'
 import { dayLabel, formatPhone, mergeRules } from './shared'
 
 /* ---------------- 课程详情（内页） ---------------- */
 
 export function CourseDetailPage({
-  course, snap, composing, onBack, onChanges, onEdit, onCapture, onOpenTask,
+  course, snap, composing, onBack, onEdit, onCapture, onOpenTask,
 }: {
   course: Course
   snap: Snapshot
   onBack: () => void
-  onChanges: () => void
   onEdit: () => void
   composing: boolean
   onCapture: (kind: 'camera' | 'text') => void
@@ -85,7 +83,6 @@ export function CourseDetailPage({
     onContextMenu: (e: React.MouseEvent) => e.preventDefault(),
   }
   const tasks = state.tasks.filter((t) => t.courseId === cur.id)
-  const changes = state.changes.filter((c) => c.target === cur.id || rules.some((r) => r.id === c.target))
 
   const merged = mergeRules(rules)
   const todayWd = weekdayOf(today)
@@ -208,12 +205,7 @@ export function CourseDetailPage({
             onText={() => onCapture('text')}
           />
         </Card>
-
-        <div className="overflow-hidden rounded-[20px] bg-(--c-surface)">
-          <MenuRow icon={ICON.undo} title="变更记录" desc={changes.length > 0 ? `${changes.length} 条` : '还没有变更'} onClick={onChanges} />
-          <MenuRow icon={ICON.ban} title={cur.hidden ? '取消隐藏' : '隐藏这门课'} desc="隐藏后不出现在课表里，可恢复" onClick={() => { store.setCourseHidden(cur.id, !cur.hidden); haptic('light'); nativeToast(cur.hidden ? '已取消隐藏' : '已隐藏') }} />
-        </div>
-        </div>
+      </div>
       </div>
       {pickSticker && (
         <StickerPicker

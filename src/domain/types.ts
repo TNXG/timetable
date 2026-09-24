@@ -131,6 +131,8 @@ export interface Prefs {
   widgetStyle: WidgetStyle
   /** 「我」页显示的名字；空则用学期名 */
   name: string
+  /** 开学日期确认过（登录导入后没配过就该补这一步） */
+  dateSet: boolean
   /** 头像、背景文件路径（同作业照片）；空则用内置图 */
   avatar: string
   wall: string
@@ -153,6 +155,7 @@ export function defaultPrefs(): Prefs {
     examDays: [7, 3, 1, 0],
     widgetStyle: 'today',
     name: '',
+    dateSet: false,
     avatar: '',
     wall: '',
   }

@@ -79,31 +79,29 @@ interface TtEduPlugin {
 
 const TtEdu = registerPlugin<TtEduPlugin>('TtEdu')
 
-interface TtVaultPlugin {
-  set(o: { profile: string; username: string; password: string }): Promise<{ ok: boolean }>
-  get(o: { profile: string }): Promise<{ username: string | null; password: string | null }>
-  clear(o: { profile: string }): Promise<{ ok: boolean }>
+interface TtCredentialsPlugin {
+  save(o: { username: string; password: string }): Promise<{ ok: boolean }>
+  get(): Promise<{ ok: boolean; username?: string; password?: string }>
 }
 
-const TtVault = registerPlugin<TtVaultPlugin>('TtVault')
+const TtCredentials = registerPlugin<TtCredentialsPlugin>('TtCredentials')
 
-/** 保存的登录凭证（用户开了「保存密码」才有）；原生 Keystore 加密，密文按学校 Profile 存本机 */
+/** 存进系统密码管理器的学号/密码（用户开了「保存密码」才有）；应用自身不落盘 */
 export interface EduSavedCred {
   username: string
   password: string
 }
 
-/** 凭证加密缓存的读写：关开关、退出登录即删；浏览器环境一律当作没有 */
-export const eduVault = {
-  /** 登录成功后写入；false = 本机没存成（异常），下次当作没存过 */
-  save: (profile: string, username: string, password: string): Promise<boolean> =>
-    nativeEdu() ? TtVault.set({ profile, username, password }).then((r) => r.ok, () => false) : Promise.resolve(false),
-  /** 登录页预填用；null = 没存过 */
-  load: (profile: string): Promise<EduSavedCred | null> =>
+/** 系统密码管理器（Credential Manager）读写：删条目没有可编程接口，只能用户在系统设置里删 */
+export const eduCredentials = {
+  /** 登录成功且开关打开时写入；false = 用户取消或环境不支持 */
+  save: (username: string, password: string): Promise<boolean> =>
+    nativeEdu() ? TtCredentials.save({ username, password }).then((r) => r.ok, () => false) : Promise.resolve(false),
+  /** 弹系统选择面板回填；null = 用户取消或没存过 */
+  load: (): Promise<EduSavedCred | null> =>
     nativeEdu()
-      ? TtVault.get({ profile }).then((r) => (r.username && r.password ? { username: r.username, password: r.password } : null), () => null)
+      ? TtCredentials.get().then((r) => (r.ok && r.username && r.password ? { username: r.username, password: r.password } : null), () => null)
       : Promise.resolve(null),
-  clear: (profile: string): Promise<void> => (nativeEdu() ? TtVault.clear({ profile }).then(() => {}, () => {}) : Promise.resolve()),
 }
 
 export const nativeEdu = () => Capacitor.getPlatform() === 'android'

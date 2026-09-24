@@ -118,7 +118,17 @@ async function fetchTimetable(http: EduHttp): Promise<EduKbFetch | null> {
   const out = { ...parseZfKbList(json), semester: { name: termLabel(term) } }
   if (out.courses.length === 0) return null
   out.timeGrid = zfTimeGrid(await rjc(http, term))
-  return { out, term, pageUrl: page.url }
+  const studentName = cleanXsxxName(json)
+  return { out, term, pageUrl: page.url, studentName }
+}
+
+/** xsxx.XM = 学生姓名；没有或空串给空 */
+function cleanXsxxName(json: unknown): string {
+  if (!json || typeof json !== 'object' || !('xsxx' in json)) return ''
+  const xsxx: unknown = json.xsxx
+  if (!xsxx || typeof xsxx !== 'object' || !('XM' in xsxx)) return ''
+  const xm: unknown = xsxx.XM
+  return typeof xm === 'string' ? xm.trim() : ''
 }
 
 /** 作息：日课表接口按学期给每节的起止钟点；失败不阻断导入（应用默认作息兜底） */

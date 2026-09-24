@@ -1,2 +1,7 @@
 [tools]
 java = "temurin-21"
+node = "22"
+
+[env]
+# 时区相关用例按 UTC 校准（parsers.test.ts「测试环境为 UTC」，CI runner 也是 UTC）
+TZ = "UTC"

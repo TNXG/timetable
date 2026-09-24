@@ -24,7 +24,7 @@ class MainActivity : BridgeActivity() {
         registerPlugin(TtCalendar::class.java)
         registerPlugin(TtFiles::class.java)
         registerPlugin(TtEdu::class.java)
-        registerPlugin(TtVault::class.java)
+        registerPlugin(TtCredentials::class.java)
         super.onCreate(savedInstanceState)
         TtFiles.handleIntent(this, intent)
         ThemeApply.applySaved(this, bridge.webView)

@@ -78,7 +78,7 @@ export function ArchivePage({ a, onBack }: { a: SemesterArchive; onBack: () => v
 }
 
 /** 学期页的自动更新组：开关与状态、立即更新、退出登录；没开过不显示 */
-function EduSyncGroup({ onLogin }: { onLogin: () => void }) {
+export function EduSyncGroup({ onLogin }: { onLogin: () => void }) {
   const s = useEduSync()
   const [busy, setBusy] = useState(eduSyncing)
   if (!s) return null
@@ -176,6 +176,7 @@ export function SemesterSettings({ sem, onBack, onNew, onArchive, onLogin }: { s
               totalWeeks: Math.min(64, Math.max(1, weeks)),
               holidays,
             })
+            store.setPrefs({ dateSet: true })
             onBack()
           }}
         >保存</PrimaryButton>
@@ -216,6 +217,7 @@ export function NewSemesterPage({ sem, onBack, onDone }: { sem: Semester; onBack
               vacations: [],
               examWeeks: [],
             })
+            store.setPrefs({ dateSet: true })
             void syncWidgets()
             onDone()
           }}

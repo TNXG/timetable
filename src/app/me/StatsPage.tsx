@@ -10,7 +10,7 @@ const periodsOf = (r: SessionRule) => r.endPeriod - r.startPeriod + 1
 
 
 /* 统计：学期走到哪、每门课上到哪，请过假的课单独标出来；可直接给导师或老师看 */
-export function StatsPage({ onBack, onCourse, onChanges, onTodo }: { onBack: () => void; onCourse: (c: Course) => void; onChanges: () => void; onTodo: () => void }) {
+export function StatsPage({ onBack, onCourse, onTodo }: { onBack: () => void; onCourse: (c: Course) => void; onTodo: () => void }) {
   const state = useStore()
   const sem = state.semester
   const live = state.courses.filter((c) => !c.removedByImport)
@@ -61,9 +61,9 @@ export function StatsPage({ onBack, onCourse, onChanges, onTodo }: { onBack: () 
       ['第一节有课', firstDays > 0 ? `每周 ${firstDays} 天` : '', null],
       ['作业', homework.length > 0 ? `${homework.filter((t) => t.done).length} / ${homework.length} 已完成` : '', onTodo],
       ['考试', exams.length > 0 ? `${exams.length} 场` : '', onTodo],
-      ['请假', nOv('leave') > 0 ? `${nOv('leave')} 次` : '', onChanges],
-      ['停课', nOv('cancelled') > 0 ? `${nOv('cancelled')} 次` : '', onChanges],
-      ['调课', nOv('moved') > 0 ? `${nOv('moved')} 次` : '', onChanges],
+      ['请假', nOv('leave') > 0 ? `${nOv('leave')} 次` : '', null],
+      ['停课', nOv('cancelled') > 0 ? `${nOv('cancelled')} 次` : '', null],
+      ['调课', nOv('moved') > 0 ? `${nOv('moved')} 次` : '', null],
     ] as More[]
   ).filter((m) => m[1])
 

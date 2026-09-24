@@ -51,6 +51,7 @@ function hydratePrefs(raw: unknown): Prefs {
     examDays: nums(p.examDays, d.examDays),
     widgetStyle: (WIDGET_STYLES as readonly string[]).includes(p.widgetStyle as string) ? (p.widgetStyle as WidgetStyle) : d.widgetStyle,
     name: typeof p.name === 'string' ? p.name : d.name,
+    dateSet: p.dateSet === true,
     avatar: typeof p.avatar === 'string' ? p.avatar : d.avatar,
     wall: typeof p.wall === 'string' ? p.wall : d.wall,
   }

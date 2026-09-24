@@ -94,14 +94,6 @@ export function CourseEditPage({ course, onBack, onEditSession }: { course: Cour
           </>
         )}
 
-        <div className="mt-5 overflow-hidden rounded-[16px] bg-(--c-surface)">
-          <button
-            onClick={() => { store.setCourseHidden(cur.id, !cur.hidden); onBack() }}
-            className="w-full px-4 py-3.5 text-left text-[13.5px] font-bold text-(--c-rose) transition-colors active:bg-(--c-bg)"
-          >
-            {cur.hidden ? '取消隐藏' : '隐藏这门课'}
-          </button>
-        </div>
       </PageBody>
 
       <PageFooter>

@@ -1,12 +1,14 @@
 /** 教务直登：应用自己的登录页（学号/密码/验证码可选）。是否启用、验证码要不要、怎么登，
     全部由学校插件声明与实现（auth.flow）：插件借原生 HTTP 逐跳登录，把各主机的会话 Cookie
     交给软件种进学校 Profile，成功后原生拉一次课表 JSON 直接进导入预览；拉不到才退回
-    内置浏览器（此时已登录）。凭证只在当次登录的内存里用一次；用户开「保存密码」才经 TtVault
-    加密缓存（AndroidKeyStore，关开关或退出登录即删），会话 Cookie 也不留在此页。 */
+    内置浏览器（此时已登录）。凭证只在当次登录的内存里用一次；用户开「保存密码」才把学号密码
+    交给系统密码管理器（Credential Manager，应用自身不落盘；删除由用户在系统设置里做），
+    会话 Cookie 也不留在此页。 */
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { EduCookieJar, EduHttp, EduKbFetch, EduPlugin } from '../../domain/edu/plugin'
-import { edu, eduProfile, eduVault, nativeEdu } from '../edu-browser'
+import { edu, eduProfile, eduCredentials, nativeEdu } from '../edu-browser'
 import { setEduBrowserOpen } from '../edu-sync'
+import { store } from '../store'
 import { haptic } from '../widgets'
 import { Field, Loader, Page, PrimaryButton, Switch, TextInput, TopBar } from '../ui'
 import { PageBody, PageFooter } from '../course/shared'
@@ -66,6 +68,8 @@ export function EduLoginPage({ plugin, onBack, onDone }: {
     } catch {
       kb = null
     }
+    /* 教务认得的名字替换默认称呼；之后在「我的」头像页可改 */
+    if (kb?.studentName) store.setPrefs({ name: kb.studentName })
     haptic('success')
     finish(kb, url)
   }, [flow, http, finish])
@@ -105,9 +109,8 @@ export function EduLoginPage({ plugin, onBack, onDone }: {
     try {
       const out = await flow.login(http, { username: name, password, captcha: code })
       if (out.kind === 'ok') {
-        /* 开关说了算：开了加密缓存本次凭证，关了顺手删掉旧的 */
-        if (save) void eduVault.save(profile, name, password)
-        else void eduVault.clear(profile)
+        /* 开关说了算：开了把学号密码交给系统密码管理器；关了不写（旧条目由用户在系统设置里删） */
+        if (save) void eduCredentials.save(name, password)
         await seed(out.jars)
         await finishWithKb(out.url)
         return
@@ -149,8 +152,8 @@ export function EduLoginPage({ plugin, onBack, onDone }: {
     }
     setEduBrowserOpen(true)
     void begin()
-    /* 存过的凭证预填学号密码，开关默认开；会话活着直接进了浏览器就不用填 */
-    void eduVault.load(profile).then((c) => {
+    /* 系统密码管理器里存过的：弹系统面板让用户确认后回填学号密码，开关默认开 */
+    void eduCredentials.load().then((c) => {
       if (!c || doneRef.current) return
       setUsername(c.username)
       setPassword(c.password)
@@ -218,8 +221,6 @@ export function EduLoginPage({ plugin, onBack, onDone }: {
                   on={save}
                   onChange={(v) => {
                     setSave(v)
-                    /* 关掉当场删掉存过的凭证，不等下次登录 */
-                    if (!v) void eduVault.clear(profile)
                   }}
                 />
               </div>
