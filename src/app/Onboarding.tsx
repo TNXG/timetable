@@ -52,7 +52,7 @@ export default function Onboarding({ onDone, initialStep = 0, backRef }: { onDon
         <div className="flex flex-1 flex-col px-7 pt-[max(64px,calc(env(safe-area-inset-top)+34px))]">
           <img src="/mascot.png" alt="" className="h-[200px] w-[200px] self-center object-contain" />
           <div className="mt-auto pb-14">
-            <div className="text-[17px] font-bold tracking-[.02em] text-(--c-ink3)">嘎嘎课程表</div>
+            <div className="text-[17px] font-bold tracking-[.02em] text-(--c-ink3)">Koma</div>
             <h1 className="mt-3 text-[44px] leading-[1.15] font-extrabold tracking-[-.04em]">
               <span className="block text-(--c-ink)">你的课表，</span>
               <span className="block text-(--c-ink4)">理应如此。</span>
