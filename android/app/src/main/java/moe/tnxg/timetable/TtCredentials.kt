@@ -1,66 +1,99 @@
 package moe.tnxg.timetable
 
-import androidx.credentials.CreatePasswordRequest
-import androidx.credentials.CredentialManager
-import androidx.credentials.GetCredentialRequest
-import androidx.credentials.GetPasswordOption
-import androidx.credentials.PasswordCredential
+import java.io.File
+import android.security.keystore.KeyGenParameterSpec
+import android.security.keystore.KeyProperties
+import android.util.Base64
 import com.getcapacitor.JSObject
 import com.getcapacitor.Plugin
 import com.getcapacitor.PluginCall
 import com.getcapacitor.PluginMethod
 import com.getcapacitor.annotation.CapacitorPlugin
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import java.nio.charset.StandardCharsets
+import java.security.KeyStore
+import javax.crypto.Cipher
+import javax.crypto.KeyGenerator
+import javax.crypto.SecretKey
+import javax.crypto.spec.GCMParameterSpec
 
 /**
- * 学号/密码交给系统密码管理器（Google 密码管理器等凭据提供器）保管：应用自身不落盘。
- * save 在登录成功且「保存密码」打开时调用；get 弹系统选择面板，由用户确认后回填学号密码。
- * 密码管理器里的条目只能由用户在系统设置里删——没有可编程的删除接口。
+ * 学号/密码由 Android Keystore 生成的 AES 密钥加密后存入应用私有的不备份目录。
+ * 明文只在登录调用期间存在内存中；应用自身不维护加密密钥。
  */
 @CapacitorPlugin(name = "TtCredentials")
 class TtCredentials : Plugin() {
+    companion object {
+        private const val KEY_ALIAS = "timetable.edu.credentials"
+        private const val VALUE = "edu_credentials"
+        private const val IV_LENGTH = 12
+    }
 
-    private val cm by lazy { CredentialManager.create(context) }
+    private fun key(): SecretKey {
+        val store = KeyStore.getInstance("AndroidKeyStore").apply { load(null) }
+        (store.getKey(KEY_ALIAS, null) as? SecretKey)?.let { return it }
+        return KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore").apply {
+            init(KeyGenParameterSpec.Builder(
+                KEY_ALIAS,
+                KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT,
+            ).setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+                .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+                .build())
+        }.generateKey()
+    }
 
-    /** 保存学号/密码；用户在系统面板取消或环境不支持时 ok=false */
+    private fun encrypt(value: String): String {
+        val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+        cipher.init(Cipher.ENCRYPT_MODE, key())
+        val body = cipher.iv + cipher.doFinal(value.toByteArray(StandardCharsets.UTF_8))
+        return Base64.encodeToString(body, Base64.NO_WRAP)
+    }
+
+    private fun decrypt(value: String): String {
+        val body = Base64.decode(value, Base64.NO_WRAP)
+        require(body.size > IV_LENGTH)
+        val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+        cipher.init(Cipher.DECRYPT_MODE, key(), GCMParameterSpec(128, body, 0, IV_LENGTH))
+        return String(cipher.doFinal(body, IV_LENGTH, body.size - IV_LENGTH), StandardCharsets.UTF_8)
+    }
+
     @PluginMethod
     fun save(call: PluginCall) {
         val username = call.getString("username") ?: ""
         val password = call.getString("password") ?: ""
-        val activity = activity
-        if (username.isEmpty() || password.isEmpty() || activity == null) {
+        if (username.isEmpty() || password.isEmpty()) {
             call.resolve(JSObject().put("ok", false))
             return
         }
-        CoroutineScope(Dispatchers.Main).launch {
-            try {
-                cm.createCredential(activity, CreatePasswordRequest(id = username, password = password))
-                call.resolve(JSObject().put("ok", true))
-            } catch (e: Exception) {
-                call.resolve(JSObject().put("ok", false))
-            }
+        try {
+            File(context.noBackupFilesDir, VALUE).writeText(encrypt("$username\u0000$password"), StandardCharsets.UTF_8)
+            call.resolve(JSObject().put("ok", true))
+        } catch (_: Exception) {
+            call.resolve(JSObject().put("ok", false))
         }
     }
 
-    /** 弹系统选择面板；用户取消、没有存过或环境不支持时 ok=false */
     @PluginMethod
     fun get(call: PluginCall) {
-        val activity = activity
-        if (activity == null) {
-            call.resolve(JSObject().put("ok", false))
-            return
-        }
-        CoroutineScope(Dispatchers.Main).launch {
-            try {
-                val result = cm.getCredential(activity, GetCredentialRequest(listOf(GetPasswordOption())))
-                val c = result.credential as? PasswordCredential
-                if (c == null) call.resolve(JSObject().put("ok", false))
-                else call.resolve(JSObject().put("ok", true).put("username", c.id).put("password", c.password))
-            } catch (e: Exception) {
+        try {
+            val raw = File(context.noBackupFilesDir, VALUE).takeIf { it.exists() }?.readText(StandardCharsets.UTF_8)
+            if (raw == null) {
                 call.resolve(JSObject().put("ok", false))
+                return
             }
+            val parts = decrypt(raw).split('\u0000', limit = 2)
+            if (parts.size != 2 || parts[0].isEmpty() || parts[1].isEmpty()) {
+                call.resolve(JSObject().put("ok", false))
+                return
+            }
+            call.resolve(JSObject().put("ok", true).put("username", parts[0]).put("password", parts[1]))
+        } catch (_: Exception) {
+            call.resolve(JSObject().put("ok", false))
         }
     }
+    @PluginMethod
+    fun clear(call: PluginCall) {
+        File(context.noBackupFilesDir, VALUE).delete()
+        call.resolve(JSObject().put("ok", true))
+    }
+
 }

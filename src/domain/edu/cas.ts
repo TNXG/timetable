@@ -16,9 +16,12 @@ export function casErrorText(html: string): string {
   return m ? m[1].trim() : ''
 }
 
+/** 这次失败只是验证码不对（凭据没错，可以换一张自动重试） */
+export const isCaptchaError = (raw: string): boolean => /FailedAuthcodeException/i.test(raw)
+
 /** CAS 失败原文 → 界面上的话；原文没有认出的就原样给出（截断） */
 export function describeCasError(raw: string): string {
-  if (/FailedAuthcodeException/i.test(raw)) return '验证码不对'
+  if (isCaptchaError(raw)) return '验证码不对'
   if (/not recognized/i.test(raw)) return '账号或密码不对'
   if (/flow|execution/i.test(raw)) return '登录过期了，请重试'
   if (/没有响应|超时/.test(raw)) return '登录没有响应，请重试'

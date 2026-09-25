@@ -1,0 +1,14 @@
+验证码识别模型
+=============
+
+captcha.onnx  —— ddddocr 默认 OCR 模型（common_old.onnx），MIT License
+  https://github.com/sml2h3/ddddocr
+  Copyright (c) 2022 sml2h3
+  sha256: b8f2ad9cbc1f2e3922a6cb9459e30824e7e2467f3fb4fd61420640e34ea0bf68
+
+charset.txt   —— 该模型的字符表里本应用用得到的子集（<索引>\t<字符>），同上许可。
+
+推理用 ONNX Runtime（com.microsoft.onnxruntime:onnxruntime-android），MIT License：
+https://github.com/microsoft/onnxruntime
+
+模型与字符表随应用打包，识别在设备本地完成，验证码图片不落盘、不出设备。

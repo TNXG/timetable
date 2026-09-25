@@ -55,10 +55,11 @@ export type EduLoginBegin =
   | { kind: 'form'; captcha: string | null }
   | { kind: 'ready'; url: string; jars: EduCookieJar[] }
 
-/** login：ok 带落点与 Cookie；fail 带给用户看的话（验证码/密码错、会话过期等），页面重新 begin */
+/** login：ok 带落点与 Cookie；fail 带给用户看的话（验证码/密码错、会话过期等），页面重新 begin。
+    captcha=true 表示这次只是验证码不对：页面可以换一张自动重试，凭据本身没问题 */
 export type EduLoginOutcome =
   | { kind: 'ok'; url: string; jars: EduCookieJar[] }
-  | { kind: 'fail'; message: string }
+  | { kind: 'fail'; message: string; captcha?: boolean }
 
 /** 登录后原生拉到的课表：正方 JSON 转好的规则输出 + 当时选中的学期 + 落点页 */
 export interface EduKbFetch {

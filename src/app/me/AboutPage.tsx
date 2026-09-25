@@ -1,6 +1,7 @@
 /** 关于：应用信息与开发者 */
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Page, Row, TopBar } from '../ui'
+import { haptic } from '../widgets'
 import { appVersion, openExternal } from '../edu/share'
 
 const DEV_AVATAR = 'https://api-space.tnxg.top/avatar?s=qq'
@@ -22,8 +23,9 @@ function DevRow({ avatar, name, role, href }: { avatar: string; name: string; ro
   )
 }
 
-export function AboutPage({ onBack }: { onBack: () => void }) {
+export function AboutPage({ onBack, onDebug }: { onBack: () => void; onDebug: () => void }) {
   const [version, setVersion] = useState('')
+  const taps = useRef<number[]>([])
   useEffect(() => {
     let alive = true
     void appVersion().then((v) => {
@@ -33,6 +35,17 @@ export function AboutPage({ onBack }: { onBack: () => void }) {
       alive = false
     }
   }, [])
+  /* 图标 900ms 内点满三次进调试页；正常点击不改变外观 */
+  const tapIcon = () => {
+    const now = Date.now()
+    const recent = [...taps.current.filter((t) => now - t < 900), now]
+    taps.current = recent
+    if (recent.length >= 3) {
+      taps.current = []
+      haptic('light')
+      onDebug()
+    }
+  }
   const repoText = DEV_REPO.replace(/^https:\/\//, '')
   const facts: [string, string][] = version
     ? [
@@ -49,7 +62,9 @@ export function AboutPage({ onBack }: { onBack: () => void }) {
       <div className="flex-1 overflow-y-auto px-5 pb-6 [scrollbar-width:none]">
         <TopBar title="关于" onBack={onBack} />
         <div className="mt-10 flex flex-col items-center">
-          <img src="/icon.png" alt="Koma" className="h-[84px] w-[84px]" />
+          <button type="button" onClick={tapIcon} className="flex-none outline-none">
+            <img src="/icon.png" alt="Koma" className="h-[84px] w-[84px]" />
+          </button>
           <div className="mt-4 text-[22px] font-extrabold tracking-[-.02em] text-(--c-ink)">Koma</div>
           {version && <div className="mt-1 text-[12.5px] font-medium tabular-nums text-(--c-ink4)">{version}</div>}
         </div>

@@ -28,7 +28,7 @@ export function MeView({ onPage }: { onPage: (p: MePage) => void }) {
       ['学期', sem ? (semesterEnded(sem) ? `${sem.name}，已结束` : `${sem.name}，第 ${Math.max(0, Math.min(sem.totalWeeks, week))} / ${sem.totalWeeks} 周`) : '未设置', 'semester'],
       ['作息时间', '', 'schedule'],
       ['课程', `${live.length} 门`, 'courses'],
-      ['导入课表', eduStatus.text, 'import'],
+      ['教务账号', eduStatus.text, 'import'],
       ['分享课表', '', 'share'],
     ]],
     ['提醒', [

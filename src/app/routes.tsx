@@ -8,7 +8,7 @@ import { occurrencesOn, type Snapshot } from '../domain/engine'
 import type { RuleManifest } from '../domain/rules'
 import type { RuleOutput } from '../domain/importer'
 import { uid } from '../domain/store'
-import { DEFAULT_PLUGIN, hasDirectLogin } from '../domain/edu/plugin'
+import { DEFAULT_PLUGIN, EDU_PLUGINS, hasDirectLogin, type EduPlugin } from '../domain/edu/plugin'
 import type { CapturedPhoto } from './camera'
 import { ConflictPage } from './course/ConflictPage'
 import { CourseDetailPage } from './course/CourseDetailPage'
@@ -25,7 +25,7 @@ import { ImportPage } from './import/ImportPage'
 import { AiImportPage } from './import/AiImportPage'
 import { ImportRunPage } from './import/ImportRunPage'
 import { RuleEditorPage } from './import/RuleEditorPage'
-import { EDU_RULE, type EduSyncSource } from './edu-sync'
+import { EDU_RULE, getEduSync, restoreEduSync, type EduSyncSource } from './edu-sync'
 import { CalendarIntroPage, NotifPrefPage, PrefPickPage, type PrefKey } from './reminder'
 import { WidgetPage } from './widget'
 import { CoursesPage } from './me/Library'
@@ -37,6 +37,11 @@ import { StatsPage } from './me/StatsPage'
 import { ThemePage } from './me/ThemePage'
 import { ErasePage } from './me/ErasePage'
 import { AboutPage } from './me/AboutPage'
+import { DebugHub, type DebugPage } from './debug/DebugHub'
+import { OcrPage } from './debug/OcrPage'
+import { EduPage } from './debug/EduPage'
+import { DataPage } from './debug/DataPage'
+import { EnvPage } from './debug/EnvPage'
 import { ICON, PopHead, PopItem, Popover } from './ui'
 import { haptic, nativeToast } from './widgets'
 import { store } from './store'
@@ -52,7 +57,8 @@ export type Route =
   | { k: 'todoReview'; photos: CapturedPhoto[]; courseId?: string }
   | { k: 'manual' }
   | { k: 'eduLogin' }
-  | { k: 'eduBrowser'; startUrl?: string }
+  | { k: 'eduRelogin'; plugin: EduPlugin }
+  | { k: 'eduBrowser'; startUrl?: string; plugin?: EduPlugin }
   | { k: 'eduPreview'; out: RuleOutput; src: EduSyncSource; over?: boolean }
   | { k: 'eduFail'; info: EduFailInfo }
   | { k: 'eduStatus' }
@@ -77,6 +83,11 @@ export type Route =
   | { k: 'stats' }
   | { k: 'erase' }
   | { k: 'about' }
+  | { k: 'debug' }
+  | { k: 'debugOcr' }
+  | { k: 'debugEdu' }
+  | { k: 'debugData' }
+  | { k: 'debugEnv' }
 
 /* 课程详情里点某条每周安排：找到这条规则在本周（或第一周）的那次课 */
 export function occurrenceOfRule(snap: Snapshot, ruleId: string): Occurrence | null {
@@ -118,6 +129,13 @@ export const notShot = (r: Route) => r.k !== 'todoCamera' && r.k !== 'todoPicker
 /** 栈里第 i 页的渲染；跳转能力由 RealApp 通过 ctx 注入 */
 export function renderRoute(r: Route, i: number, ctx: RouteCtx): ReactNode {
   const { snap, stack, compose, pop, push, replaceTop, setStack, setTab, backToTimetable, openCourseById, openCapture, onPhotos, applyPhoto, pickPhoto, eraseDone, openEduLogin } = ctx
+  const loginBoundSchool = () => {
+    const sync = getEduSync()
+    if (!sync) { openEduLogin(); return }
+    const plugin = EDU_PLUGINS.find((p) => p.url === sync.school.url)
+    if (!plugin) { nativeToast('该学校暂不支持重新登录'); return }
+    push(hasDirectLogin(plugin) ? { k: 'eduRelogin', plugin } : { k: 'eduBrowser', plugin })
+  }
     const key = `${r.k}-${i}`
     switch (r.k) {
       case 'course':
@@ -187,7 +205,7 @@ export function renderRoute(r: Route, i: number, ctx: RouteCtx): ReactNode {
         )
       case 'manual':
         return <ManualAddPage key={key} snap={snap} onBack={pop} />
-      case 'eduLogin':
+      case 'eduLogin': {
         return (
           <EduLoginPage
             key={key}
@@ -200,11 +218,25 @@ export function renderRoute(r: Route, i: number, ctx: RouteCtx): ReactNode {
             }}
           />
         )
+      }
+      case 'eduRelogin':
+        return (
+          <EduLoginPage
+            key={key}
+            plugin={r.plugin}
+            onBack={pop}
+            onDone={(kb, url) => {
+              restoreEduSync()
+              if (kb) pop()
+              else replaceTop({ k: 'eduBrowser', startUrl: url, plugin: r.plugin })
+            }}
+          />
+        )
       case 'eduBrowser':
         return (
           <EduBrowserPage
             key={key}
-            plugin={DEFAULT_PLUGIN}
+            plugin={r.plugin ?? DEFAULT_PLUGIN}
             startUrl={r.startUrl}
             active={i === stack.length - 1}
             onBack={pop}
@@ -250,7 +282,7 @@ export function renderRoute(r: Route, i: number, ctx: RouteCtx): ReactNode {
       case 'rule':
         return <RuleEditorPage key={key} rule={r.rule} onBack={pop} />
       case 'semester':
-        return <SemesterSettings key={key} sem={snap.semester} onBack={pop} onNew={() => push({ k: 'newSemester' })} onArchive={(id) => push({ k: 'archive', id })} onLogin={openEduLogin} />
+        return <SemesterSettings key={key} sem={snap.semester} onBack={pop} onNew={() => push({ k: 'newSemester' })} onArchive={(id) => push({ k: 'archive', id })} onLogin={loginBoundSchool} />
       case 'archive': {
         const a = store.state.archives.find((x) => x.semester.id === r.id)
         return a ? <ArchivePage key={key} a={a} onBack={pop} /> : null
@@ -262,7 +294,7 @@ export function renderRoute(r: Route, i: number, ctx: RouteCtx): ReactNode {
       case 'completeInfo':
         return <CompleteInfoPage key={key} onDone={backToTimetable} />
       case 'eduStatus':
-        return <EduStatusPage key={key} onBack={pop} onLogin={() => push({ k: 'eduLogin' })} />
+        return <EduStatusPage key={key} onBack={pop} onLogin={loginBoundSchool} />
       case 'notif':
         return <NotifPrefPage key={key} onBack={pop} onPick={(pref) => push({ k: 'notifPick', pref })} />
       case 'calendarIntro':
@@ -282,7 +314,17 @@ export function renderRoute(r: Route, i: number, ctx: RouteCtx): ReactNode {
       case 'erase':
         return <ErasePage key={key} onBack={pop} onDone={eraseDone} />
       case 'about':
-        return <AboutPage key={key} onBack={pop} />
+        return <AboutPage key={key} onBack={pop} onDebug={() => push({ k: 'debug' })} />
+      case 'debug':
+        return <DebugHub key={key} onBack={pop} onPage={(p: DebugPage) => push({ k: p })} />
+      case 'debugOcr':
+        return <OcrPage key={key} onBack={pop} />
+      case 'debugEdu':
+        return <EduPage key={key} onBack={pop} />
+      case 'debugData':
+        return <DataPage key={key} onBack={pop} />
+      case 'debugEnv':
+        return <EnvPage key={key} onBack={pop} />
       case 'courses':
         return (
           <CoursesPage

@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { store } from '../store'
 import { camera } from '../camera'
 import { clearCalendar } from '../calendar'
+import { logoutEduSync } from '../edu-sync'
 import { syncWidgets } from '../widgets'
 import { Page, PrimaryButton, TopBar } from '../ui'
 
@@ -16,6 +17,7 @@ export function ErasePage({ onBack, onDone }: { onBack: () => void; onDone: () =
     const paths = [...s.tasks.flatMap((t) => t.photos?.map((p) => p.path) ?? []), s.prefs.avatar, s.prefs.wall].filter(Boolean)
     await clearCalendar()
     await camera.remove(paths)
+    await logoutEduSync()
     store.reset()
     await syncWidgets()
     onDone()
@@ -25,7 +27,7 @@ export function ErasePage({ onBack, onDone }: { onBack: () => void; onDone: () =
       <div className="flex-1 overflow-y-auto px-5 [scrollbar-width:none]">
         <TopBar title="清除数据" sub="卸载应用不会移除系统日历中的内容。" onBack={onBack} />
         <div className="mt-6 rounded-[18px] bg-(--c-surface) px-4">
-          {['课表、课程和调整', '作业和照片', '系统日历中由本应用创建的日历'].map((t, i) => (
+          {['课表、课程和调整', '作业和照片', '教务账号与登录凭据', '系统日历中由本应用创建的日历'].map((t, i) => (
             <div key={t} className={`py-3.5 text-[14px] font-semibold text-(--c-ink) ${i ? 'border-t border-(--c-surface2)' : ''}`}>{t}</div>
           ))}
         </div>

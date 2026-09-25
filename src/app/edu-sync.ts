@@ -1,11 +1,9 @@
-/**
- * 教务自动更新：学校的 WebView 会话（只有 Cookie，不存账号密码）默认保留，
- * 这里在不可见 WebView 里打开课表页，用导入时同一套脚本取课表，走同一套合并逻辑。
- * 会话失效只标记「需要重新登录」，不重试；连续三次失效自动关闭。
- */
+/** 教务自动更新：优先使用学校 Profile 的 Cookie；Cookie 失效时用 Android Keystore 凭据静默重建会话。每天最多自动检查一次。 */
 import { useSyncExternalStore } from 'react'
 import type { RuleManifest } from '../domain/rules'
-import type { School } from '../domain/edu/plugin'
+import type { EduHttp, EduPlugin, School } from '../domain/edu/plugin'
+import { EDU_PLUGINS } from '../domain/edu/plugin'
+import { captchaAnswer } from '../domain/edu/captcha'
 import { detectSystem, isTimetablePage } from '../domain/edu/systems'
 import { parseZfKbList, termLabel, type ZfKb, type ZfTerm } from '../domain/edu/zhengfang'
 import { parseHtml } from '../domain/importers/html'
@@ -13,7 +11,8 @@ import { normalize, type NormalizedCourse, type RuleOutput } from '../domain/imp
 import { uid } from '../domain/store'
 import { store } from './store'
 import { extendGrid, semesterEnded } from './semester'
-import { edu, eduProfile, nativeEdu, type EduBgNav } from './edu-browser'
+import { edu, eduCredentials, eduOcr, eduProfile, nativeEdu, type EduBgNav } from './edu-browser'
+import { CAPTCHA_OCR_VIEWS } from './edu-browser'
 
 export const EDU_RULE: RuleManifest = { id: 'builtin-edu', name: '教务系统', version: '1.0', input: 'json', createdAt: 0, updatedAt: 0 }
 
@@ -44,7 +43,7 @@ export interface SyncOutcome {
 
 const KEY = 'tt.edu.sync'
 const PAGE_TIMEOUT = 45_000
-const RESUME_GAP = 6 * 3600_000
+const RESUME_GAP = 24 * 3600_000
 /** 连续失效几次后自动关闭 */
 const MAX_EXPIRED = 3
 
@@ -111,19 +110,26 @@ export function bindEduSync(src: EduSyncSource, enabled: boolean) {
   })
 }
 
+
+/** 重新认证成功后恢复当前绑定，不创建新的账号记录。 */
+export function restoreEduSync() {
+  const s = load()
+  if (!s) return
+  save({ ...s, lastAt: 0, lastResult: '', lastChanges: 0, failStreak: 0 })
+}
+
 export function setEduSyncEnabled(on: boolean) {
   const s = load()
   if (!s) return
   save({ ...s, enabled: on, failStreak: on ? 0 : s.failStreak })
 }
 
-/** 退出登录：删掉该学校的 WebView Profile 与记录；密码在系统密码管理器里，由用户自行管理 */
+/** 退出登录：删掉该学校的 WebView Profile 与本机加密凭据。 */
 export async function logoutEduSync(): Promise<void> {
   const s = load()
   save(null)
-  if (s) {
-    await edu.clearProfile(s.school.url)
-  }
+  if (s) await edu.clearProfile(s.school.url)
+  await eduCredentials.clear()
 }
 
 /** 内置浏览器正在前台时不做后台抓取 */
@@ -163,6 +169,37 @@ export function countChanges(incoming: NormalizedCourse[]): number {
   return diff.added.length + diff.removed.length + diff.changed.length
 }
 
+async function renewSession(s: EduSync): Promise<boolean> {
+  const plugin: EduPlugin | undefined = EDU_PLUGINS.find((p) => p.url === s.school.url)
+  if (plugin?.auth.kind !== 'login') return false
+  const credentials = await eduCredentials.load()
+  if (!credentials) return false
+  const http: EduHttp = (req) => edu.http(req)
+  const profile = eduProfile(s.school.url)
+  for (let round = 0; round < 3; round++) {
+    const begin = await plugin.auth.flow.begin(http, (url) => edu.getCookies(profile, url))
+    let captcha = ''
+    if (begin.kind === 'ready') {
+      for (const jar of begin.jars) await edu.setCookies(profile, jar.url, jar.cookies)
+      return true
+    }
+    if (begin.captcha) {
+      for (let view = 0; view < CAPTCHA_OCR_VIEWS; view++) {
+        captcha = captchaAnswer(await eduOcr.recognize(begin.captcha, view).then((r) => r.text, () => '')) ?? ''
+        if (captcha) break
+      }
+      if (!captcha) continue
+    }
+    const result = await plugin.auth.flow.login(http, { ...credentials, captcha })
+    if (result.kind === 'ok') {
+      for (const jar of result.jars) await edu.setCookies(profile, jar.url, jar.cookies)
+      return true
+    }
+    if (!result.captcha) return false
+  }
+  return false
+}
+
 /** 正方接口在未登录时返回登录页 HTML，JSON 解析失败 */
 const looksExpired = (e: unknown) => e instanceof Error && /JSON|token|Unexpected/i.test(e.message)
 
@@ -178,7 +215,7 @@ function finish(s: EduSync, result: EduSyncResult, message?: string, changes = 0
   return { result, changes, message, note }
 }
 
-async function doSync(): Promise<SyncOutcome> {
+async function doSync(allowRenew = true): Promise<SyncOutcome> {
   const s = load()
   if (!s) return { result: 'error', changes: 0, message: '未开启自动更新' }
   if (!nativeEdu()) return { result: 'error', changes: 0, message: '仅在应用内可用' }
@@ -192,7 +229,13 @@ async function doSync(): Promise<SyncOutcome> {
     const nav = await page
     if (nav.error) return finish(s, 'error', '页面打不开')
     const sys = detectSystem(nav.url, s.school.system)
-    if (!isTimetablePage(sys, nav.url, nav.title)) return finish(s, 'expired')
+    if (!isTimetablePage(sys, nav.url, nav.title)) {
+      if (allowRenew) {
+        await edu.bgClose().catch(() => {})
+        if (await renewSession(s)) return doSync(false)
+      }
+      return finish(s, 'expired')
+    }
 
     let out: RuleOutput
     if (sys === 'zhengfang_new' && s.term) {
@@ -200,8 +243,13 @@ async function doSync(): Promise<SyncOutcome> {
       try {
         list = await edu.bgZfFetch(s.term.xnm, s.term.xqm)
       } catch (e) {
+        if (allowRenew && looksExpired(e)) {
+          await edu.bgClose().catch(() => {})
+          if (await renewSession(s)) return doSync(false)
+        }
         return finish(s, looksExpired(e) ? 'expired' : 'error', e instanceof Error ? e.message : undefined)
       }
+
       out = { ...parseZfKbList(list), semester: { name: termLabel(s.term) } }
     } else {
       out = parseHtml(await edu.bgPageHtml(), { mode: 'grid' })
@@ -222,6 +270,10 @@ async function doSync(): Promise<SyncOutcome> {
     })
     return finish(s, 'ok', undefined, changes)
   } catch (e) {
+    if (allowRenew && looksExpired(e)) {
+      await edu.bgClose().catch(() => {})
+      if (await renewSession(s)) return doSync(false)
+    }
     return finish(s, 'error', e instanceof Error ? e.message : undefined)
   } finally {
     await edu.bgClose().catch(() => {})
@@ -242,11 +294,10 @@ export function syncNow(): Promise<SyncOutcome> {
 
 export const eduSyncing = () => running !== null
 
-/** 回前台静默检查：开着、距上次超过 6 小时、上次不是失效 */
+/** 回前台静默检查：开着、距上次超过 24 小时。 */
 export function resumeSync(): Promise<SyncOutcome> | null {
   const s = load()
   if (!s || !s.enabled || browserOpen || running) return null
-  if (s.lastResult === 'expired') return null
   if (Date.now() - s.lastAt < RESUME_GAP) return null
   return syncNow()
 }

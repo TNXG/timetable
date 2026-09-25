@@ -82,29 +82,82 @@ const TtEdu = registerPlugin<TtEduPlugin>('TtEdu')
 interface TtCredentialsPlugin {
   save(o: { username: string; password: string }): Promise<{ ok: boolean }>
   get(): Promise<{ ok: boolean; username?: string; password?: string }>
+  clear(): Promise<{ ok: boolean }>
 }
 
 const TtCredentials = registerPlugin<TtCredentialsPlugin>('TtCredentials')
 
-/** 存进系统密码管理器的学号/密码（用户开了「保存密码」才有）；应用自身不落盘 */
+interface TtOcrPlugin {
+  /** 图片以 data URI 或裸 base64 传入；view = 预处理视图；provider = nnapi / cpu */
+  recognize(o: { image: string; view: number }): Promise<{ text: string; provider: string }>
+  /** 调试入口用：推理后端与加速器实跑探测（原生侧新建会话各跑三次） */
+  diagnose(): Promise<OcrDiagnostics>
+}
+
+const TtOcr = registerPlugin<TtOcrPlugin>('TtOcr')
+
+/** 一条推理路径的探测结果：建会话 + 实跑 */
+export interface OcrBench {
+  ok: boolean
+  /** 失败原因（成功时原生侧回 null） */
+  error?: string | null
+  /** 建会话耗时（毫秒） */
+  createMs: number
+  /** 首次推理耗时（NNAPI 的图上编译都在这里） */
+  firstMs: number
+  /** 后续两次里最快的一次 */
+  bestMs: number
+}
+
+/** 关于页调试入口（图标三连点）读的推理自检 */
+export interface OcrDiagnostics {
+  /** 当前进程内会话实际落地的后端：nnapi / cpu */
+  provider: string
+  /** 推理内核里编译进来的执行后端 */
+  providers: string[]
+  /** ONNX Runtime 版本 */
+  ort: string
+  /** NNAPI 且禁止回退 CPU：算子必须全部落在加速器上 */
+  strict: OcrBench
+  /** NNAPI，允许算子回退 CPU */
+  nnapi: OcrBench
+  cpu: OcrBench
+}
+
+/** 存进 Android Keystore 保护的应用私有凭据（用户开启保存密码才有）。 */
 export interface EduSavedCred {
   username: string
   password: string
 }
 
-/** 系统密码管理器（Credential Manager）读写：删条目没有可编程接口，只能用户在系统设置里删 */
+/** Android Keystore 凭据读写；get 静默读取，供后台自动更新使用。 */
 export const eduCredentials = {
-  /** 登录成功且开关打开时写入；false = 用户取消或环境不支持 */
   save: (username: string, password: string): Promise<boolean> =>
     nativeEdu() ? TtCredentials.save({ username, password }).then((r) => r.ok, () => false) : Promise.resolve(false),
-  /** 弹系统选择面板回填；null = 用户取消或没存过 */
   load: (): Promise<EduSavedCred | null> =>
     nativeEdu()
       ? TtCredentials.get().then((r) => (r.ok && r.username && r.password ? { username: r.username, password: r.password } : null), () => null)
       : Promise.resolve(null),
+  clear: (): Promise<boolean> => nativeEdu() ? TtCredentials.clear().then((r) => r.ok, () => false) : Promise.resolve(false),
 }
 
 export const nativeEdu = () => Capacitor.getPlatform() === 'android'
+
+/** 本地识别的预处理视图数，与 `OcrEngine.kt` 的 `VIEWS` 表一一对应（越界值原生侧夹取） */
+export const CAPTCHA_OCR_VIEWS = 2
+
+/**
+ * 验证码本地识别：模型随包分发（ddddocr，MIT），推理在设备上跑，图片不出设备、不落盘。
+ * 只在应用内可用（浏览器预览没有原生插件）。同一张图换视图重试不联网。
+ */
+export const eduOcr = {
+  /** 失败/环境不支持时 reject，调用方按「没认出来」处理（换一张重试或交给人工） */
+  recognize: (image: string, view: number): Promise<{ text: string; provider: string }> =>
+    nativeEdu() ? TtOcr.recognize({ image, view }) : Promise.reject(new Error('本地识别仅在应用内可用')),
+  /** 推理自检：失败/环境不支持时 reject */
+  diagnose: (): Promise<OcrDiagnostics> =>
+    nativeEdu() ? TtOcr.diagnose() : Promise.reject(new Error('本地识别仅在应用内可用')),
+}
 
 export const RUN_TIMEOUT = 20_000
 

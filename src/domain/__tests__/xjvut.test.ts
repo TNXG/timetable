@@ -172,11 +172,18 @@ describe('xjvut 直登流程', () => {
     expect(server.hops.some((h) => h.method === 'POST')).toBe(false)
   })
 
-  it('验证码不对：fail 带人话；重试时瓶里留着旧会话也会被服务端拒绝后重建', async () => {
+  it('验证码不对：fail 带人话且标记 captcha，页面据此换一张自动重试', async () => {
     const server = makeServer({ loginError: 'authenticationFailure.FailedAuthcodeException' })
     await flow.begin(server.http, noCookies)
     const out = await flow.login(server.http, { username: 'x', password: 'pw', captcha: '9' })
-    expect(out).toEqual({ kind: 'fail', message: '验证码不对' })
+    expect(out).toEqual({ kind: 'fail', message: '验证码不对', captcha: true })
+  })
+
+  it('账号密码不对：fail 不带 captcha 标记（不许拿错凭据反复试）', async () => {
+    const server = makeServer({ loginError: 'authenticationFailure.AccountNotFoundException: 用户名或密码无效 not recognized' })
+    await flow.begin(server.http, noCookies)
+    const out = await flow.login(server.http, { username: 'x', password: 'pw', captcha: '9' })
+    expect(out).toEqual({ kind: 'fail', message: '账号或密码不对', captcha: false })
   })
 
   it('要验证码的学校：begin 带回验证码图片（base64 data URL），login 把答案带上', async () => {

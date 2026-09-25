@@ -1,12 +1,13 @@
-/** 教务直登：应用自己的登录页（学号/密码/验证码可选）。是否启用、验证码要不要、怎么登，
+/** 教务直登：应用自己的登录页（学号/密码/验证码可选）。是否启用、验证码怎么取与登录方式，
     全部由学校插件声明与实现（auth.flow）：插件借原生 HTTP 逐跳登录，把各主机的会话 Cookie
     交给软件种进学校 Profile，成功后原生拉一次课表 JSON 直接进导入预览；拉不到才退回
-    内置浏览器（此时已登录）。凭证只在当次登录的内存里用一次；用户开「保存密码」才把学号密码
-    交给系统密码管理器（Credential Manager，应用自身不落盘；删除由用户在系统设置里做）。
-    会话 Cookie 种进学校 Profile 后默认保留，会话活着时再进免验证码。 */
+    内置浏览器（此时已登录）。凭证只在当次登录的内存里用一次；用户开「保存密码」才写入 Android Keystore 保护的应用私有凭据。
+    会话 Cookie 种进学校 Profile 后默认保留，会话活着时再进免验证码。
+    验证码默认不显示，登录时在设备本地 OCR；识别或提交失败后提供手动输入。 */
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { EduCookieJar, EduHttp, EduKbFetch, EduPlugin } from '../../domain/edu/plugin'
-import { edu, eduProfile, eduCredentials, nativeEdu } from '../edu-browser'
+import { captchaAnswer } from '../../domain/edu/captcha'
+import { CAPTCHA_OCR_VIEWS, edu, eduCredentials, eduOcr, eduProfile, nativeEdu } from '../edu-browser'
 import { setEduBrowserOpen } from '../edu-sync'
 import { store } from '../store'
 import { haptic } from '../widgets'
@@ -14,6 +15,9 @@ import { Field, Loader, Page, PrimaryButton, Switch, TextInput, TopBar } from '.
 import { PageBody } from '../course/shared'
 
 type Phase = 'connect' | 'form' | 'submit' | 'fetch'
+
+/** 自动登录最多换这么多张验证码：一次 begin 就是一次对教务系统的请求，次数要压住 */
+const MAX_CAPTCHA_ROUNDS = 3
 
 /** 网络/环境类错误给一句人话，其余原样 */
 const netMsg = (e: unknown): string => {
@@ -40,10 +44,18 @@ export function EduLoginPage({ plugin, onBack, onDone }: {
   /** null = 这次不用验证码，整行不出现 */
   const [captcha, setCaptcha] = useState<string | null>(null)
   const [capBusy, setCapBusy] = useState(false)
-  /** 保存密码：开了就在登录成功后把学号密码加密缓存；从缓存预填时默认开着 */
+  /** 保存密码：开了就在登录成功后写入 Android Keystore；从本地密钥串回填时默认开着 */
   const [save, setSave] = useState(false)
+  /** Android Keystore 回填的凭据：拿到就自动登录，不用再手填 */
+  const [saved, setSaved] = useState<{ username: string; password: string } | null>(null)
+  /** 默认完全隐藏验证码；自动识别多轮失败后才显示人工输入 */
+  const [manual, setManual] = useState(false)
 
   const doneRef = useRef(false)
+  /** 当前这张验证码原图：自动识别与换图重试都从它取 */
+  const captchaRef = useRef<string | null>(null)
+  /** 自动登录只跑一轮，轮内的验证码重试自己管 */
+  const autoRanRef = useRef(false)
   /** onDone 每次渲染都是新闭包，钉进 ref：登录流程挂载一次，不能被 30s 的全局重渲染打断 */
   const onDoneRef = useRef(onDone)
   useEffect(() => {
@@ -88,52 +100,116 @@ export function EduLoginPage({ plugin, onBack, onDone }: {
     try {
       const b = await flow!.begin(http, (url) => edu.getCookies(profile, url))
       if (b.kind === 'ready') {
+        captchaRef.current = null
         await seed(b.jars)
         await finishWithKb(b.url)
-        return
+        return false
       }
+      captchaRef.current = b.captcha
+      setAuthcode('')
       setCaptcha(b.captcha)
       setPhase('form')
+      return true
     } catch (e) {
       setFatal(netMsg(e))
+      return false
     }
   }, [flow, profile, seed, finishWithKb])
 
-  const submit = useCallback(async () => {
-    if (!flow || phase === 'submit') return
-    const name = username.trim()
-    const code = captcha != null ? authcode.trim() : ''
-    if (!name || !password || (captcha != null && !code)) return
-    setPhase('submit')
-    setError('')
+  /** 提交一次登录；成功就收尾。失败带上「是不是验证码不对」，由调用方决定要不要换一张重试 */
+  const attempt = useCallback(async (name: string, pass: string, code: string) => {
+    if (!flow) return { ok: false, captcha: false, message: '登录还没准备好' }
     try {
-      const out = await flow.login(http, { username: name, password, captcha: code })
+      const out = await flow.login(http, { username: name, password: pass, captcha: code })
       if (out.kind === 'ok') {
-        /* 开关说了算：开了把学号密码交给系统密码管理器；关了不写（旧条目由用户在系统设置里删） */
-        if (save) void eduCredentials.save(name, password)
+        /* 保存密码只控制本地 Keystore 密文；关闭时不能继续用旧凭据自动更新。 */
+        if (save) void eduCredentials.save(name, pass)
+        else void eduCredentials.clear()
         await seed(out.jars)
         await finishWithKb(out.url)
-        return
+        return { ok: true, captcha: false, message: '' }
       }
-      /* 服务器已换掉 execution/公钥：整轮重来，验证码必换新 */
-      setError(out.message)
-      setAuthcode('')
-      await begin(true)
+      return { ok: false, captcha: out.captcha === true, message: out.message }
     } catch (e) {
-      setError(netMsg(e))
-      setAuthcode('')
-      await begin(true)
-    } finally {
-      setPhase((cur) => (cur === 'submit' ? 'form' : cur))
+      return { ok: false, captcha: false, message: netMsg(e) }
     }
-  }, [flow, phase, username, password, authcode, captcha, save, profile, begin, seed, finishWithKb])
+  }, [flow, http, save, seed, finishWithKb])
 
+  /** 本地识别一张验证码：主视图读不出就换裁切视图，都在设备上跑、不联网。
+      判不出合法算式给 null——上层换一张重试，而不是拿不准的答案去提交。 */
+  const solveCaptcha = useCallback(async (image: string): Promise<string | null> => {
+    for (let view = 0; view < CAPTCHA_OCR_VIEWS; view++) {
+      const text = await eduOcr.recognize(image, view).then((r) => r.text, () => '')
+      const answer = captchaAnswer(text)
+      if (answer) return answer
+    }
+    return null
+  }, [])
+
+
+  /** 两种凭据来源共用同一套本地识别与最多三张图的重试流程。 */
+  const autoLogin = useCallback(async (name: string, pass: string) => {
+    let stale = false
+    for (let round = 0; round < MAX_CAPTCHA_ROUNDS; round++) {
+      if (doneRef.current) return
+      stale = false
+      const image = captchaRef.current
+      let code = ''
+      if (image) {
+        setPhase('connect')
+        code = (await solveCaptcha(image)) ?? ''
+      }
+      if (code || !image) {
+        setPhase('submit')
+        const r = await attempt(name, pass, code)
+        if (r.ok || doneRef.current) return
+        setError(r.message)
+        stale = true
+        if (!r.captcha) {
+          /* 非验证码错误立即停手；下一次登录重新获取表单，验证码仍由本地识别。 */
+          await begin(true)
+          return
+        }
+      }
+      if (round < MAX_CAPTCHA_ROUNDS - 1) {
+        if (!await begin(true)) return
+        stale = false
+      }
+    }
+    if (stale && !await begin(true)) return
+    if (!doneRef.current) {
+      setManual(true)
+      setError('验证码识别失败，请手动填写')
+      setPhase('form')
+    }
+  }, [attempt, begin, solveCaptcha])
+  const submit = useCallback(async () => {
+    if (!flow || phase !== 'form') return
+    const name = username.trim()
+    if (!name || !password) return
+    setError('')
+    if (!manual) {
+      setPhase('connect')
+      void autoLogin(name, password)
+      return
+    }
+    const code = captcha != null ? authcode.trim() : ''
+    if (captcha != null && !code) return
+    setPhase('submit')
+    const r = await attempt(name, password, code)
+    if (r.ok) return
+    setError(r.message)
+    await begin(true)
+
+  }, [flow, phase, username, password, manual, captcha, authcode, autoLogin, attempt, begin])
   const refreshCaptcha = useCallback(async () => {
     if (capBusy || !flow) return
     setCapBusy(true)
     try {
       if (flow.refreshCaptcha) {
-        setCaptcha(await flow.refreshCaptcha(http))
+        const next = await flow.refreshCaptcha(http)
+        captchaRef.current = next
+        setCaptcha(next)
         setError('')
       } else {
         await begin()
@@ -152,12 +228,13 @@ export function EduLoginPage({ plugin, onBack, onDone }: {
     }
     setEduBrowserOpen(true)
     void begin()
-    /* 系统密码管理器里存过的：弹系统面板让用户确认后回填学号密码，开关默认开 */
+    /* Android Keystore 里的凭据：静默回填，接着自动登录 */
     void eduCredentials.load().then((c) => {
       if (!c || doneRef.current) return
       setUsername(c.username)
       setPassword(c.password)
       setSave(true)
+      setSaved(c)
     })
     return () => {
       /* 登录中途退出：没种过 Cookie，Profile 不用清；成了会话已种进 Profile，交给浏览器接管 */
@@ -166,7 +243,14 @@ export function EduLoginPage({ plugin, onBack, onDone }: {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const canSubmit = !!username.trim() && !!password && (captcha == null || !!authcode.trim())
+  /* 凭据和表单都就绪（可能不用验证码）就自动试一轮 */
+  useEffect(() => {
+    if (!saved || autoRanRef.current || phase !== 'form') return
+    autoRanRef.current = true
+    void autoLogin(saved.username, saved.password)
+  }, [saved, phase, autoLogin])
+
+  const canSubmit = !!username.trim() && !!password && (captcha == null || !manual || !!authcode.trim())
 
   return (
     <Page>
@@ -196,7 +280,7 @@ export function EduLoginPage({ plugin, onBack, onDone }: {
               <Field k="密码">
                 <TextInput type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" />
               </Field>
-              {captcha != null && (
+              {captcha != null && manual && (
                 <Field k="验证码" sub="图片里算式的得数，点图换一张">
                   <div className="flex items-center gap-3">
                     <button
@@ -221,6 +305,7 @@ export function EduLoginPage({ plugin, onBack, onDone }: {
                   on={save}
                   onChange={(v) => {
                     setSave(v)
+                    if (!v) void eduCredentials.clear()
                   }}
                 />
               </div>

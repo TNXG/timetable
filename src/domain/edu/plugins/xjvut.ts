@@ -1,5 +1,5 @@
 import type { EduCookieJar, EduHttp, EduHttpRequest, EduHttpResult, EduKbFetch, EduLoginBegin, EduLoginFlow, EduPlugin } from '../plugin'
-import { applySetCookie, casErrorText, cookieHeaderValue, describeCasError, encryptCasPassword, extractExecution, parseCookieHeader } from '../cas'
+import { applySetCookie, casErrorText, cookieHeaderValue, describeCasError, encryptCasPassword, extractExecution, isCaptchaError, parseCookieHeader } from '../cas'
 import { guessTerm, parseZfKbList, termLabel, zfTimeGrid, type ZfTerm } from '../zhengfang'
 
 /** 新疆理工职业大学：统一身份认证（CAS）直登 + 教务（正方新版）原生取课表。
@@ -7,7 +7,7 @@ import { guessTerm, parseZfKbList, termLabel, zfTimeGrid, type ZfTerm } from '..
  *  GET jw/sso/zfiotlogin?url=课表索引页（教务不认 CAS 跳转、表单也不吃 CAS 密码，
  *  唯它拿 TGT 换 ticket → 内部 ticketlogin 以 uid+timestamp+verify 签发已认证教务会话）→
  *  POST xskbcx_cxXsgrkb.html 拿课表 JSON。全程原生 HTTP 逐跳收 Cookie，不经 WebView；
- *  凭证只在当次登录的内存里用一次。 */
+ * 用户开启保存密码时，凭据由 Android Keystore 保护，仅用于后续会话失效时自动重建 Cookie。 */
 
 const CAS_ORIGIN = 'https://qyrz.xjvut.edu.cn'
 const CAS_LOGIN = `${CAS_ORIGIN}/cas/login`
@@ -205,11 +205,12 @@ export const flow: EduLoginFlow = {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded', Referer: CAS_LOGIN },
       body: form.toString(),
     })
-    /* 还在登录页 = 失败，服务器已换掉 execution：整轮重来 */
+    /* 还在登录页 = 失败，服务器已换掉 execution：整轮重来；只是验证码错时页面会换一张自动重试 */
     if (extractExecution(r.body)) {
-      const message = describeCasError(casErrorText(r.body))
+      const raw = casErrorText(r.body)
+      const message = describeCasError(raw)
       reset()
-      return { kind: 'fail', message }
+      return { kind: 'fail', message, captcha: isCaptchaError(raw) }
     }
     /* CAS 已登录：zfiotlogin 换已认证教务会话（JSESSIONID/route/rememberMe 都进瓶） */
     const page = await follow(http, SSO_JUMP)

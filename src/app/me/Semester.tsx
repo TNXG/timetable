@@ -88,6 +88,10 @@ export function EduSyncGroup({ onLogin }: { onLogin: () => void }) {
     setBusy(true)
     try {
       const o = await syncNow()
+      if (o.result === 'expired') {
+        onLogin()
+        return
+      }
       haptic(o.result === 'ok' || o.result === 'nochange' ? 'success' : 'error')
       nativeToast(outcomeText(o))
     } finally {
@@ -105,17 +109,19 @@ export function EduSyncGroup({ onLogin }: { onLogin: () => void }) {
     <>
       <div className="mt-7 mb-2 px-1 text-[12.5px] font-semibold text-(--c-ink4)">自动更新</div>
       <div className="divide-y divide-(--c-surface2) overflow-hidden rounded-[16px] bg-(--c-surface)">
-        <div className="flex items-center px-4 py-3.5">
-          <div className="min-w-0 flex-1">
-            <div className="truncate text-[14px] font-bold">{s.school.name}</div>
-            <div className={`mt-0.5 text-[12px] font-medium ${status.danger ? 'text-(--c-danger)' : 'text-(--c-ink4)'}`}>{status.text}</div>
-          </div>
-          <Switch on={s.enabled} onChange={setEduSyncEnabled} />
-        </div>
         {s.lastResult === 'expired' ? (
-          <Row title="重新登录" onClick={() => onLogin()} />
+          <Row title={`${s.school.name} · 重新登录`} desc={status.text} onClick={() => onLogin()} />
         ) : (
-          <Row title="立即更新" onClick={() => void update()} right={busy ? <Loader className="ml-3 text-(--c-ink4)" /> : <span />} />
+          <>
+            <div className="flex items-center px-4 py-3.5">
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-[14px] font-bold">{s.school.name}</div>
+                <div className={`mt-0.5 text-[12px] font-medium ${status.danger ? 'text-(--c-danger)' : 'text-(--c-ink4)'}`}>{status.text}</div>
+              </div>
+              <Switch on={s.enabled} onChange={setEduSyncEnabled} />
+            </div>
+            <Row title="立即更新" onClick={() => void update()} right={busy ? <Loader className="ml-3 text-(--c-ink4)" /> : <span />} />
+          </>
         )}
         <Row title="退出登录" danger onClick={() => void logout()} right={<span />} />
       </div>
