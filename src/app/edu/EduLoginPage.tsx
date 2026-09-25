@@ -2,8 +2,8 @@
     全部由学校插件声明与实现（auth.flow）：插件借原生 HTTP 逐跳登录，把各主机的会话 Cookie
     交给软件种进学校 Profile，成功后原生拉一次课表 JSON 直接进导入预览；拉不到才退回
     内置浏览器（此时已登录）。凭证只在当次登录的内存里用一次；用户开「保存密码」才把学号密码
-    交给系统密码管理器（Credential Manager，应用自身不落盘；删除由用户在系统设置里做），
-    会话 Cookie 也不留在此页。 */
+    交给系统密码管理器（Credential Manager，应用自身不落盘；删除由用户在系统设置里做）。
+    会话 Cookie 种进学校 Profile 后默认保留，会话活着时再进免验证码。 */
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { EduCookieJar, EduHttp, EduKbFetch, EduPlugin } from '../../domain/edu/plugin'
 import { edu, eduProfile, eduCredentials, nativeEdu } from '../edu-browser'
@@ -11,7 +11,7 @@ import { setEduBrowserOpen } from '../edu-sync'
 import { store } from '../store'
 import { haptic } from '../widgets'
 import { Field, Loader, Page, PrimaryButton, Switch, TextInput, TopBar } from '../ui'
-import { PageBody, PageFooter } from '../course/shared'
+import { PageBody } from '../course/shared'
 
 type Phase = 'connect' | 'form' | 'submit' | 'fetch'
 
@@ -160,7 +160,7 @@ export function EduLoginPage({ plugin, onBack, onDone }: {
       setSave(true)
     })
     return () => {
-      /* 登录中途退出：没种过 Cookie，Profile 不用清；成了就交给浏览器按保持登录的规矩管 */
+      /* 登录中途退出：没种过 Cookie，Profile 不用清；成了会话已种进 Profile，交给浏览器接管 */
       if (!doneRef.current) setEduBrowserOpen(false)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -170,7 +170,7 @@ export function EduLoginPage({ plugin, onBack, onDone }: {
 
   return (
     <Page>
-      <PageBody>
+      <PageBody className="flex min-h-0 flex-col !pb-[max(22px,env(safe-area-inset-bottom))]">
         <TopBar title="登录" sub={plugin.name} onBack={onBack} />
 
         {fatal ? (
@@ -188,7 +188,7 @@ export function EduLoginPage({ plugin, onBack, onDone }: {
             <div className="text-[12.5px] font-medium text-(--c-ink4)">{phase === 'fetch' ? '正在读取课表' : '正在连接统一身份认证'}</div>
           </div>
         ) : (
-          <form onSubmit={(e) => { e.preventDefault(); void submit() }}>
+          <form className="flex flex-1 flex-col" onSubmit={(e) => { e.preventDefault(); void submit() }}>
             <div className="mt-5 divide-y divide-(--c-surface2) overflow-hidden rounded-[16px] bg-(--c-surface)">
               <Field k="学号">
                 <TextInput value={username} onChange={(e) => setUsername(e.target.value)} autoComplete="username" autoCapitalize="off" autoCorrect="off" spellCheck={false} />
@@ -226,17 +226,15 @@ export function EduLoginPage({ plugin, onBack, onDone }: {
               </div>
             </div>
             {error && <div className="mt-2.5 px-1 text-[12.5px] font-medium text-(--c-danger)">{error}</div>}
+            <div className="mt-auto pt-6">
+              <PrimaryButton busy={phase === 'submit'} disabled={!canSubmit}>
+                登录
+              </PrimaryButton>
+            </div>
           </form>
         )}
       </PageBody>
 
-      {!fatal && phase !== 'connect' && (
-        <PageFooter>
-          <PrimaryButton busy={phase === 'submit'} disabled={!canSubmit} onClick={() => void submit()}>
-            登录
-          </PrimaryButton>
-        </PageFooter>
-      )}
     </Page>
   )
 }

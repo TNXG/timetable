@@ -1,5 +1,6 @@
 /** 内置浏览器：直登成功后从这里进（已带学校会话），到课表页浮出导入胶囊。
-    会话按学校独立，默认离开时清掉，开了保持登录的学校才保留；只在用户点「导入」后读取当前页面。 */
+    会话按学校独立，支持多 Profile 的 WebView 默认保留（免得反复验证码），老 WebView 离开时清掉；
+    只在用户点「导入」后读取当前页面。 */
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { animate, motion, useIsPresent, useMotionValue, useTransform } from 'motion/react'
 import type { RuleOutput } from '../../domain/importer'
@@ -9,8 +10,8 @@ import type { PageCapture, ProbeResult } from '../../domain/edu/scripts'
 import { parseZfKbList, termLabel, type ZfTerm } from '../../domain/edu/zhengfang'
 import { issueUrl } from '../../domain/edu/release'
 import { parseHtml } from '../../domain/importers/html'
-import { edu, nativeEdu, type EduNav } from '../edu-browser'
-import { keepEduSession, setEduBrowserOpen, type EduSyncSource } from '../edu-sync'
+import { edu, nativeEdu, profilesSupported, type EduNav } from '../edu-browser'
+import { setEduBrowserOpen, type EduSyncSource } from '../edu-sync'
 import { haptic, nativeToast } from '../widgets'
 import { ActionSheet, FADE, Loader, Page, SLIDE, dockStyle } from '../ui'
 import { appVersion, openExternal, shareDebug } from './share'
@@ -39,7 +40,7 @@ export function EduBrowserPage({ plugin, startUrl, active, onBack, onImport, onF
   /** 其他导入方式：定格学校页面后交回调用方，换成导入方式列表 */
   onOther: () => void
   onBack: () => void
-  /** src：保持登录自动更新时的抓取来源 */
+  /** src：自动更新时的抓取来源 */
   onImport: (out: RuleOutput, src: EduSyncSource) => void
   onFail: (info: EduFailInfo) => void
 }) {
@@ -65,14 +66,20 @@ export function EduBrowserPage({ plugin, startUrl, active, onBack, onImport, onF
 
   /*
    * 原生页面在推入动画期间就开始加载（此时应用仍不透明，看不到它）；
-   * 动画结束后再把应用切透明，洞里的幕布等页面画出首帧才淡去。原生会话在页面卸载（退场动画结束）时才关；
-   * 开了保持登录的学校保留会话，否则打开和关闭都清。
+   * 动画结束后再把应用切透明，洞里的幕布等页面画出首帧才淡去。原生会话在页面卸载（退场动画结束）时才关：
+   * 支持多 Profile 的 WebView 会话保留，下次进来不用重新登录；老 WebView 打开和关闭都清。
    */
   useEffect(() => {
     const off = edu.onNav(setNav)
     setEduBrowserOpen(true)
-    /* startUrl = 直登刚建立的会话：不管保持登录开关，打开时都必须保住 */
-    void edu.open(url, keepEduSession(plugin.url) || !!startUrl)
+    /* startUrl = 直登刚建立的会话：老 WebView 没有独立 Profile，这一场也必须保住 */
+    let alive = true
+    let keep = false
+    void profilesSupported().then((ok) => {
+      if (!alive) return
+      keep = ok
+      void edu.open(url, ok || !!startUrl)
+    })
     const t = window.setTimeout(() => {
       if (left.current) return
       document.documentElement.classList.add(HTML_CLASS)
@@ -80,10 +87,11 @@ export function EduBrowserPage({ plugin, startUrl, active, onBack, onImport, onF
     }, SLIDE.duration * 1000 + 40)
     return () => {
       window.clearTimeout(t)
+      alive = false
       off()
       document.documentElement.classList.remove(HTML_CLASS)
       setEduBrowserOpen(false)
-      void edu.close(keepEduSession(plugin.url))
+      void edu.close(keep)
     }
   }, [url])
 

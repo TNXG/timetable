@@ -1,4 +1,4 @@
-/** 教务状态：绑定的学校、保持登录开关、立即更新 / 重新登录、退出登录；没绑定时给登录入口 */
+/** 教务状态：绑定的学校、自动更新开关、立即更新 / 重新登录、退出登录；没绑定时给登录入口 */
 import { useEduSync } from '../edu-sync'
 import { EduSyncGroup } from './Semester'
 import { PrimaryButton, SubPage } from '../ui'

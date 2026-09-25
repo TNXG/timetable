@@ -1,6 +1,6 @@
 /**
- * 教务自动更新：保留学校的 WebView 会话（只有 Cookie，不存账号密码），
- * 在不可见 WebView 里打开课表页，用导入时同一套脚本取课表，走同一套合并逻辑。
+ * 教务自动更新：学校的 WebView 会话（只有 Cookie，不存账号密码）默认保留，
+ * 这里在不可见 WebView 里打开课表页，用导入时同一套脚本取课表，走同一套合并逻辑。
  * 会话失效只标记「需要重新登录」，不重试；连续三次失效自动关闭。
  */
 import { useSyncExternalStore } from 'react'
@@ -97,13 +97,13 @@ export function useEduSync(): EduSync | null {
   )
 }
 
-/** 导入完成时开启：重新登录后再导入也走这里，失效计数清零 */
-export function enableEduSync(src: EduSyncSource) {
+/** 导入完成时记下绑定并按开关定自动更新；同校重新导入保留上次更新状态，失效计数清零 */
+export function bindEduSync(src: EduSyncSource, enabled: boolean) {
   const prev = load()
   const same = prev && eduProfile(prev.school.url) === eduProfile(src.school.url)
   save({
     ...src,
-    enabled: true,
+    enabled,
     lastAt: same ? prev.lastAt : 0,
     lastResult: same && prev.lastResult !== 'expired' ? prev.lastResult : '',
     lastChanges: same ? prev.lastChanges : 0,
@@ -124,12 +124,6 @@ export async function logoutEduSync(): Promise<void> {
   if (s) {
     await edu.clearProfile(s.school.url)
   }
-}
-
-/** 内置浏览器打开 / 离开这所学校时是否保留会话 */
-export function keepEduSession(url: string): boolean {
-  const s = load()
-  return !!s && s.enabled && eduProfile(s.school.url) === eduProfile(url)
 }
 
 /** 内置浏览器正在前台时不做后台抓取 */
@@ -178,7 +172,7 @@ function finish(s: EduSync, result: EduSyncResult, message?: string, changes = 0
   let note: string | undefined
   if (failStreak >= MAX_EXPIRED && enabled) {
     enabled = false
-    note = '该学校不支持保持登录，已关闭自动更新'
+    note = '登录已失效，已关闭自动更新'
   }
   save({ ...s, enabled, lastAt: Date.now(), lastResult: result, lastChanges: changes, failStreak })
   return { result, changes, message, note }
@@ -285,7 +279,7 @@ function when(at: number): string {
 /** 学期页状态行文案 */
 export function statusText(s: EduSync): { text: string; danger: boolean } {
   if (s.lastResult === 'expired') return { text: '需要重新登录', danger: true }
-  if (!s.lastAt || !s.lastResult) return { text: s.enabled ? '还没更新过' : '已关闭', danger: false }
+  if (!s.lastAt || !s.lastResult) return { text: s.enabled ? '还没更新过' : '已登录', danger: false }
   const t = when(s.lastAt)
   if (s.lastResult === 'ok') return { text: `${t}，${s.lastChanges} 处变更`, danger: false }
   if (s.lastResult === 'nochange') return { text: `${t}，无变化`, danger: false }

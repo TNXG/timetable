@@ -1,4 +1,4 @@
-/** 导入预览：解析 → 差异 → 应用；教务导入在这一页可选「保持登录，自动更新」 */
+/** 导入预览：解析 → 差异 → 应用；教务导入在这一页可选「自动更新课表」 */
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import type { Semester } from '../../domain/types'
@@ -11,7 +11,7 @@ import { uid } from '../../domain/store'
 import { store } from '../store'
 import { defaultSemester, extendGrid, guessSemesterName, isDefaultGrid, mondayOf, semesterEnded, todayStr } from '../semester'
 import { edu } from '../edu-browser'
-import { enableEduSync, setEduSyncEnabled, useEduSync, type EduSyncSource } from '../edu-sync'
+import { bindEduSync, useEduSync, type EduSyncSource } from '../edu-sync'
 import { FADE, Page, PrimaryButton, Switch, TextAction, TextInput, TopBar, WD, md } from '../ui'
 import { KIND_HINT, KIND_LABEL } from './kinds'
 import { PreviewGrid } from './PreviewGrid'
@@ -47,11 +47,11 @@ function ParsedRow({ nc, sem }: { nc: NormalizedCourse; sem: Semester }) {
 }
 
 /* 导入流程（内页）：输入 → 解析结果 → 回到课表 */
-export function ImportRunPage({ rule, initialText, initialOut, autoRun, overBrowser, syncSource, onBack, onDone }: { rule: RuleManifest; initialText?: string; initialOut?: RuleOutput; autoRun?: boolean; /** 盖在内置浏览器上：透明模式下仍保持可见且不透明，退回时从学校页面上滑走 */ overBrowser?: boolean; /** 教务导入：可选保持登录自动更新 */ syncSource?: EduSyncSource; onBack: () => void; onDone: () => void }) {
+export function ImportRunPage({ rule, initialText, initialOut, autoRun, overBrowser, syncSource, onBack, onDone }: { rule: RuleManifest; initialText?: string; initialOut?: RuleOutput; autoRun?: boolean; /** 盖在内置浏览器上：透明模式下仍保持可见且不透明，退回时从学校页面上滑走 */ overBrowser?: boolean; /** 教务导入：可选自动更新课表 */ syncSource?: EduSyncSource; onBack: () => void; onDone: () => void }) {
   const [stage, setStage] = useState<ImportStage>(initialOut ? 'preview' : 'input')
   const eduSync = useEduSync()
   const [keepLogin, setKeepLogin] = useState(!!eduSync?.enabled)
-  /* 保持登录需要系统 WebView 支持多 Profile，不支持就不显示 */
+  /* 自动更新需要系统 WebView 支持多 Profile，不支持就不显示 */
   const [canKeep, setCanKeep] = useState(false)
   useEffect(() => {
     if (!syncSource) return
@@ -139,10 +139,7 @@ export function ImportRunPage({ rule, initialText, initialOut, autoRun, overBrow
       at: Date.now(), durationMs: Math.max(1, Math.round(performance.now() - t0)),
       failed, diagnostics: pending.diagnostics,
     })
-    if (syncSource && canKeep) {
-      if (keepLogin) enableEduSync(syncSource)
-      else if (eduSync) setEduSyncEnabled(false)
-    }
+    if (syncSource && canKeep) bindEduSync(syncSource, keepLogin)
     onDone()
   }
 
@@ -272,7 +269,7 @@ export function ImportRunPage({ rule, initialText, initialOut, autoRun, overBrow
 
                 {syncSource && canKeep && (
                   <div className="mt-2.5 flex items-center rounded-[16px] bg-(--c-surface) px-4 py-3">
-                    <div className="min-w-0 flex-1 text-[14px] font-bold">保持登录，自动更新课表</div>
+                    <div className="min-w-0 flex-1 text-[14px] font-bold">自动更新课表</div>
                     <Switch on={keepLogin} onChange={setKeepLogin} />
                   </div>
                 )}

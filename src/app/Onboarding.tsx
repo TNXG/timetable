@@ -69,7 +69,7 @@ export default function Onboarding({ onDone, initialStep = 0, backRef }: { onDon
           <Step
             key="login"
             title="登录"
-            sub={DEFAULT_PLUGIN.name}
+            sub="使用学号和统一身份认证密码"
             onBack={() => setStep(0)}
             footer={
               <div className="flex justify-center gap-8">

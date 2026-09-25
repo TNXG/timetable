@@ -39,7 +39,7 @@
 
 ### 安全
 
-凭证不上传；用户开「保存密码」才把学号/密码交给系统密码管理器（`TtCredentials.kt`：androidx.credentials 的 Credential Manager，应用自身不落盘，TS 侧 `eduCredentials`；删除由用户在系统设置里做），不开则凭证只在当次登录的内存里用一次。教务绑定 = 应用内直登页（学号/密码/验证码可选，`src/app/edu/EduLoginPage.tsx`）：登录页是软件的通用页面，学校插件声明是否启用（`auth.kind`）并实现登录流程（`auth.flow`，见 `src/domain/edu/plugins/xjvut.ts` 与 `docs/CAS_LOGIN.md`）——插件借软件的原生 HTTP 能力（`TtEdu.kt` 的 `http` 接口，一头一响应、不跟重定向）逐跳完成 CAS 登录与教务 SSO，把各主机的会话 Cookie 交给软件种进学校 Profile（`setCookies`/`getCookies`），登录成功后插件原生走教务 `sso/zfiotlogin`（见 `docs/CAS_LOGIN.md` 第 5-6 步）拉一次课表 JSON 直接进导入预览，拉不到才退回内置浏览器（此时已登录）；登录全程不经 WebView。凭证只在当次登录的内存里用一次，成功后留下的只有会话 Cookie。浏览器只在用户点「导入」时读当前页或调同源接口（教务页后自动读一次课程数量用于胶囊文案，不落库）；先预览再应用；只注入随应用打包的脚本，不下载执行远程脚本。浏览器 Cookie/存储按学校放在独立 WebView Profile（`edu-<host>`），与应用隔离，默认打开和离开时清空（直登刚建立的会话在浏览器打开期间保留，离开即清）；用户开了「保持登录，自动更新课表」才保留该学校的会话（仅 Cookie/存储，不含账号密码），学期页「退出登录」一键删 Profile（密码在系统密码管理器里，由用户自行删除）。自动更新（`src/app/edu-sync.ts`）只在不可见 WebView 里打开导入时的课表页、跑导入同一套脚本；不在登录页就标「需要重新登录」，不重试，连续三次失效自动关闭。不支持多 Profile 的老 WebView 不提供保持登录（直登会话在当次仍可用）。其余导入只处理用户主动粘贴或选择的内容。
+凭证不上传；用户开「保存密码」才把学号/密码交给系统密码管理器（`TtCredentials.kt`：androidx.credentials 的 Credential Manager，应用自身不落盘，TS 侧 `eduCredentials`；删除由用户在系统设置里做），不开则凭证只在当次登录的内存里用一次。教务绑定 = 应用内直登页（学号/密码/验证码可选，`src/app/edu/EduLoginPage.tsx`）：登录页是软件的通用页面，学校插件声明是否启用（`auth.kind`）并实现登录流程（`auth.flow`，见 `src/domain/edu/plugins/xjvut.ts` 与 `docs/CAS_LOGIN.md`）——插件借软件的原生 HTTP 能力（`TtEdu.kt` 的 `http` 接口，一头一响应、不跟重定向）逐跳完成 CAS 登录与教务 SSO，把各主机的会话 Cookie 交给软件种进学校 Profile（`setCookies`/`getCookies`），登录成功后插件原生走教务 `sso/zfiotlogin`（见 `docs/CAS_LOGIN.md` 第 5-6 步）拉一次课表 JSON 直接进导入预览，拉不到才退回内置浏览器（此时已登录）；登录全程不经 WebView。凭证只在当次登录的内存里用一次，成功后留下的只有会话 Cookie。浏览器只在用户点「导入」时读当前页或调同源接口（教务页后自动读一次课程数量用于胶囊文案，不落库）；先预览再应用；只注入随应用打包的脚本，不下载执行远程脚本。浏览器 Cookie/存储按学校放在独立 WebView Profile（`edu-<host>`），与应用隔离；支持多 Profile 的 WebView 上会话默认保留（仅 Cookie/存储，不含账号密码，避免反复验证码），学期页「退出登录」一键删 Profile（密码在系统密码管理器里，由用户自行删除）。自动更新（`src/app/edu-sync.ts`）只在不可见 WebView 里打开导入时的课表页、跑导入同一套脚本；不在登录页就标「需要重新登录」，不重试，连续三次失效自动关闭；「自动更新课表」开关只管自动更新，不管会话保留。不支持多 Profile 的老 WebView 打开和离开时清空会话，不提供自动更新（直登会话在当次仍可用）。其余导入只处理用户主动粘贴或选择的内容。
 
 学校登录是插件化的：`src/domain/edu/plugin.ts` 定义 `EduPlugin`（登录入口 + `auth: login | webview`，login 时带 `flow` 登录执行），一家学校一个插件文件放 `src/domain/edu/plugins/`；当前只内置新疆理工职业大学（`xjvut`）。页面识别与抓取脚本按教务系统区分（`systems.ts` / `scripts.ts`），与学校无关。
 
@@ -64,7 +64,7 @@
 | 教务绑定（CAS 直登页/内置浏览器/未识别页） | `src/app/edu/`（直登页 `EduLoginPage.tsx`）、`src/app/edu-browser.ts`、`android/.../TtEdu.kt` |
 | 保存的登录密码（系统密码管理器） | `android/.../TtCredentials.kt`、`eduCredentials`（`src/app/edu-browser.ts`） |
 | 学校登录插件（默认=新疆理工职业大学） | `src/domain/edu/plugin.ts`、`src/domain/edu/plugins/`、`src/domain/edu/cas.ts`（解析/加密/Cookie 瓶） |
-| 教务保持登录 / 自动更新 | `src/app/edu-sync.ts`（状态、立即更新、回前台检查），`TtEdu.kt` 的 profile / bg* / http 接口 |
+| 教务绑定记录 / 自动更新 | `src/app/edu-sync.ts`（状态、立即更新、回前台检查），`TtEdu.kt` 的 profile / bg* / http 接口 |
 | AI Prompt 文本 | `src/domain/ai-prompt.ts` |
 | Store、持久化、导入合并 | `src/domain/store.ts`、`persistence/` |
 | 桌面小组件 | `android/.../widget/`、`src/domain/widget-data.ts`、`tools/` |

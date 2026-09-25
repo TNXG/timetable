@@ -77,7 +77,7 @@ export function ArchivePage({ a, onBack }: { a: SemesterArchive; onBack: () => v
   )
 }
 
-/** 学期页的自动更新组：开关与状态、立即更新、退出登录；没开过不显示 */
+/** 学期页的自动更新组：开关与状态、立即更新、退出登录；没绑定过不显示 */
 export function EduSyncGroup({ onLogin }: { onLogin: () => void }) {
   const s = useEduSync()
   const [busy, setBusy] = useState(eduSyncing)

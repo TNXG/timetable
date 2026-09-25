@@ -7,6 +7,7 @@ import androidx.credentials.GetPasswordOption
 import androidx.credentials.PasswordCredential
 import com.getcapacitor.JSObject
 import com.getcapacitor.Plugin
+import com.getcapacitor.PluginCall
 import com.getcapacitor.PluginMethod
 import com.getcapacitor.annotation.CapacitorPlugin
 import kotlinx.coroutines.CoroutineScope

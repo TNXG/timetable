@@ -11,7 +11,7 @@ import type { RuleOutput } from '../importer'
 import type { ZfTerm } from './zhengfang'
 import { xjvut } from './plugins/xjvut'
 
-/** 教务站入口与学校标识；保持登录、自动更新等记录也按这三项存 */
+/** 教务站入口与学校标识；绑定与自动更新记录也按这三项存 */
 export interface School {
   name: string
   url: string

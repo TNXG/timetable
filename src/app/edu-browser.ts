@@ -183,14 +183,14 @@ export function eduProfile(url: string): string {
 }
 
 export const edu = {
-  /** keep：保留上次会话（用户开了保持登录）；返回本次会话是否落在独立 Profile 里 */
+  /** keep：保留该学校的会话 Cookie（支持多 Profile 时跨会话保留，免得反复验证码）；返回本次会话是否落在独立 Profile 里 */
   open: (url: string, keep = false): Promise<boolean> =>
     nativeEdu() ? TtEdu.open({ url, profile: eduProfile(url), keep }).then((r) => r.persistent, () => false) : Promise.resolve(false),
   close: (keep = false) => {
     rejectAll('浏览器已关闭')
     return nativeEdu() ? TtEdu.close({ keep }) : Promise.resolve()
   },
-  /** 系统 WebView 是否支持多 Profile（保持登录的前提） */
+  /** 系统 WebView 是否支持多 Profile（会话保留与自动更新的前提） */
   profiles: (): Promise<boolean> => (nativeEdu() ? TtEdu.profiles().then((r) => r.supported, () => false) : Promise.resolve(false)),
   clearProfile: (url: string): Promise<boolean> =>
     nativeEdu() ? TtEdu.clearProfile({ profile: eduProfile(url) }).then((r) => r.ok, () => false) : Promise.resolve(false),
@@ -230,4 +230,12 @@ export const edu = {
   pageText: () => run<string>(PAGE_TEXT_JS),
   /** 调试包：主文档与同源子框架的 HTML 及编码信息 */
   capture: () => run<PageCapture>(PAGE_CAPTURE_JS),
+}
+
+let profilesP: Promise<boolean> | null = null
+
+/** 系统 WebView 是否支持多 Profile；只查一次，浏览器开关与自动更新开关共用 */
+export function profilesSupported(): Promise<boolean> {
+  profilesP ??= edu.profiles()
+  return profilesP
 }
