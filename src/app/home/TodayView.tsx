@@ -1,15 +1,16 @@
 import type { Snapshot } from "../../domain/engine";
-import type { Occurrence } from "../../domain/types";
+import type { Occurrence, ScheduleAdjustment } from "../../domain/types";
 import type { Rect } from "../ui";
 import { AnimatePresence } from "motion/react";
 /** 今天：跨日连续时间线 + 底部日期条；轻点进详情，长按弹快捷菜单 */
-import { Fragment, useEffect, useMemo, useRef, useState } from "react";
-import { addDays, fmtDuration, fmtMinutes, inVacation, weekdayOf, weekOf } from "../../domain/dates";
-import { firstClassDate, occurrencesOn } from "../../domain/engine";
+import { Fragment, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { addDays, diffDays, fmtDuration, fmtMinutes, inVacation, weekdayOf, weekOf } from "../../domain/dates";
+import { occurrencesOn } from "../../domain/engine";
+import { holidaysBetween } from "../../domain/holidays";
 import { justEndedClass } from "../../domain/next-class";
 import { stickerOfOcc } from "../../domain/stickers";
-import { termEnd } from "../semester";
 import { Sticker } from "../Sticker";
+import { termEnd } from "../semester";
 import { ClassEndCard } from "../todo";
 import { BackPill, BottomVeil, EmptyBlock, md, SearchButton, StickyHead, WD } from "../ui";
 import { CalendarSheet } from "./calendar";
@@ -27,6 +28,7 @@ export function TodayView({
   onImport,
   onManual,
   onSemester,
+  onAdjustment,
   onNewSemester,
   onCapture,
   liftKey,
@@ -40,6 +42,7 @@ export function TodayView({
   onImport: () => void;
   onManual: () => void;
   onSemester: () => void;
+  onAdjustment: () => void;
   onNewSemester: () => void;
   onCapture: (kind: "camera" | "text", courseId?: string) => void;
   liftKey?: string;
@@ -48,19 +51,47 @@ export function TodayView({
   const now = useNowMinutes();
   const [cal, setCal] = useState(false);
   const scrollRef = useRef<HTMLDivElement | null>(null);
+  const firstDay = snap.semester.startDate < anchor ? snap.semester.startDate : anchor;
+  const lastDay = termEnd(snap.semester) > anchor ? termEnd(snap.semester) : anchor;
+  const [range, setRange] = useState(() => ({ anchor, start: addDays(anchor, -21), end: addDays(anchor, 34) }));
+  if (range.anchor !== anchor)
+    setRange({ anchor, start: addDays(anchor, -21), end: addDays(anchor, 34) });
+  const start = range.anchor !== anchor ? (addDays(anchor, -21) < firstDay ? firstDay : addDays(anchor, -21)) : range.start < firstDay ? firstDay : range.start;
+  const end = range.anchor !== anchor ? (addDays(anchor, 34) > lastDay ? lastDay : addDays(anchor, 34)) : range.end > lastDay ? lastDay : range.end;
+  const restoreRef = useRef<{ date: string; top: number } | null>(null);
+  const jumpRef = useRef<string | null>(null);
+  useLayoutEffect(() => {
+    const restore = restoreRef.current;
+    if (!restore)
+      return;
+    restoreRef.current = null;
+    const sc = scrollRef.current;
+    const el = sc?.querySelector<HTMLElement>(`[data-day="${restore.date}"]`);
+    if (sc && el)
+      sc.scrollTop += el.getBoundingClientRect().top - restore.top;
+  }, [start, end]);
+  useLayoutEffect(() => {
+    const target = jumpRef.current;
+    if (!target)
+      return;
+    jumpRef.current = null;
+    const sc = scrollRef.current;
+    const el = sc?.querySelector<HTMLElement>(`[data-day="${target}"]`);
+    if (sc && el)
+      sc.scrollTop = Math.max(0, dayTop(sc, el) - ((sc.firstElementChild as HTMLElement | null)?.offsetHeight ?? 0) - 8);
+  }, [start, end]);
   /* 底部日期条跟随滚动位置：滚到「明天」那段时选中项切到明天 */
   const [view, setView] = useState(anchor);
+  const selectedGroupRef = useRef(anchor);
   /* anchor 变化时在渲染期同步选中项（React 推荐的「渲染期派生」写法，不进 effect） */
   const prevAnchorRef = useRef(anchor);
   if (prevAnchorRef.current !== anchor) {
     prevAnchorRef.current = anchor;
     setView(anchor);
   }
-  /* 某一天的段落在滚动容器里的顶部偏移（标题区下方对齐） */
-  const dayTop = (sc: HTMLElement, el: HTMLElement) => {
-    const headH = (sc.firstElementChild as HTMLElement | null)?.offsetHeight ?? 0;
-    return el.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop - headH;
-  };
+  /* 吸顶标题下方的日期与日期条保持一致 */
+  const dayTop = (sc: HTMLElement, el: HTMLElement) =>
+    el.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop;
   const glidingRef = useRef(0);
   const onScroll = () => {
     const sc = scrollRef.current;
@@ -71,57 +102,91 @@ export function TodayView({
       glidingRef.current = window.setTimeout(() => { glidingRef.current = 0; onScroll(); }, 120);
       return;
     }
-    let cur = anchor;
-    if (sc.scrollTop > 4) {
-      const line = sc.scrollTop + Math.min(sc.clientHeight * 0.3, 120);
-      for (const el of Array.from(sc.querySelectorAll<HTMLElement>("[data-day]"))) {
-        if (dayTop(sc, el) <= line)
-          cur = el.dataset.day!;
-        else break;
+    const line = sc.getBoundingClientRect().top + ((sc.firstElementChild as HTMLElement | null)?.offsetHeight ?? 0) + 8;
+    const sections = sc.querySelectorAll<HTMLElement>("[data-day]");
+    let cur = sections[0]?.dataset.day ?? anchor;
+    for (const el of sections) {
+      if (el.getBoundingClientRect().top > line)
+        break;
+      const group = el.parentElement?.dataset;
+      if (group?.groupStart) {
+        if (el.dataset.day === group.groupStart)
+          cur = selectedGroupRef.current >= group.groupStart && selectedGroupRef.current <= group.groupEnd! ? selectedGroupRef.current : group.groupStart;
+      } else {
+        cur = el.dataset.day!;
+      }
+    }
+    const nearTop = sc.scrollTop < 250 && start > firstDay;
+    const nearBottom = sc.scrollHeight - sc.scrollTop - sc.clientHeight < 250 && end < lastDay;
+    if ((nearTop || nearBottom) && !restoreRef.current) {
+      const marker = Array.from(sections).find(el => el.getBoundingClientRect().top >= line) ?? sections[sections.length - 1];
+      if (marker) {
+        restoreRef.current = { date: marker.dataset.day!, top: marker.getBoundingClientRect().top };
+        setRange(r => nearTop
+          ? { ...r, start: addDays(start, -14) < firstDay ? firstDay : addDays(start, -14) }
+          : { ...r, end: addDays(end, 14) > lastDay ? lastDay : addDays(end, 14) });
       }
     }
     setView(cur);
   };
   /* 点日期条：目标日已在时间线里就滚过去，不重建列表；不在才换锁定日 */
   const pickDay = (d: string) => {
+    selectedGroupRef.current = d;
     const sc = scrollRef.current;
     const el = sc?.querySelector<HTMLElement>(`[data-day="${d}"]`);
     if (sc && el) {
       setView(d);
       window.clearTimeout(glidingRef.current);
       glidingRef.current = window.setTimeout(() => { glidingRef.current = 0; onScroll(); }, 120);
-      sc.scrollTo({ top: Math.max(0, dayTop(sc, el) - 8), behavior: "smooth" });
-    } else if (d === anchor) {
-      setView(d);
-      sc?.scrollTo({ top: 0, behavior: "smooth" });
+      sc.scrollTo({ top: Math.max(0, dayTop(sc, el) - ((sc.firstElementChild as HTMLElement | null)?.offsetHeight ?? 0) - 8), behavior: "smooth" });
     } else {
-      setAnchor(d);
+      jumpRef.current = d;
+      setView(d);
+      setRange({ anchor: d, start: addDays(d, -21), end: addDays(d, 34) });
+      if (anchor !== d)
+        setAnchor(d);
     }
   };
 
   const days = useMemo(() => {
-    const out: { date: string; rel: string; occ: Occurrence[] }[] = [];
-    for (let i = 0; i < 14; i++) {
-      const d = addDays(anchor, i);
+    const out: { date: string; rel: string; occ: Occurrence[]; vacation: string | null; adjustment?: ScheduleAdjustment }[] = [];
+    for (let d = start; d <= end; d = addDays(d, 1)) {
       const occ = occurrencesOn(snap, d);
       const rel = d === today ? "今天" : d === addDays(today, 1) ? "明天" : d === addDays(today, 2) ? "后天" : WD[weekdayOf(d)];
-      if (i === 0 || occ.length > 0)
-        out.push({ date: d, rel, occ });
-      if (out.reduce((n, x) => n + x.occ.length, 0) >= 14 && i >= 2)
-        break;
+      out.push({ date: d, rel, occ, vacation: inVacation(snap.semester, d), adjustment: snap.semester.scheduleAdjustments?.find(a => a.date === d) });
     }
     return out;
-  }, [snap, anchor, today]);
+  }, [snap, start, end, today]);
+  const timeline = useMemo(() => {
+    const groups: ({ kind: "day"; day: typeof days[number] } | { kind: "vacation" | "free"; name: string; dates: typeof days })[] = [];
+    for (const day of days) {
+      const previous = groups.at(-1);
+      if (!day.adjustment && day.occ.length === 0) {
+        const kind = day.vacation ? "vacation" : "free";
+        const name = day.vacation ?? "无课";
+        if (previous && previous.kind === kind && previous.name === name && weekdayOf(day.date) !== 1)
+          previous.dates.push(day);
+        else
+          groups.push({ kind, name, dates: [day] });
+      } else {
+        groups.push({ kind: "day", day });
+      }
+    }
+    return groups;
+  }, [days]);
+  const holidayRanges = useMemo(() => holidaysBetween(start, end), [start, end]);
 
-  useEffect(() => {
-    scrollRef.current?.scrollTo({ top: 0 });
+  useLayoutEffect(() => {
+    const sc = scrollRef.current;
+    const el = sc?.querySelector<HTMLElement>(`[data-day="${anchor}"]`);
+    if (sc && el)
+      sc.scrollTop = Math.max(0, dayTop(sc, el) - ((sc.firstElementChild as HTMLElement | null)?.offsetHeight ?? 0) - 8);
   }, [anchor]);
 
   const shown = days.find(day => day.date === view);
   const shownOcc = shown?.occ ?? occurrencesOn(snap, view);
   const shownWeek = weekOf(snap.semester, view);
-  const vac = inVacation(snap.semester, anchor);
-  const head = days[0]?.occ ?? [];
+  const vac = inVacation(snap.semester, view);
   const remain = view === today ? shownOcc.filter(o => o.end > now && o.status !== "cancelled").length : shownOcc.length;
   const inTerm = shownWeek >= 1 && shownWeek <= snap.semester.totalWeeks;
   const nothingAtAll = snap.courses.length === 0 && snap.entries.length === 0;
@@ -130,14 +195,8 @@ export function TodayView({
   const [endHidden, setEndHidden] = useState<string[]>([]);
   const endKey = ended ? `${ended.date}-${ended.courseId}-${ended.start}` : "";
   const showEnd = ended && !endHidden.includes(endKey);
-  const weekend = weekdayOf(anchor) >= 6;
   const termEndDay = termEnd(snap.semester);
-  /* 学期第一节课还在选中日之后：整个学期还没开课；两周内都没课且已过学期末：学期已结束 */
-  const free = !nothingAtAll && head.length === 0;
-  const firstClass = useMemo(() => (free ? firstClassDate(snap, snap.semester.startDate) : null), [snap, free]);
-  const notStarted = free && firstClass != null && firstClass > anchor;
-  const idle = free && days.length === 1;
-  const afterTerm = idle && anchor > termEndDay && firstClassDate(snap, anchor) == null;
+  const afterTerm = view > termEndDay;
 
   return (
     <>
@@ -160,6 +219,7 @@ export function TodayView({
               ? (
                   <span>
                     第
+                    {" "}
                     {shownWeek}
                     {" "}
                     周
@@ -190,87 +250,79 @@ export function TodayView({
                   </span>
                 )
               : (
-                  <span className="text-(--c-ink5)">{nothingAtAll ? "暂无课表" : notStarted ? "暂未开课" : afterTerm ? "学期已结束" : "今天没有课"}</span>
+                  <span className="text-(--c-ink5)">{nothingAtAll ? "暂无课表" : vac ?? (afterTerm ? "学期已结束" : weekdayOf(view) >= 6 ? "周末无课" : "无课")}</span>
                 )}
           </div>
         </StickyHead>
-        {vac && <div className="mx-5 mt-1 rounded-2xl bg-(--c-surface) px-4 py-3 text-[13px] font-semibold text-[#9A7B3F]">{vac}</div>}
 
-        {nothingAtAll
-          ? (
-              <div className="mt-16">
-                <EmptyBlock
-                  kind="none"
-                  title="让课表就位"
-                  desc="一键导入，或是手动创建。随后的日程追踪与准时提醒，皆会为你准备就绪。"
-                  actions={[["导入课表", onImport], ["手动添加", onManual]]}
-                />
-              </div>
-            )
-          : notStarted && idle
-            ? (
-                <div className="mt-14">
-                  <EmptyBlock
-                    kind="term"
-                    title="暂未开课"
-                    desc={`课程将于第 ${weekOf(snap.semester, firstClass)} 周（${md(firstClass)}）正式开启`}
-                    actions={[[`前往 ${md(firstClass)}`, () => setAnchor(firstClass)]]}
-                  />
-                </div>
-              )
-            : afterTerm
-              ? (
-                  <div className="mt-14">
-                    <EmptyBlock
-                      kind="term"
-                      title="学期已结束"
-                      actions={[["开始新学期", onNewSemester], ["学期设置", onSemester]]}
-                    />
+        {nothingAtAll && (
+          <div className="mt-6 px-5">
+            <div className="rounded-2xl bg-(--c-surface) px-4 py-3 text-[13px] font-semibold text-(--c-ink3)">
+              暂无课表
+              <button className="ml-4 text-(--c-accent)" onClick={onImport}>导入课表</button>
+              <button className="ml-4 text-(--c-accent)" onClick={onManual}>手动添加</button>
+            </div>
+          </div>
+        )}
+        {afterTerm && !nothingAtAll && view === anchor && <div className="mt-6 px-5"><button className="text-[13px] font-semibold text-(--c-accent)" onClick={onNewSemester}>开始新学期</button></div>}
+        {holidayRanges.length === 0 && snap.semester.vacations.length === 0 && (
+          <div className="px-5 pt-4"><button onClick={onAdjustment} className="text-[12px] font-semibold text-(--c-ink4)">调休安排</button></div>
+        )}
+        <div className="mt-6 px-5">
+          {timeline.map((item) => {
+            if (item.kind !== "day") {
+              const first = item.dates[0];
+              const last = item.dates[item.dates.length - 1];
+              const full = item.kind === "vacation"
+                ? snap.semester.vacations.find(v => v.name === item.name && v.start <= first.date && v.end >= last.date)
+                  ?? (snap.semester.holidays === false ? undefined : holidayRanges.find(h => h.name === item.name && h.start <= first.date && h.end >= last.date))
+                : undefined;
+              const rangeStart = full?.start ?? first.date;
+              const rangeEnd = full?.end ?? last.date;
+              return (
+                <Fragment key={`${item.kind}-${first.date}`}>
+                  {weekdayOf(first.date) === 1 && <div className="flex items-center gap-3 py-5 text-[11px] font-semibold text-(--c-ink5)"><span className="h-px flex-1 bg-(--c-line)" />第 {weekOf(snap.semester, first.date)} 周<span className="h-px flex-1 bg-(--c-line)" /></div>}
+                  <div data-group-start={first.date} data-group-end={last.date} className={`relative mb-6 overflow-hidden rounded-2xl px-5 py-5 ${item.kind === "vacation" ? "bg-(--c-amber-soft)" : "bg-(--c-surface)"}`}>
+                    {item.dates.map(day => <span key={day.date} data-day={day.date} className="pointer-events-none absolute top-0 left-0 h-0 w-0" />)}
+                    {item.kind === "vacation" && <div className="flex items-center justify-between gap-3"><span className="text-[11px] font-bold tracking-wide text-(--c-amber)">假期安排</span><button onClick={onAdjustment} className="rounded-full bg-(--c-surface) px-3 py-1.5 text-[12px] font-bold text-(--c-amber)">调休安排</button></div>}
+                    <div className="mt-2 text-[20px] font-extrabold tracking-[-.02em] text-(--c-ink)">{item.name}</div>
+                    <div className="mt-1 text-[13px] font-semibold tabular-nums text-(--c-ink3)">{md(rangeStart)}{rangeStart !== rangeEnd ? `—${md(rangeEnd)}` : ""} · {diffDays(rangeEnd, rangeStart) + 1} 天</div>
+                    {item.dates.filter(day => weekdayOf(day.date) === 1 && day.date !== first.date).map(day => (
+                      <div key={`week-${day.date}`} className={`mt-4 flex items-center gap-3 text-[11px] font-semibold ${item.kind === "vacation" ? "text-(--c-amber)" : "text-(--c-ink5)"}`}><span className="h-px flex-1 bg-(--c-line)" />第 {weekOf(snap.semester, day.date)} 周<span className="h-px flex-1 bg-(--c-line)" /></div>
+                    ))}
                   </div>
-                )
-              : head.length === 0 && days.length === 1
-                ? (
-                    <div className="mt-14">
-                      <EmptyBlock
-                        kind="free"
-                        title="今天没有课，好耶"
-                        desc={weekend ? "周末到了，不如去做点感兴趣的事，出去走走。" : "不如去做点感兴趣的事，出去走走。"}
-                        actions={[["手动添加", onManual]]}
-                      />
-                    </div>
-                  )
-                : (
-                    <div className="mt-6 px-5">
-                      {days.map((day, di) => {
-                        /* 今天里第一节还没开始的课：给出「下一节」提示，和原型一致 */
-                        const nextKey = day.date === today
-                          ? day.occ.find(x => x.start > now && x.status !== "cancelled")?.key
-                          : undefined;
-                        const inClass = day.date === today && day.occ.some(x => x.start <= now && now < x.end && x.status !== "cancelled");
-                        return (
-                          <div key={day.date} data-day={day.date}>
-                            {day.occ.length > 0 && (
-                              <div className="flex items-baseline justify-between pb-5.5">
-                                <div className="flex items-baseline gap-2.5">
-                                  <span className="text-[17px] leading-none font-extrabold tracking-[-.02em]">{day.rel}</span>
-                                  <span className="text-[12.5px] font-semibold text-(--c-ink4)">
-                                    {md(day.date)}
-                                    {day.rel !== WD[weekdayOf(day.date)] ? ` ${WD[weekdayOf(day.date)]}` : ""}
-                                  </span>
-                                </div>
-                                <span className="text-[12px] font-semibold tabular-nums text-(--c-ink5)">
-                                  {day.occ.length}
-                                  {" "}
-                                  节课，
-                                  {fmtMinutes(day.occ[0].start)}
-                                  {" "}
-                                  开始
-                                </span>
-                              </div>
-                            )}
-                            {day.occ.length === 0 && di === 0 && (
-                              <div className="pb-7 text-[13.5px] font-semibold text-(--c-ink4)">{notStarted ? "暂未开课" : "无课程"}</div>
-                            )}
+                </Fragment>
+              );
+            }
+            const day = item.day;
+            const nextKey = day.date === today
+              ? day.occ.find(x => x.start > now && x.status !== "cancelled")?.key
+              : undefined;
+            const inClass = day.date === today && day.occ.some(x => x.start <= now && now < x.end && x.status !== "cancelled");
+            const adjustment = day.adjustment;
+            return (
+              <Fragment key={day.date}>
+              {weekdayOf(day.date) === 1 && <div className="flex items-center gap-3 py-5 text-[11px] font-semibold text-(--c-ink5)"><span className="h-px flex-1 bg-(--c-line)" />第 {weekOf(snap.semester, day.date)} 周<span className="h-px flex-1 bg-(--c-line)" /></div>}
+              <div data-day={day.date} className="min-h-22">
+              <div className="flex items-baseline justify-between pb-4">
+                <div className="flex items-baseline gap-2.5">
+                  <span className="text-[17px] leading-none font-extrabold tracking-[-.02em]">{day.rel}</span>
+                  <span className="text-[12.5px] font-semibold text-(--c-ink4)">
+                    {md(day.date)}
+                    {day.rel !== WD[weekdayOf(day.date)] ? ` ${WD[weekdayOf(day.date)]}` : ""}
+                  </span>
+                </div>
+                {day.occ.length > 0 && <span className="text-[12px] font-semibold tabular-nums text-(--c-ink5)">{day.occ.length} 节课，{fmtMinutes(day.occ[0].start)} 开始</span>}
+              </div>
+              {day.vacation && day.occ.length > 0 && <div className="mb-4 rounded-xl bg-(--c-amber-soft) px-3 py-2 text-[12px] font-bold text-(--c-amber)">{day.vacation} · 假期课程</div>}
+              {day.occ.length === 0 && (
+                <div className="pb-7 text-[13.5px] font-semibold text-(--c-ink4)">
+                  {adjustment ? "无课" : inVacation(snap.semester, day.date) ?? (weekdayOf(day.date) >= 6 ? "周末 · 无课" : "无课")}
+                </div>
+              )}
+              {adjustment && (
+                <div className="pb-4 text-[12px] font-semibold text-(--c-accent)">调休 · 补第 {weekOf(snap.semester, adjustment.teachingDate)} 周{WD[weekdayOf(adjustment.teachingDate)]}课程</div>
+              )}
                             {day.occ.map((o, oi) => {
                               const isLast = oi === day.occ.length - 1;
                               const isToday = day.date === today;
@@ -290,7 +342,7 @@ export function TodayView({
                                       <div className="text-[11px] font-medium tabular-nums text-(--c-ink5)">{fmtMinutes(o.end)}</div>
                                     </div>
                                     {/* 时间轴在一天里贯穿，最后一节下方留出与日期标题下方等高的空白 */}
-                                    <div className={`-my-1.5 ml-3 w-[2px] flex-none self-stretch ${isLast ? "pb-7" : ""}`}>
+                                    <div className={`-my-1.5 ml-3 w-0.5 flex-none self-stretch ${isLast ? "pb-7" : ""}`}>
                                       <div className="relative h-full bg-(--c-line)">
                                         {past && <i className="absolute inset-0 bg-(--c-accent)" />}
                                         {nowOn && (
@@ -306,7 +358,7 @@ export function TodayView({
                                       <div data-lift className="relative rounded-2xl bg-(--c-surface) px-4 py-3.5">
                                         <div className="flex items-start gap-2">
                                           <div className="min-w-0 flex-1">
-                                            <div className={`text-[16px] leading-[1.25] font-bold tracking-[-.01em] ${o.status === "cancelled" ? "line-through" : ""}`}>{o.name}</div>
+                                            <div className={`text-[16px] leading-tight font-bold tracking-[-.01em] ${o.status === "cancelled" ? "line-through" : ""}`}>{o.name}</div>
                                             <div className="mt-1 flex items-center gap-2 text-[12.5px] font-medium text-(--c-ink3)">
                                               <span className="min-w-0 truncate">{[o.location, o.teacher].filter(Boolean).join("，") || "—"}</span>
                                               {o.conflict && <span className="flex-none rounded-[7px] bg-(--c-amber-soft) px-2 py-0.75 text-[10.5px] font-bold text-(--c-amber)">冲突</span>}
@@ -360,11 +412,11 @@ export function TodayView({
                                 </Fragment>
                               );
                             })}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
+              </div>
+              </Fragment>
+            );
+          })}
+        </div>
       </div>
 
       <BottomVeil height={210} />

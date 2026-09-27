@@ -39,7 +39,7 @@ import { EduStatusPage } from "./me/EduStatus";
 import { ErasePage } from "./me/ErasePage";
 import { CoursesPage } from "./me/Library";
 import { ProfilePage } from "./me/ProfilePage";
-import { ArchivePage, NewSemesterPage, SemesterSettings } from "./me/Semester";
+import { ArchivePage, NewSemesterPage, ScheduleAdjustmentPage, SemesterSettings } from "./me/Semester";
 import { StatsPage } from "./me/StatsPage";
 import { ThemePage } from "./me/ThemePage";
 import { CalendarIntroPage, NotifPrefPage, PrefPickPage } from "./reminder";
@@ -73,6 +73,7 @@ export type Route
     | { k: "aiImport"; attach?: string }
     | { k: "rule"; rule: RuleManifest | null }
     | { k: "semester" }
+    | { k: "adjustments" }
     | { k: "newSemester" }
     | { k: "archive"; id: string }
     | { k: "schedule" }
@@ -293,7 +294,9 @@ export function renderRoute(r: Route, i: number, ctx: RouteCtx): ReactNode {
     case "rule":
       return <RuleEditorPage key={key} rule={r.rule} onBack={pop} />;
     case "semester":
-      return <SemesterSettings key={key} sem={snap.semester} onBack={pop} onNew={() => push({ k: "newSemester" })} onArchive={id => push({ k: "archive", id })} onLogin={loginBoundSchool} />;
+      return <SemesterSettings key={key} sem={snap.semester} onBack={pop} onNew={() => push({ k: "newSemester" })} onArchive={id => push({ k: "archive", id })} onLogin={loginBoundSchool} onAdjustments={() => push({ k: "adjustments" })} />;
+    case "adjustments":
+      return <ScheduleAdjustmentPage key={key} sem={snap.semester} onBack={pop} />;
     case "archive": {
       const a = store.state.archives.find(x => x.semester.id === r.id);
       return a ? <ArchivePage key={key} a={a} onBack={pop} /> : null;

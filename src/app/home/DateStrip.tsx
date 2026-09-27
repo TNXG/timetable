@@ -1,10 +1,11 @@
+import CalendarLine from "~icons/mingcute/calendar-line";
 import type { Snapshot } from "../../domain/engine";
 import { motion } from "motion/react";
 /** 底部日期条：整学期连续横向滚动（原生惯性），选中项居中；只在关掉日历重新出现时播出场动画 */
 import { useEffect, useMemo, useRef } from "react";
 import { addDays, weekdayOf } from "../../domain/dates";
 import { occurrencesOn } from "../../domain/engine";
-import { mondayOf, todayStr } from "../semester";
+import { termEnd, todayStr } from "../semester";
 import { dockStyle, SPRING, WD } from "../ui";
 
 /* ---------------- 日期条 + 月历 ---------------- */
@@ -14,8 +15,8 @@ export function DateStrip({ snap, anchor, onPick, onCalendar }: { snap: Snapshot
   const today = todayStr();
   const sem = snap.semester;
   const days = useMemo(() => {
-    const lo = [mondayOf(sem.startDate), mondayOf(addDays(today, -28)), mondayOf(anchor)].sort()[0];
-    const hi = [addDays(sem.startDate, sem.totalWeeks * 7 + 6), addDays(today, 34), addDays(anchor, 6)].sort().pop()!;
+    const lo = [sem.startDate, anchor, today].sort()[0];
+    const hi = [termEnd(sem), anchor, today].sort().pop()!;
     const out: string[] = [];
     for (let d = lo; d <= hi; d = addDays(d, 1)) out.push(d);
     return out;
@@ -73,10 +74,7 @@ export function DateStrip({ snap, anchor, onPick, onCalendar }: { snap: Snapshot
         })}
       </div>
       <button onClick={onCalendar} className="flex w-9 flex-none items-center justify-center">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style={{ stroke: "var(--c-ink2)" }} strokeWidth="1.9">
-          <rect x="3" y="4" width="18" height="17" rx="4" />
-          <path d="M3 9h18M8 2v4M16 2v4" />
-        </svg>
+        <CalendarLine width={17} height={17} className="text-(--c-ink2)" />
       </button>
     </motion.div>
   );
