@@ -158,6 +158,42 @@ internal fun TtEdu.bgTeardown() {
     if (w.parent is ViewGroup) (w.parent as ViewGroup).removeView(w)
     w.destroy()
 }
+/** 先释放占用中的学校 WebView，再删除 Profile；无多 Profile 的设备清全局 Cookie。 */
+internal fun TtEdu.eraseSchoolProfile(call: PluginCall) {
+    val profile = call.getString("profile", "")
+    activity.runOnUiThread {
+        if (profile.isNullOrEmpty()) {
+            call.reject("profile required")
+            return@runOnUiThread
+        }
+        if (profileName == profile) teardown(true)
+        bgTeardown()
+        if (multiProfile()) {
+            try {
+                val store = androidx.webkit.ProfileStore.getInstance()
+                if (store.deleteProfile(profile)) {
+                    call.resolve(JSObject().put("ok", true))
+                    return@runOnUiThread
+                }
+                // ProfileStore may refuse deletion when another WebView still references the profile;
+                // clearing its CookieManager still ends the session even when full deletion is unavailable.
+                val cm = store.getOrCreateProfile(profile).cookieManager
+                cm.removeAllCookies {
+                    cm.flush()
+                    call.resolve(JSObject().put("ok", true))
+                }
+            } catch (e: Exception) {
+                call.reject(e.message ?: "profile deletion failed")
+            }
+        } else {
+            val cm = CookieManager.getInstance()
+            cm.removeAllCookies {
+                cm.flush()
+                call.resolve(JSObject().put("ok", true))
+            }
+        }
+    }
+}
 
 /* ---------------- 应用 WebView 透明（下面的学校页面才看得见） ---------------- */
 

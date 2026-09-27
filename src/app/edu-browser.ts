@@ -62,6 +62,7 @@ interface TtEduPlugin {
   http: (o: { url: string; method?: string; headers?: Record<string, string>; body?: string; binary?: boolean }) => Promise<EduHttpResult>;
   /** 会话 Cookie 按网址种进学校 Profile */
   setCookies: (o: { profile: string; url: string; cookies: string[] }) => Promise<{ ok: boolean }>;
+  replaceCookies: (o: { profile: string; jars: { url: string; cookies: string[] }[] }) => Promise<{ ok: boolean }>;
   getCookies: (o: { profile: string; url: string }) => Promise<{ cookie: string | null }>;
   bgOpen: (o: { url: string; profile?: string }) => Promise<void>;
   bgEval: (o: { js: string }) => Promise<{ value: string }>;
@@ -258,9 +259,11 @@ export const edu = {
     nativeEdu() ? TtEdu.http(req) : Promise.reject(new Error("仅在应用内可用")),
   setCookies: (profile: string, url: string, cookies: string[]): Promise<boolean> =>
     nativeEdu() ? TtEdu.setCookies({ profile, url, cookies }).then(r => r.ok, () => false) : Promise.resolve(false),
+  replaceCookies: (profile: string, jars: { url: string; cookies: string[] }[]): Promise<boolean> =>
+    nativeEdu() ? TtEdu.replaceCookies({ profile, jars }).then(r => r.ok) : Promise.resolve(false),
   getCookies: (profile: string, url: string): Promise<string | null> =>
     nativeEdu() ? TtEdu.getCookies({ profile, url }).then(r => r.cookie, () => null) : Promise.resolve(null),
-  bgOpen: (url: string) => (nativeEdu() ? TtEdu.bgOpen({ url, profile: eduProfile(url) }) : Promise.reject(new Error("仅在应用内可用"))),
+  bgOpen: (url: string, schoolUrl = url) => (nativeEdu() ? TtEdu.bgOpen({ url, profile: eduProfile(schoolUrl) }) : Promise.reject(new Error("仅在应用内可用"))),
   bgClose: () => (nativeEdu() ? TtEdu.bgClose() : Promise.resolve()),
   onBgNav: (fn: (e: EduBgNav) => void): (() => void) => {
     if (!nativeEdu())

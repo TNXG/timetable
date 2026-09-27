@@ -92,8 +92,8 @@ class TtCredentials : Plugin() {
     }
     @PluginMethod
     fun clear(call: PluginCall) {
-        File(context.noBackupFilesDir, VALUE).delete()
-        call.resolve(JSObject().put("ok", true))
+        val file = File(context.noBackupFilesDir, VALUE)
+        call.resolve(JSObject().put("ok", !file.exists() || file.delete()))
     }
 
 }

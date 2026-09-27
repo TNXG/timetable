@@ -1,3 +1,5 @@
+import EyeLine from "~icons/mingcute/eye-2-line";
+import EyeCloseLine from "~icons/mingcute/eye-close-line";
 import type { EduCookieJar, EduHttp, EduKbFetch, EduPlugin } from "../../domain/edu/plugin";
 /**
      教务直登：应用自己的登录页（学号/密码/验证码可选）。是否启用、验证码怎么取与登录方式，
@@ -45,13 +47,14 @@ export function EduLoginPage({ plugin, onBack, onDone }: {
   const [error, setError] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [passwordVisible, setPasswordVisible] = useState(false);
   const [authcode, setAuthcode] = useState("");
   /** null = 这次不用验证码，整行不出现 */
   const [captcha, setCaptcha] = useState<string | null>(null);
   const [capBusy, setCapBusy] = useState(false);
   /** 保存密码：开了就在登录成功后写入 Android Keystore；从本地密钥串回填时默认开着 */
   const [save, setSave] = useState(false);
-  /** Android Keystore 回填的凭据：拿到就自动登录，不用再手填 */
+  /** 只有先前真正保存过的凭据才能在后续进入时自动登录。 */
   const [saved, setSaved] = useState<{ username: string; password: string } | null>(null);
   /** 默认完全隐藏验证码；自动识别多轮失败后才显示人工输入 */
   const [manual, setManual] = useState(false);
@@ -59,8 +62,9 @@ export function EduLoginPage({ plugin, onBack, onDone }: {
   const doneRef = useRef(false);
   /** 当前这张验证码原图：自动识别与换图重试都从它取 */
   const captchaRef = useRef<string | null>(null);
-  /** 自动登录只跑一轮，轮内的验证码重试自己管 */
   const autoRanRef = useRef(false);
+  /** 用户一旦操作表单，异步读到的旧凭据不再覆盖输入或触发自动登录。 */
+  const credentialsTouchedRef = useRef(false);
   /** onDone 每次渲染都是新闭包，钉进 ref：登录流程挂载一次，不能被 30s 的全局重渲染打断 */
   const onDoneRef = useRef(onDone);
   useEffect(() => {
@@ -134,11 +138,14 @@ export function EduLoginPage({ plugin, onBack, onDone }: {
     try {
       const out = await flow.login(http, { username: name, password: pass, captcha: code });
       if (out.kind === "ok") {
-        /* 保存密码只控制本地 Keystore 密文；关闭时不能继续用旧凭据自动更新。 */
-        if (save)
-          void eduCredentials.save(name, pass);
-        else void eduCredentials.clear();
         await seed(out.jars);
+        /* 凭据写入失败不阻断已成功的登录，会话仍可用于当次读取课表。 */
+        if (save) {
+          if (!await eduCredentials.save(name, pass))
+            setError("密码保存失败");
+        } else {
+          await eduCredentials.clear();
+        }
         await finishWithKb(out.url);
         return { ok: true, captcha: false, message: "" };
       }
@@ -208,6 +215,8 @@ export function EduLoginPage({ plugin, onBack, onDone }: {
     const name = username.trim();
     if (!name || !password)
       return;
+    credentialsTouchedRef.current = true;
+    setSaved(null);
     setError("");
     if (!manual) {
       setPhase("connect");
@@ -247,11 +256,12 @@ export function EduLoginPage({ plugin, onBack, onDone }: {
   useEffect(() => {
     if (!native || !flow)
       return;
+    let cancelled = false;
     setEduBrowserOpen(true);
     void begin();
-    /* Android Keystore 里的凭据：静默回填，接着自动登录 */
+    /* 已保存的凭据在后续进入时可自动登录；本页新开的保存开关不触发提交。 */
     void eduCredentials.load().then((c) => {
-      if (!c || doneRef.current)
+      if (!c || cancelled || doneRef.current || credentialsTouchedRef.current)
         return;
       setUsername(c.username);
       setPassword(c.password);
@@ -259,16 +269,16 @@ export function EduLoginPage({ plugin, onBack, onDone }: {
       setSaved(c);
     });
     return () => {
+      cancelled = true;
       /* 登录中途退出：没种过 Cookie，Profile 不用清；成了会话已种进 Profile，交给浏览器接管 */
       if (!doneRef.current)
         setEduBrowserOpen(false);
     };
-    // eslint-disable-next-line react/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  /* 凭据和表单都就绪（可能不用验证码）就自动试一轮 */
   useEffect(() => {
-    if (!saved || autoRanRef.current || phase !== "form")
+    if (!saved || credentialsTouchedRef.current || autoRanRef.current || phase !== "form")
       return;
     autoRanRef.current = true;
     void autoLogin(saved.username, saved.password);
@@ -303,10 +313,15 @@ export function EduLoginPage({ plugin, onBack, onDone }: {
                 <form className="flex flex-1 flex-col" onSubmit={(e) => { e.preventDefault(); void submit(); }}>
                   <div className="mt-5 divide-y divide-(--c-surface2) overflow-hidden rounded-2xl bg-(--c-surface)">
                     <Field k="学号">
-                      <TextInput value={username} onChange={e => setUsername(e.target.value)} autoComplete="username" autoCapitalize="off" autoCorrect="off" spellCheck={false} />
+                      <TextInput value={username} onChange={e => { credentialsTouchedRef.current = true; setSaved(null); setUsername(e.target.value); }} autoComplete="username" autoCapitalize="off" autoCorrect="off" spellCheck={false} />
                     </Field>
                     <Field k="密码">
-                      <TextInput type="password" value={password} onChange={e => setPassword(e.target.value)} autoComplete="current-password" />
+                      <div className="flex min-w-0 items-center gap-2">
+                        <TextInput type={passwordVisible ? "text" : "password"} value={password} onChange={e => { credentialsTouchedRef.current = true; setSaved(null); setPassword(e.target.value); }} autoComplete="current-password" className="min-w-0 flex-1" />
+                        <button type="button" onClick={() => setPasswordVisible(v => !v)} aria-label={passwordVisible ? "隐藏密码" : "显示密码"} className="flex h-7 w-7 flex-none items-center justify-center text-(--c-ink4)">
+                          {passwordVisible ? <EyeCloseLine width={18} height={18} /> : <EyeLine width={18} height={18} />}
+                        </button>
+                      </div>
                     </Field>
                     {captcha != null && manual && (
                       <Field k="验证码" sub="图片里算式的得数，点图换一张">
@@ -334,6 +349,8 @@ export function EduLoginPage({ plugin, onBack, onDone }: {
                       <Switch
                         on={save}
                         onChange={(v) => {
+                          credentialsTouchedRef.current = true;
+                          setSaved(null);
                           setSave(v);
                           if (!v)
                             void eduCredentials.clear();

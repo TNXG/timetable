@@ -130,7 +130,8 @@ describe("xjvut 直登流程", () => {
       return;
     expect(out.url).toBe(INDEX_URL);
     expect(out.jars).toContainEqual({ url: CAS, cookies: expect.arrayContaining(["TGC=tgt1", "_pv0CAS=pk1"]) });
-    expect(out.jars).toContainEqual({ url: JW, cookies: expect.arrayContaining(["JSESSIONID=js2", "route=jw-route", "rememberMe=r1"]) });
+    expect(out.jars).toContainEqual({ url: JW, cookies: expect.arrayContaining(["route=jw-route", "rememberMe=r1"]) });
+    expect(out.jars).toContainEqual({ url: `${JW}/jwglxt/`, cookies: ["JSESSIONID=js2; Path=/jwglxt"] });
 
     /* 登录 POST 带 _pv0CAS；zfiotlogin 换 ticket 带 TGC；最终索引页请求带签发好的 JSESSIONID+route */
     const post = server.hops.find(h => h.method === "POST" && h.url === `${CAS}/cas/login`);

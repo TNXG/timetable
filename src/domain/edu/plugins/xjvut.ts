@@ -80,7 +80,7 @@ async function follow(http: EduHttp, url: string, init?: Omit<EduHttpRequest, "u
   }
 }
 
-/** 把瓶交成软件要的形态：每台主机一组 */
+/** 把瓶交成软件要的形态：每台主机一组。 */
 function jarsOut(): EduCookieJar[] {
   const out: EduCookieJar[] = [];
   for (const [host, m] of jar) {
@@ -88,6 +88,20 @@ function jarsOut(): EduCookieJar[] {
       continue;
     out.push({ url: HOST_ORIGIN[host], cookies: [...m].map(([k, v]) => `${k}=${v}`) });
   }
+  return out;
+}
+
+/** 供 WebView 的路径 Cookie：JW 的 JSESSIONID 由 /jwglxt/ticketlogin 签发，只对 /jwglxt 有效。 */
+function browserJars(): EduCookieJar[] {
+  const out = jarsOut();
+  const jw = out.find(j => j.url === JW_ORIGIN);
+  if (!jw)
+    return out;
+  const jsid = jw.cookies.find(c => /^JSESSIONID=/i.test(c));
+  if (!jsid)
+    return out;
+  jw.cookies = jw.cookies.filter(c => !/^JSESSIONID=/i.test(c));
+  out.push({ url: `${JW_ORIGIN}/jwglxt/`, cookies: [`${jsid}; Path=/jwglxt`] });
   return out;
 }
 
@@ -198,7 +212,7 @@ export const flow: EduLoginFlow = {
     /* TGT 活着：zfiotlogin 一趟直接换到已认证教务会话，落在课表索引页 */
     const ready = await follow(http, SSO_JUMP);
     if (hostOf(ready.url) === new URL(JW_ORIGIN).host && INDEX_RE.test(ready.url)) {
-      return { kind: "ready", url: ready.url, jars: jarsOut() };
+      return { kind: "ready", url: ready.url, jars: browserJars() };
     }
     reset();
     return beginForm(http);
@@ -235,7 +249,7 @@ export const flow: EduLoginFlow = {
       reset();
       return { kind: "fail", message: "教务登录没接上，请重试" };
     }
-    return { kind: "ok", url: page.url, jars: jarsOut() };
+    return { kind: "ok", url: page.url, jars: browserJars() };
   },
 
   /** 换一张验证码：同一会话的公钥/Cookie 不动 */

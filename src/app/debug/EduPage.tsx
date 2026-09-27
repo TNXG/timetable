@@ -31,7 +31,8 @@ export function EduPage({ onBack }: { onBack: () => void }) {
         </Group>
         <Group title="自动更新">
           <KV k="开关" v={sync ? (sync.enabled ? "开" : "关") : "—"} />
-          <KV k="上次结果" v={status ? status.text : "—"} tone={status?.danger ? "bad" : undefined} sub={when} />
+          <KV k="上次结果" v={status ? status.text : "—"} tone={sync?.lastResult === "error" || sync?.lastResult === "expired" ? "bad" : undefined} sub={when} />
+          {(sync?.lastResult === "error" || sync?.lastResult === "expired") && <KV k="失败原因" v={sync.lastMessage || (sync.lastResult === "expired" ? "登录已失效" : "未记录原因")} tone="bad" />}
           <KV k="变更与失效" v={sync ? `${sync.lastChanges} 处 · 连续失效 ${sync.failStreak}` : "—"} />
           <KV k="来源页" v={sync?.pageUrl || "—"} sub={sync?.term ? termLabel(sync.term) : ""} />
         </Group>

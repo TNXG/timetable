@@ -102,23 +102,9 @@ class TtEdu : Plugin() {
         call.resolve(o)
     }
 
-    /** 退出登录：整个删掉该学校的 Profile；正在使用中则删不掉，ok=false */
+    /** 清除学校的 Profile；老 WebView 只支持全局 CookieManager。 */
     @PluginMethod
-    fun clearProfile(call: PluginCall) {
-        val profile = call.getString("profile", "")
-        activity.runOnUiThread {
-            var ok = false
-            if (profile != null && !profile.isEmpty() && multiProfile()) {
-                try {
-                    ok = androidx.webkit.ProfileStore.getInstance().deleteProfile(profile)
-                } catch (ignored: Exception) {
-                }
-            }
-            val o = JSObject()
-            o.put("ok", ok)
-            call.resolve(o)
-        }
-    }
+    fun clearProfile(call: PluginCall) = eraseSchoolProfile(call)
 
     /* ---------------- 直登：HTTP 与会话 Cookie（实现在 EduHttp.kt） ---------------- */
 
@@ -126,13 +112,23 @@ class TtEdu : Plugin() {
     @PluginMethod
     fun http(call: PluginCall) = EduHttp.request(call)
 
-    /** 登录拿到的会话 Cookie 按网址种进学校 Profile，浏览器打开即已登录 */
+    /** ProfileStore 与其 CookieManager 必须从 WebView 所属的主线程访问。 */
     @PluginMethod
-    fun setCookies(call: PluginCall) = EduHttp.setCookies(call)
+    fun setCookies(call: PluginCall) {
+        activity.runOnUiThread { EduHttp.setCookies(call) }
+    }
 
-    /** 读 Profile 里的会话 Cookie 给插件做「会话还活着吗」探测 */
+    /** 清旧会话并种回新的 CAS / 教务 Cookie；异步清除的回调也留在主线程。 */
     @PluginMethod
-    fun getCookies(call: PluginCall) = EduHttp.getCookies(call)
+    fun replaceCookies(call: PluginCall) {
+        activity.runOnUiThread { EduHttp.replaceCookies(call) }
+    }
+
+    /** 续登时读取已有会话 Cookie，同样不能在 Capacitor 插件线程访问 Profile。 */
+    @PluginMethod
+    fun getCookies(call: PluginCall) {
+        activity.runOnUiThread { EduHttp.getCookies(call) }
+    }
 
     /* ---------------- 自动更新：不可见 WebView ---------------- */
 

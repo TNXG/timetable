@@ -70,10 +70,7 @@ internal object EduHttp {
     /** profile 的 CookieManager；老 WebView 为全局单例（应用自身不用 Cookie） */
     private fun manager(profile: String?): android.webkit.CookieManager {
         if (!profile.isNullOrEmpty() && multiProfile()) {
-            try {
-                return ProfileStore.getInstance().getOrCreateProfile(profile).cookieManager
-            } catch (ignored: Exception) {
-            }
+            return ProfileStore.getInstance().getOrCreateProfile(profile).cookieManager
         }
         return android.webkit.CookieManager.getInstance()
     }
@@ -99,6 +96,34 @@ internal object EduHttp {
         }
     }
 
+    /** 静默续登成功后替换旧会话（包括 Path=/jwglxt 的旧 JSESSIONID），再一次性种回完整 Cookie 瓶。 */
+    internal fun replaceCookies(call: PluginCall) {
+        val profile = call.getString("profile", "")
+        val jars = call.getArray("jars")
+        if (jars == null) {
+            call.reject("jars required")
+            return
+        }
+        try {
+            val cm = manager(profile)
+            cm.removeAllCookies {
+                try {
+                    for (i in 0 until jars.length()) {
+                        val jar = jars.getJSONObject(i)
+                        val url = jar.getString("url")
+                        val values = jar.getJSONArray("cookies")
+                        for (j in 0 until values.length()) cm.setCookie(url, values.getString(j))
+                    }
+                    cm.flush()
+                    call.resolve(JSObject().put("ok", true))
+                } catch (e: Exception) {
+                    call.reject(e.message ?: "cookie replacement failed")
+                }
+            }
+        } catch (e: Exception) {
+            call.reject(e.message ?: "cookie replacement failed")
+        }
+    }
     internal fun getCookies(call: PluginCall) {
         val profile = call.getString("profile", "")
         val url = call.getString("url", "")

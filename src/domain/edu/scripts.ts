@@ -31,19 +31,22 @@ return r;
 
 /** 正方新版：POST 个人课表接口，只回传排课字段 */
 export function zfFetchJs(xnm: string, xqm: string): string {
-  const body = `xnm=${encodeURIComponent(xnm)}&xqm=${encodeURIComponent(xqm)}`;
+  const body = new URLSearchParams({ xnm, xqm, kzlx: "ck", xsdm: "", kclbdm: "", kclxdm: "" }).toString();
   return `
 var p = location.pathname, i = p.indexOf('/jwglxt/');
 var base = i >= 0 ? p.slice(0, i) : '';
-var res = await fetch(base + '/jwglxt/kbcx/xskbcx_cxXsgrkb.html?gnmkdm=N253508', {
+var res = await fetch(base + '/jwglxt/kbcx/xskbcx_cxXsgrkb.html?gnmkdm=N2151', {
   method: 'POST', credentials: 'include',
-  headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest' },
+  headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json, text/javascript, */*; q=0.01' },
   body: ${JSON.stringify(body)}
 });
+if (res.status === 401 || res.status === 403 || res.status === 901 || /\\/(?:cas\\/login|[^/]*login[^/]*\\.(?:html?|jsp|aspx?))(?:[/?#]|$)/i.test(res.url)) throw new Error('登录已失效');
 if (!res.ok) throw new Error('HTTP ' + res.status);
-var j = await res.json();
-var list = (j && j.kbList) || [];
-return list.map(function (c) { return { kcmc: c.kcmc, xm: c.xm, cdmc: c.cdmc, xqj: c.xqj, jcs: c.jcs, zcd: c.zcd }; });
+var text = await res.text();
+if (/^\\s*<(?:!doctype\\s+html|html)\\b/i.test(text) && /<form\\b[^>]*[\\s\\S]*?(?:name=["']?(?:username|password)|type=["']?password)/i.test(text)) throw new Error('登录已失效');
+var j = JSON.parse(text);
+if (!j || !Array.isArray(j.kbList)) throw new Error('课表接口没有返回 kbList');
+return j.kbList.map(function (c) { return { kcmc: c.kcmc, xm: c.xm, cdmc: c.cdmc, xqj: c.xqj, jcs: c.jcs, zcd: c.zcd }; });
 `;
 }
 

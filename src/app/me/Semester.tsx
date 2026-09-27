@@ -3,7 +3,10 @@ import type { SemesterArchive } from "../../domain/store";
 import type { ScheduleAdjustment, Semester } from "../../domain/types";
 /** 学期：设置、新学期、往期、分享选学期、教务自动更新 */
 import { useRef, useState } from "react";
-import { weekdayOf, weekOf } from "../../domain/dates";
+import RefreshLine from "~icons/mingcute/refresh-1-line";
+import RightLine from "~icons/mingcute/right-line";
+import { weekdayOf } from "../../domain/dates";
+import { termLabel } from "../../domain/edu/zhengfang";
 import { holidaysBetween } from "../../domain/holidays";
 import { uid } from "../../domain/store";
 import { eduSyncing, logoutEduSync, outcomeText, setEduSyncEnabled, statusText, syncNow, useEduSync } from "../edu-sync";
@@ -15,7 +18,6 @@ import { DateInput, Field, Loader, md, Page, PrimaryButton, RadioRow, Row, Sheet
 import { haptic, nativeConfirm, nativeToast, syncWidgets } from "../widgets";
 
 const WEEKDAYS = ["", "周一", "周二", "周三", "周四", "周五", "周六", "周日"] as const;
-const adjustmentLabel = (sem: Semester, a: ScheduleAdjustment) => `补第${weekOf(sem, a.teachingDate)}周${WEEKDAYS[weekdayOf(a.teachingDate)]}课程`;
 const liveCount = (s: Snapshot) => s.courses.filter(c => !c.hidden && !c.removedByImport).length;
 
 /* 选学期：和教务导入的「导入哪个学期？」同一套单选样式，第一项默认选中 */
@@ -85,15 +87,20 @@ export function ArchivePage({ a, onBack }: { a: SemesterArchive; onBack: () => v
   );
 }
 
-/** 学期页的自动更新组：开关与状态、立即更新、退出登录；没绑定过不显示 */
-export function EduSyncGroup({ onLogin }: { onLogin: () => void }) {
+/** 教务账号卡：点卡片检查课表，左滑退出；自动更新只控制后台检查。 */
+export function EduSyncGroup({ onLogin, heading = true }: { onLogin: () => void; heading?: boolean }) {
   const s = useEduSync();
   const [busy, setBusy] = useState(eduSyncing);
+  const [revealed, setRevealed] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
+  const touchX = useRef<number | null>(null);
+  const suppressClick = useRef(false);
   if (!s)
     return null;
   const status = statusText(s);
+  const expired = s.lastResult === "expired";
   const update = async () => {
-    if (busy)
+    if (busy || loggingOut)
       return;
     setBusy(true);
     try {
@@ -109,40 +116,97 @@ export function EduSyncGroup({ onLogin }: { onLogin: () => void }) {
     }
   };
   const logout = async () => {
-    const ok = await nativeConfirm({ title: "退出登录", message: `清除${s.school.name}的登录会话，关闭自动更新`, ok: "退出" });
+    if (loggingOut)
+      return;
+    const ok = await nativeConfirm({ title: "退出登录", message: `清除${s.school.name}的登录会话及保存的密码`, ok: "退出" });
     if (!ok)
       return;
-    await logoutEduSync();
-    haptic("warning");
-    nativeToast("已退出登录");
+    setLoggingOut(true);
+    try {
+      await logoutEduSync();
+      haptic("warning");
+      nativeToast("已退出登录");
+    } catch (e) {
+      nativeToast(e instanceof Error ? e.message : "退出登录失败");
+    } finally {
+      setLoggingOut(false);
+    }
   };
   return (
-    <>
-      <div className="mt-7 mb-2 px-1 text-[12.5px] font-semibold text-(--c-ink4)">自动更新</div>
-      <div className="divide-y divide-(--c-surface2) overflow-hidden rounded-2xl bg-(--c-surface)">
-        {s.lastResult === "expired"
-          ? (
-              <Row title={`${s.school.name} · 重新登录`} desc={status.text} onClick={() => onLogin()} />
-            )
-          : (
-              <>
-                <div className="flex items-center px-4 py-3.5">
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate text-[14px] font-bold">{s.school.name}</div>
-                    <div className={`mt-0.5 text-[12px] font-medium ${status.danger ? "text-(--c-danger)" : "text-(--c-ink4)"}`}>{status.text}</div>
-                  </div>
-                  <Switch on={s.enabled} onChange={setEduSyncEnabled} />
-                </div>
-                <Row title="立即更新" onClick={() => void update()} right={busy ? <Loader className="ml-3 text-(--c-ink4)" /> : <span />} />
-              </>
-            )}
-        <Row title="退出登录" danger onClick={() => void logout()} right={<span />} />
+    <div className={heading ? "mt-7" : "mt-6"}>
+      {heading && <div className="mb-2 px-1 text-[12.5px] font-semibold text-(--c-ink4)">教务账号</div>}
+      <div className="relative overflow-hidden rounded-[18px] bg-(--c-surface)">
+        <button
+          type="button"
+          onClick={() => void logout()}
+          tabIndex={revealed ? 0 : -1}
+          aria-hidden={!revealed}
+          className="absolute inset-y-0 right-0 flex w-24 items-center justify-center bg-(--c-danger) text-[13px] font-bold text-white"
+        >
+          退出登录
+        </button>
+        <div
+          className="relative bg-(--c-surface) transition-transform duration-200"
+          style={{ transform: revealed ? "translateX(-96px)" : "translateX(0)" }}
+          onTouchStart={(e) => { touchX.current = e.touches[0].clientX; }}
+          onTouchEnd={(e) => {
+            if (touchX.current === null)
+              return;
+            const dx = e.changedTouches[0].clientX - touchX.current;
+            touchX.current = null;
+            if (Math.abs(dx) > 35) {
+              suppressClick.current = true;
+              setRevealed(dx < 0);
+            }
+          }}
+        >
+          <button
+            type="button"
+            onClick={() => {
+              if (suppressClick.current) { suppressClick.current = false; return; }
+              if (revealed) { setRevealed(false); return; }
+              if (expired)
+                onLogin();
+              else void update();
+            }}
+            aria-label={`${s.school.name}，${status.text}，${expired ? "重新登录" : "检查课表"}`}
+            className="flex w-full items-start gap-3 px-4 pt-4 pb-3 text-left transition-colors active:bg-(--c-surface2)"
+          >
+            <div className="min-w-0 flex-1">
+              <div className="truncate text-[15px] font-bold text-(--c-ink)">{s.school.name}</div>
+              {s.term && <div className="mt-1 text-[12px] font-medium text-(--c-ink4)">{termLabel(s.term)}</div>}
+              <div className={`mt-2 text-[12.5px] font-medium ${status.danger || s.lastResult === "error" ? "text-(--c-danger)" : "text-(--c-ink3)"}`}>{status.text}</div>
+              {(s.lastResult === "error" || expired) && s.lastMessage && <div className="mt-1 text-[11.5px] font-medium text-(--c-danger)">{s.lastMessage}</div>}
+            </div>
+            <div className="flex flex-none items-center gap-1 pt-0.5 text-[12px] font-semibold text-(--c-accent)">
+              {busy
+                ? <Loader size={17} />
+                : expired
+                  ? (
+                      <>
+                        重新登录
+                        <RightLine width={15} height={15} />
+                      </>
+                    )
+                  : (
+                      <>
+                        检查课表
+                        <RefreshLine width={15} height={15} />
+                      </>
+                    )}
+            </div>
+          </button>
+          <div className="mx-4 flex items-center border-t border-(--c-surface2) py-3">
+            <span className="min-w-0 flex-1 text-[12.5px] font-medium text-(--c-ink3)">{busy ? "正在更新课表" : "自动更新课表"}</span>
+            <Switch on={s.enabled} onChange={setEduSyncEnabled} />
+          </div>
+        </div>
       </div>
-    </>
+    </div>
   );
 }
 
-export function SemesterSettings({ sem, onBack, onNew, onArchive, onLogin }: { sem: Semester; onBack: () => void; onNew: () => void; onArchive: (id: string) => void; onLogin: () => void }) {
+export function SemesterSettings({ sem, onBack, onNew, onArchive, onLogin, onAdjustments }: { sem: Semester; onBack: () => void; onNew: () => void; onArchive: (id: string) => void; onLogin: () => void; onAdjustments: () => void }) {
   const state = useStore();
   const [name, setName] = useState(sem.name);
   const [date, setDate] = useState(sem.startDate);
@@ -153,22 +217,11 @@ export function SemesterSettings({ sem, onBack, onNew, onArchive, onLogin }: { s
   const archives = [...state.archives].reverse();
   const hols = holidaysBetween(start, termEnd({ startDate: start, totalWeeks: weeks }));
 
-  const [adjusting, setAdjusting] = useState(false);
-  const [adjustments, setAdjustments] = useState<ScheduleAdjustment[]>(sem.scheduleAdjustments ?? []);
-  const saveAdjustments = (next: ScheduleAdjustment[]) => {
-    setAdjustments(next);
-    store.setSemester({ ...sem, scheduleAdjustments: next });
-    setAdjusting(false);
-  };
-
-  if (adjusting)
-    return <ScheduleAdjustmentPage sem={{ ...sem, scheduleAdjustments: adjustments }} onSave={saveAdjustments} onBack={() => setAdjusting(false)} />;
-
   return (
     <SubPage title="学期" sub={ended ? `已结束，共 ${weeks} 周` : `第 ${Math.max(1, currentWeek(start))} 周，共 ${weeks} 周`} onBack={onBack}>
       <div className="divide-y divide-(--c-surface2) overflow-hidden rounded-2xl bg-(--c-surface)">
         <Field k="名称"><TextInput value={name} onChange={e => setName(e.target.value)} /></Field>
-        <Field k="开学" sub={`第 1 周 ${md(start)} 周一`}><DateInput value={date} onChange={setDate} /></Field>
+        <Field k="开学周" sub={`${md(start)} 周一为第 1 周`}><DateInput value={start} onChange={d => setDate(mondayOf(d))} /></Field>
         <Field k="总周数"><TextInput type="number" min={1} max={64} value={weeks} onChange={e => setWeeks(Number(e.target.value))} /></Field>
         <div className="flex items-center px-4 py-3.5">
           <div className="min-w-0 flex-1">
@@ -179,7 +232,7 @@ export function SemesterSettings({ sem, onBack, onNew, onArchive, onLogin }: { s
         </div>
       </div>
       <div className="mt-2.5 overflow-hidden rounded-2xl bg-(--c-surface)">
-        <Row title="调休安排" desc={adjustments.length ? adjustments.map(a => `${md(a.date)} ${adjustmentLabel(sem, a)}`).join("，") : "未设置"} onClick={() => setAdjusting(true)} right={<span />} />
+        <Row title="调休安排" desc={(sem.scheduleAdjustments ?? []).length ? (sem.scheduleAdjustments ?? []).map(a => `${md(a.date)} 上 ${md(a.teachingDate)} 的课`).join("，") : "未设置补课日期"} onClick={onAdjustments} right={<span />} />
       </div>
       <div className="mt-2.5 overflow-hidden rounded-2xl bg-(--c-surface)">
         <Row title="开始新学期" desc={ended ? "当前学期移入往期" : undefined} onClick={onNew} />
@@ -193,12 +246,12 @@ export function SemesterSettings({ sem, onBack, onNew, onArchive, onLogin }: { s
           </div>
         </>
       )}
-      <div className="mt-8"><PrimaryButton onClick={() => { store.setSemester({ ...sem, name: name.trim() || sem.name, startDate: start, totalWeeks: Math.min(64, Math.max(1, weeks)), holidays, scheduleAdjustments: adjustments }); store.setPrefs({ dateSet: true }); onBack(); }}>保存</PrimaryButton></div>
+      <div className="mt-8"><PrimaryButton onClick={() => { store.setSemester({ ...store.state.semester!, name: name.trim() || sem.name, startDate: start, totalWeeks: Math.min(64, Math.max(1, weeks)), holidays }); store.setPrefs({ dateSet: true }); onBack(); }}>保存</PrimaryButton></div>
     </SubPage>
   );
 }
 
-function ScheduleAdjustmentPage({ sem, onSave, onBack }: { sem: Semester; onSave: (items: ScheduleAdjustment[]) => void; onBack: () => void }) {
+export function ScheduleAdjustmentPage({ sem, onBack }: { sem: Semester; onBack: () => void }) {
   const [items, setItems] = useState<ScheduleAdjustment[]>(sem.scheduleAdjustments ?? []);
   const [date, setDate] = useState(() => todayStr());
   const [teachingDate, setTeachingDate] = useState(() => todayStr());
@@ -207,21 +260,26 @@ function ScheduleAdjustmentPage({ sem, onSave, onBack }: { sem: Semester; onSave
   return (
     <Page>
       <div className="flex-1 overflow-y-auto px-5 pb-6 scrollbar-none">
-        <TopBar title="调休安排" sub="仅按手动设置调整课程" onBack={onBack} />
-        <div className="mt-5 divide-y divide-(--c-surface2) overflow-hidden rounded-2xl bg-(--c-surface)">
-          <Field k="实际上课日"><DateInput value={date} onChange={setDate} /></Field>
-          <Field k="被调教学日"><DateInput value={teachingDate} onChange={setTeachingDate} /></Field>
+        <TopBar title="调休安排" onBack={onBack} />
+        <div className="mt-5 rounded-2xl bg-(--c-amber-soft) px-4 py-4">
+          <div className="text-[14px] font-bold text-(--c-ink)">补课日期 → 课表日期</div>
+          <div className="mt-1 text-[12.5px] font-medium leading-relaxed text-(--c-ink3)">例：10月10日 补 10月7日的课，补课日期选 10月10日，课表日期选 10月7日。</div>
         </div>
-        <div className="mt-2 text-[12px] font-medium text-(--c-ink4)">{valid ? `${md(date)} ${WEEKDAYS[weekdayOf(date)]} · ${adjustmentLabel(sem, { id: "", date, teachingDate, createdAt: 0 })}` : duplicate ? "该实际上课日已有安排" : "实际上课日与教学日不能相同"}</div>
-        <div className="mt-5"><PrimaryButton disabled={!valid} onClick={() => { setItems(xs => [...xs, { id: uid(), date, teachingDate, createdAt: Date.now() }].sort((a, b) => a.date.localeCompare(b.date))); }}>添加调休</PrimaryButton></div>
+        <div className="mt-6 mb-2 px-1 text-[12.5px] font-semibold text-(--c-ink4)">新增安排</div>
+        <div className="divide-y divide-(--c-surface2) overflow-hidden rounded-2xl bg-(--c-surface)">
+          <Field k="补课日期" sub="原本休息，实际要上课"><DateInput value={date} onChange={setDate} /></Field>
+          <Field k="课表日期" sub="要补哪一天的课"><DateInput value={teachingDate} onChange={setTeachingDate} /></Field>
+        </div>
+        <div className="mt-3 px-1 text-[12.5px] font-medium text-(--c-ink4)">{valid ? `${md(date)} 上 ${md(teachingDate)} ${WEEKDAYS[weekdayOf(teachingDate)]}的课` : duplicate ? "补课日期已有安排" : "选择两个不同的日期"}</div>
+        <div className="mt-5"><PrimaryButton disabled={!valid} onClick={() => { setItems(xs => [...xs, { id: uid(), date, teachingDate, createdAt: Date.now() }].sort((a, b) => a.date.localeCompare(b.date))); }}>添加安排</PrimaryButton></div>
         {items.length > 0 && (
           <>
             <div className="mt-7 mb-2 px-1 text-[12.5px] font-semibold text-(--c-ink4)">已设置</div>
-            <div className="divide-y divide-(--c-surface2) overflow-hidden rounded-2xl bg-(--c-surface)">{items.map(a => <Row key={a.id} title={`${md(a.date)} ${WEEKDAYS[weekdayOf(a.date)]}`} desc={`${adjustmentLabel(sem, a)} · ${md(a.teachingDate)}`} onClick={() => setItems(xs => xs.filter(x => x.id !== a.id))} right={<span className="text-(--c-danger)">删除</span>} />)}</div>
+            <div className="divide-y divide-(--c-surface2) overflow-hidden rounded-2xl bg-(--c-surface)">{items.map(a => <Row key={a.id} title={`${md(a.date)} 补课`} desc={`上 ${md(a.teachingDate)} ${WEEKDAYS[weekdayOf(a.teachingDate)]}的课`} onClick={() => setItems(xs => xs.filter(x => x.id !== a.id))} right={<span className="text-(--c-danger)">删除</span>} />)}</div>
           </>
         )}
       </div>
-      <div className="flex-none px-5 pt-2 pb-[max(22px,env(safe-area-inset-bottom))]"><PrimaryButton onClick={() => onSave(items)}>保存</PrimaryButton></div>
+      <div className="flex-none px-5 pt-2 pb-[max(22px,env(safe-area-inset-bottom))]"><PrimaryButton onClick={() => { store.setSemester({ ...store.state.semester!, scheduleAdjustments: items }); onBack(); }}>保存</PrimaryButton></div>
     </Page>
   );
 }
