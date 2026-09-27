@@ -20,11 +20,11 @@ google-chrome --remote-debugging-port=9334 about:blank
 
 ## 三类来源
 
-| 图 | URL | 说明 |
-| --- | --- | --- |
-| 原型单屏（today、week、lock、conflict 等 26 张） | `http://localhost:4173/?proto&s=<key>` | key 见 `src/App.tsx` 底部 `screens` 数组 |
-| 引导页 onboard-0/1/2 | `http://localhost:4173/?onboardStep=0|1|2&still=1` | `still=1` 关闭动画定格 |
-| AI 转换页 airule | `http://localhost:4173/` | 真实 app：点「开始」→「继续」→「让 AI 转换」，再截图（原型的 airule 屏带底栏，不要用） |
+| 图                                               | URL                                    | 说明                                                                                   |
+| ------------------------------------------------ | -------------------------------------- | -------------------------------------------------------------------------------------- |
+| 原型单屏（today、week、lock、conflict 等 26 张） | `http://localhost:4173/?proto&s=<key>` | key 见 `src/App.tsx` 底部 `screens` 数组                                               |
+| 引导页 onboard-0/1/2                             | `http://localhost:4173/?onboardStep=0  | 1                                                                                      | 2&still=1` | `still=1` 关闭动画定格 |
+| AI 转换页 airule                                 | `http://localhost:4173/`               | 真实 app：点「开始」→「继续」→「让 AI 转换」，再截图（原型的 airule 屏带底栏，不要用） |
 
 深色：真实 app 页面加 `&theme=dark` 即可；原型屏是写死浅色的，不支持。
 

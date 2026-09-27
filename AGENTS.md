@@ -49,27 +49,27 @@
 
 ### 目录速查
 
-| 改什么 | 去哪 |
-| --- | --- |
-| 路由栈、Tab、返回键 | `src/app/RealApp.tsx` |
-| 今天/周视图/日历面板、长按 | `src/app/home/`、`src/app/press.ts` |
-| 课程详情/编辑/冲突/变更/手动添加 | `src/app/course/` |
-| 搜索 | `src/app/search/` |
-| 导入（其他方式/AI 转换/规则/预览） | `src/app/import/` |
-| 首次引导 | `src/app/Onboarding.tsx` |
-| 公共组件、动效常量 | `src/app/ui.tsx` |
-| 原生桥（对话框、Toast、返回键、小组件） | `src/app/widgets.ts`、`android/.../WidgetBridge.kt`、`MainActivity.kt` |
-| 周次/节次/冲突算法 | `src/domain/engine.ts`、`weeks.ts`、`dates.ts` |
-| 导入解析、诊断、normalize | `src/domain/importer.ts`、`importers/*`、`rules.ts` |
-| 教务绑定（CAS 直登页/内置浏览器/未识别页） | `src/app/edu/`（直登页 `EduLoginPage.tsx`）、`src/app/edu-browser.ts`、`android/.../TtEdu.kt` |
-| 保存的登录密码（Android Keystore 密文） | `android/.../TtCredentials.kt`、`eduCredentials`（`src/app/edu-browser.ts`） |
-| 验证码本地识别（模型/推理/判定） | `android/.../TtOcr.kt`、`OcrEngine.kt`、`OcrImage.kt`、`android/app/src/main/assets/ocr/`、`src/domain/edu/captcha.ts` |
-| 学校登录插件（默认=新疆理工职业大学） | `src/domain/edu/plugin.ts`、`src/domain/edu/plugins/`、`src/domain/edu/cas.ts`（解析/加密/Cookie 瓶） |
-| 教务绑定记录 / 自动更新 | `src/app/edu-sync.ts`（状态、立即更新、回前台检查），`TtEdu.kt` 的 profile / bg* / http 接口 |
-| AI Prompt 文本 | `src/domain/ai-prompt.ts` |
-| Store、持久化、导入合并 | `src/domain/store.ts`、`persistence/` |
-| 桌面小组件 | `android/.../widget/`、`src/domain/widget-data.ts`、`tools/` |
-| 调试入口（关于页图标三连点，原型里没有） | `src/app/debug/`（`DebugHub.tsx` 分「推理/教务/数据/环境」四页）、`android/.../TtDebug.kt` |
+| 改什么                                     | 去哪                                                                                                                   |
+| ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
+| 路由栈、Tab、返回键                        | `src/app/RealApp.tsx`                                                                                                  |
+| 今天/周视图/日历面板、长按                 | `src/app/home/`、`src/app/press.ts`                                                                                    |
+| 课程详情/编辑/冲突/变更/手动添加           | `src/app/course/`                                                                                                      |
+| 搜索                                       | `src/app/search/`                                                                                                      |
+| 导入（其他方式/AI 转换/规则/预览）         | `src/app/import/`                                                                                                      |
+| 首次引导                                   | `src/app/Onboarding.tsx`                                                                                               |
+| 公共组件、动效常量                         | `src/app/ui.tsx`                                                                                                       |
+| 原生桥（对话框、Toast、返回键、小组件）    | `src/app/widgets.ts`、`android/.../WidgetBridge.kt`、`MainActivity.kt`                                                 |
+| 周次/节次/冲突算法                         | `src/domain/engine.ts`、`weeks.ts`、`dates.ts`                                                                         |
+| 导入解析、诊断、normalize                  | `src/domain/importer.ts`、`importers/*`、`rules.ts`                                                                    |
+| 教务绑定（CAS 直登页/内置浏览器/未识别页） | `src/app/edu/`（直登页 `EduLoginPage.tsx`）、`src/app/edu-browser.ts`、`android/.../TtEdu.kt`                          |
+| 保存的登录密码（Android Keystore 密文）    | `android/.../TtCredentials.kt`、`eduCredentials`（`src/app/edu-browser.ts`）                                           |
+| 验证码本地识别（模型/推理/判定）           | `android/.../TtOcr.kt`、`OcrEngine.kt`、`OcrImage.kt`、`android/app/src/main/assets/ocr/`、`src/domain/edu/captcha.ts` |
+| 学校登录插件（默认=新疆理工职业大学）      | `src/domain/edu/plugin.ts`、`src/domain/edu/plugins/`、`src/domain/edu/cas.ts`（解析/加密/Cookie 瓶）                  |
+| 教务绑定记录 / 自动更新                    | `src/app/edu-sync.ts`（状态、立即更新、回前台检查），`TtEdu.kt` 的 profile / bg* / http 接口                           |
+| AI Prompt 文本                             | `src/domain/ai-prompt.ts`                                                                                              |
+| Store、持久化、导入合并                    | `src/domain/store.ts`、`persistence/`                                                                                  |
+| 桌面小组件                                 | `android/.../widget/`、`src/domain/widget-data.ts`、`tools/`                                                           |
+| 调试入口（关于页图标三连点，原型里没有）   | `src/app/debug/`（`DebugHub.tsx` 分「推理/教务/数据/环境」四页）、`android/.../TtDebug.kt`                             |
 
 ### 环境
 

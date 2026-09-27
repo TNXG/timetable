@@ -2,24 +2,44 @@
 <html lang="zh">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+    />
     <meta name="theme-color" content="#F7F7F6" />
     <title>Koma</title>
     <script>
       (function () {
-        var t = localStorage.getItem('tt.theme')
-        if (t !== 'light' && t !== 'dark' && t !== 'black') t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-        if (t !== 'light') document.documentElement.dataset.theme = t
-      })()
+        var t = localStorage.getItem("tt.theme");
+        if (t !== "light" && t !== "dark" && t !== "black")
+          t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        if (t !== "light") document.documentElement.dataset.theme = t;
+      })();
     </script>
     <link rel="preload" as="image" href="/wall.jpg" />
     <link rel="preload" as="image" href="/mascot.png" />
     <link rel="preload" as="image" href="/intro-bg.jpg" />
     <link rel="preload" as="image" href="/avatar.jpg" />
+    <link rel="preload" as="image" href="https://api-space.tnxg.top/avatar?s=qq" />
+    <link
+      rel="preload"
+      as="image"
+      href="https://api-space.tnxg.top/images/proxy?url=https%3A%2F%2Favatars.githubusercontent.com%2Fu%2F149454909%3Fv%3D4"
+    />
     <style>
-      html, body { margin: 0; background: #F7F7F6; }
-      [data-theme='dark'], [data-theme='dark'] body { background: #111214; }
-      [data-theme='black'], [data-theme='black'] body { background: #000; }
+      html,
+      body {
+        margin: 0;
+        background: #f7f7f6;
+      }
+      [data-theme="dark"],
+      [data-theme="dark"] body {
+        background: #111214;
+      }
+      [data-theme="black"],
+      [data-theme="black"] body {
+        background: #000;
+      }
     </style>
   </head>
   <body>

@@ -1,12 +1,12 @@
-import type { CapacitorConfig } from '@capacitor/cli'
+import type { CapacitorConfig } from "@capacitor/cli";
 
 const config: CapacitorConfig = {
-  appId: 'moe.tnxg.timetable',
-  appName: 'Koma',
-  webDir: 'dist',
-  backgroundColor: '#F7F7F6',
+  appId: "moe.tnxg.timetable",
+  appName: "Koma",
+  webDir: "dist",
+  backgroundColor: "#F7F7F6",
   android: {
-    backgroundColor: '#F7F7F6',
+    backgroundColor: "#F7F7F6",
   },
   plugins: {
     CapacitorSQLite: {
@@ -16,6 +16,6 @@ const config: CapacitorConfig = {
       overlaysWebView: false,
     },
   },
-}
+};
 
-export default config
+export default config;
