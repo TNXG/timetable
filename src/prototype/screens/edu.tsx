@@ -1,4 +1,11 @@
 import React from "react";
+import CheckLine from "~icons/mingcute/check-line";
+import DownLine from "~icons/mingcute/down-line";
+import LeftLine from "~icons/mingcute/left-line";
+import LockLine from "~icons/mingcute/lock-line";
+import MoreLine from "~icons/mingcute/more-1-fill";
+import RefreshLine from "~icons/mingcute/refresh-1-line";
+import RightLine from "~icons/mingcute/right-line";
 import { dockStyle, Phone, tint, TopBar } from "../shared";
 import { parsed } from "./detail-rules";
 import { WEEK_COLS } from "./today-week";
@@ -25,7 +32,7 @@ export function EduTermSheet() {
                 style={{ background: on ? "var(--c-accent-soft)" : "var(--c-row-muted)", boxShadow: on ? "inset 0 0 0 1.5px var(--c-accent)" : undefined }}
               >
                 <span className="mr-3 flex h-4.25 w-4.25 flex-none items-center justify-center rounded-full border-[1.8px]" style={{ borderColor: on ? "var(--c-accent)" : "var(--c-radio-border)", background: on ? "var(--c-accent)" : "transparent" }}>
-                  {on && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.6"><path d="m6 12.5 4 4 8-9" /></svg>}
+                  {on && <CheckLine width="10" height="10" style={{ color: "#fff" }} />}
                 </span>
                 <span className={`text-[13.5px] font-bold text-(--c-ink) ${on ? "" : "opacity-55"}`}>{t}</span>
               </div>
@@ -46,24 +53,17 @@ export function EduBrowserScreen({ ready = true, overlay }: { ready?: boolean; o
       <div className="relative flex flex-1 flex-col overflow-hidden pt-12">
         <div className="flex items-center gap-3 px-5">
           <div className="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-(--c-surface)">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink)" strokeWidth="2.4"><path d="M15 19 8 12l7-7" /></svg>
+            <LeftLine width="14" height="14" style={{ color: "var(--c-ink)" }} />
           </div>
           <div className="flex h-9 min-w-0 flex-1 items-center rounded-full bg-(--c-surface) px-4">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink4)" strokeWidth="2.4" className="mr-2 flex-none">
-              <rect x="5" y="11" width="14" height="10" rx="2" />
-              <path d="M8 11V8a4 4 0 0 1 8 0v3" />
-            </svg>
+            <LockLine width="11" height="11" className="mr-2 flex-none text-(--c-ink4)" />
             <span className="min-w-0 truncate text-[12.5px] font-semibold text-(--c-ink2)">qyrz.xjvut.edu.cn</span>
           </div>
           <div className="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-(--c-surface)">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink)" strokeWidth="2.4" strokeLinecap="round"><path d="M20 12a8 8 0 1 1-2.3-5.7M20 4v5h-5" /></svg>
+            <RefreshLine width="14" height="14" className="text-(--c-ink)" />
           </div>
           <div className="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-(--c-surface)">
-            <svg width="16" height="16" viewBox="0 0 24 24" style={{ fill: "var(--c-ink)" }}>
-              <circle cx="5" cy="12" r="2" />
-              <circle cx="12" cy="12" r="2" />
-              <circle cx="19" cy="12" r="2" />
-            </svg>
+            <MoreLine width="16" height="16" className="text-(--c-ink)" />
           </div>
         </div>
 
@@ -101,7 +101,7 @@ export function EduBrowserScreen({ ready = true, overlay }: { ready?: boolean; o
                   <span className="text-[16px] font-semibold tracking-[-.01em]">我的课表</span>
                   <span className="ml-auto flex h-6.5 items-center gap-1.5 rounded-full bg-[#F4F4F5] px-3 text-[11px] font-medium text-[#444]">
                     2025 秋季学期
-                    <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="3" strokeLinecap="round"><path d="m6 9 6 6 6-6" /></svg>
+                    <DownLine width="8" height="8" style={{ color: "#888" }} strokeLinecap="round" />
                   </span>
                 </div>
                 <div className="grid grid-cols-[34px_repeat(5,1fr)] px-3 text-[9px]">
@@ -145,7 +145,7 @@ export function EduBrowserScreen({ ready = true, overlay }: { ready?: boolean; o
             )}
 
         <div className="pointer-events-none absolute inset-x-0 bottom-9 z-9 flex justify-center">
-          <span className={`flex h-[36px] items-center gap-1.5 rounded-full px-4 text-[13px] font-bold ${ready ? "text-(--c-accent)" : "text-(--c-ink3)"}`} style={dockStyle}>
+          <span className={`flex h-9 items-center gap-1.5 rounded-full px-4 text-[13px] font-bold ${ready ? "text-(--c-accent)" : "text-(--c-ink3)"}`} style={dockStyle}>
             {ready ? "导入 32 门课" : "登录后打开课表页"}
           </span>
         </div>
@@ -237,7 +237,7 @@ export function EduFailScreen() {
           {options.map((t, i) => (
             <div key={t} className={`flex items-center px-4 py-3.5 ${i > 0 ? "border-t border-(--c-surface2)" : ""}`}>
               <span className="flex-1 text-[14px] font-bold text-(--c-ink)">{t}</span>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink5)" strokeWidth="2.4" className="flex-none"><path d="m9 5 7 7-7 7" /></svg>
+              <RightLine width="13" height="13" style={{ color: "var(--c-ink5)" }} className="flex-none" />
             </div>
           ))}
         </div>

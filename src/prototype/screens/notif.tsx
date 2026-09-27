@@ -1,3 +1,6 @@
+import CalendarLine from "~icons/mingcute/calendar-line";
+import LeftLine from "~icons/mingcute/left-line";
+import RightLine from "~icons/mingcute/right-line";
 import React from "react";
 import { Phone } from "../shared";
 
@@ -54,10 +57,7 @@ export function NotifCard({ n }: { n: Notif }) {
     >
       <div className="flex items-center">
         <span className="flex h-4.5 w-4.5 flex-none items-center justify-center rounded-[5px] bg-(--c-accent)">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.6">
-            <rect x="3" y="4" width="18" height="17" rx="4" />
-            <path d="M3 9h18" />
-          </svg>
+          <CalendarLine width="10" height="10" className="text-white" />
         </span>
         <span className="ml-1.5 flex-1 text-[11.5px] font-semibold tracking-[-.01em] text-white/75">日历</span>
         <span className="text-[11.5px] font-medium tabular-nums text-white/60">{n.time}</span>
@@ -104,7 +104,7 @@ export function NotifPrefScreen() {
       <div className="flex-1 overflow-hidden pt-12">
         <div className="px-5">
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-(--c-surface)">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink)" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M15 19 8 12l7-7" /></svg>
+            <LeftLine width="14" height="14" style={{ color: "var(--c-ink)" }} strokeLinecap="round" strokeLinejoin="round" />
           </div>
           <h1 className="mt-4 text-[26px] font-extrabold tracking-[-.02em] text-(--c-ink)">提醒</h1>
         </div>
@@ -123,7 +123,7 @@ export function NotifPrefScreen() {
                   <div key={k} className={`flex items-center py-3.5 ${i ? "border-t border-(--c-line2)" : ""}`}>
                     <span className="flex-1 text-[14px] font-semibold text-(--c-ink)">{k}</span>
                     <span className="text-[12.5px] font-medium tabular-nums text-(--c-ink4)">{v}</span>
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink5)" strokeWidth="2.2" className="ml-2"><path d="m9 5 7 7-7 7" /></svg>
+                    <RightLine width="13" height="13" style={{ color: "var(--c-ink5)" }} className="ml-2" />
                   </div>
                 ))}
               </div>

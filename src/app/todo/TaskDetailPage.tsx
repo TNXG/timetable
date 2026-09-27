@@ -1,3 +1,5 @@
+import LeftLine from "~icons/mingcute/left-line";
+import More1Line from "~icons/mingcute/more-1-line";
 import type { Snapshot } from "../../domain/engine";
 import type { Task } from "../../domain/types";
 import type { ActionItem } from "../ui";
@@ -67,14 +69,10 @@ export function TaskDetailPage({
       <div className="flex flex-1 flex-col overflow-y-auto px-5 pt-12 scrollbar-none">
         <div className="flex flex-none items-center justify-between">
           <button onClick={onBack} className="flex h-9 w-9 items-center justify-center rounded-full bg-(--c-surface) transition-transform duration-150 active:scale-[.92]">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style={{ stroke: "var(--c-ink)" }} strokeWidth="2.4"><path d="M15 19 8 12l7-7" /></svg>
+            <LeftLine width="14" height="14" style={{ color: "var(--c-ink)" }} />
           </button>
           <button onClick={() => setMenu({ kind: "task" })} className="flex h-9 w-9 items-center justify-center rounded-full bg-(--c-surface) transition-transform duration-150 active:scale-[.92]">
-            <svg width="16" height="16" viewBox="0 0 24 24" style={{ fill: "var(--c-ink)" }}>
-              <circle cx="5" cy="12" r="2" />
-              <circle cx="12" cy="12" r="2" />
-              <circle cx="19" cy="12" r="2" />
-            </svg>
+            <More1Line width="16" height="16" style={{ color: "var(--c-ink)" }} />
           </button>
         </div>
 

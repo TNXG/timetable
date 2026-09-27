@@ -1,3 +1,4 @@
+import CheckLine from "~icons/mingcute/check-line";
 import RightLine from "~icons/mingcute/right-line";
 import SearchLine from "~icons/mingcute/search-line";
 import React from "react";
@@ -59,7 +60,7 @@ export function RadioRow({ on, onClick, children, right }: { on: boolean; onClic
   return (
     <button onClick={onClick} className="flex w-full items-center rounded-xl px-3.5 py-3 text-left" style={{ background: on ? "var(--c-accent-soft)" : "var(--c-row-muted)", boxShadow: on ? "inset 0 0 0 1.5px var(--c-accent)" : undefined }}>
       <span className="mr-3 flex h-4.25 w-4.25 flex-none items-center justify-center rounded-full border-[1.8px]" style={{ borderColor: on ? "var(--c-accent)" : "var(--c-radio-border)", background: on ? "var(--c-accent)" : "transparent" }}>
-        {on && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.6"><path d="m6 12.5 4 4 8-9" /></svg>}
+        {on && <CheckLine width={10} height={10} className="text-white" />}
       </span>
       <span className={`min-w-0 flex-1 truncate text-[13.5px] font-bold text-(--c-ink) ${on ? "" : "opacity-55"}`}>{children}</span>
       {right != null && <span className={`ml-3 flex-none text-[12.5px] font-semibold tabular-nums text-(--c-ink4) ${on ? "" : "opacity-55"}`}>{right}</span>}

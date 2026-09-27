@@ -1,3 +1,6 @@
+import RightLine from "~icons/mingcute/right-line";
+import AddLine from "~icons/mingcute/add-line";
+import MinimizeLine from "~icons/mingcute/minimize-line";
 import React, { useState } from "react";
 import { haptic } from "../widgets";
 import { ActionSheet } from "./actions";
@@ -99,7 +102,7 @@ export function Row({ title, desc, badge, right, onClick, danger, active }: { ti
         {desc && <div className="mt-0.5 text-[12px] font-medium text-(--c-ink4)">{desc}</div>}
       </div>
       {right ?? (
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" style={{ stroke: "var(--c-ink5)" }} strokeWidth="2.4" strokeLinecap="round" className="ml-3 flex-none"><path d="m9 5 7 7-7 7" /></svg>
+        <RightLine width={13} height={13} className="ml-3 flex-none text-(--c-ink5)" />
       )}
     </button>
   );
@@ -116,22 +119,22 @@ export function Stepper({ value, unit, min, max, step = 1, onChange }: { value: 
     haptic("selection");
     onChange(next);
   };
-  const btn = (dir: -1 | 1, path: string) => (
+  const btn = (dir: -1 | 1) => (
     <button
       onClick={() => go(dir)}
       className={`flex h-7 w-7 items-center justify-center rounded-full bg-(--c-surface2) transition-transform duration-150 active:scale-[.92] ${(dir < 0 ? value - step < min : value + step > max) ? "opacity-40" : ""}`}
     >
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink)" strokeWidth="2.6" strokeLinecap="round"><path d={path} /></svg>
+      {dir < 0 ? <MinimizeLine width={12} height={12} className="text-(--c-ink)" /> : <AddLine width={12} height={12} className="text-(--c-ink)" />}
     </button>
   );
   return (
     <div className="flex items-center gap-1">
-      {btn(-1, "M5 12h14")}
+      {btn(-1)}
       <span className="min-w-14 text-center text-[15px] font-bold tabular-nums text-(--c-ink)">
         {value}
         {unit && <span className="ml-0.5 text-[12px] font-semibold text-(--c-ink4)">{unit}</span>}
       </span>
-      {btn(1, "M12 5v14M5 12h14")}
+      {btn(1)}
     </div>
   );
 }
@@ -139,6 +142,7 @@ export function Stepper({ value, unit, min, max, step = 1, onChange }: { value: 
 export function Switch({ on, onChange }: { on: boolean; onChange: (v: boolean) => void }) {
   return (
     <button
+      type="button"
       role="switch"
       aria-checked={on}
       onClick={() => { haptic("light"); onChange(!on); }}

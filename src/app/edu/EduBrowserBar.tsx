@@ -1,3 +1,7 @@
+import LockLine from "~icons/mingcute/lock-line";
+import CloseLine from "~icons/mingcute/close-line";
+import Refresh2Line from "~icons/mingcute/refresh-2-line";
+import More1Line from "~icons/mingcute/more-1-line";
 /** 教务浏览器顶栏：返回、地址与加载进度、停止/刷新、更多菜单入口 */
 import type { EduNav } from "../edu-browser";
 import { hostOf } from "../../domain/edu/systems";
@@ -17,10 +21,7 @@ export function EduBrowserBar({ nav, onBack, onMenu }: {
       <div className="relative flex h-9 min-w-0 flex-1 items-center overflow-hidden rounded-full bg-(--c-surface) px-4">
         <LoadFill loading={nav.loading} progress={nav.progress} />
         {secure && (
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" style={{ stroke: "var(--c-ink4)" }} strokeWidth="2.4" className="relative mr-2 flex-none">
-            <rect x="5" y="11" width="14" height="10" rx="2" />
-            <path d="M8 11V8a4 4 0 0 1 8 0v3" />
-          </svg>
+          <LockLine width="11" height="11" className="relative mr-2 flex-none" style={{ color: "var(--c-ink4)" }} />
         )}
         <span className="relative min-w-0 flex-1 truncate text-[12.5px] font-semibold text-(--c-ink2)">{hostOf(nav.url)}</span>
       </div>
@@ -32,10 +33,10 @@ export function EduBrowserBar({ nav, onBack, onMenu }: {
       >
         {nav.loading
           ? (
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style={{ stroke: "var(--c-ink)" }} strokeWidth="2.4" strokeLinecap="round"><path d="M6 6l12 12M18 6 6 18" /></svg>
+              <CloseLine width="14" height="14" style={{ color: "var(--c-ink)" }} />
             )
           : (
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style={{ stroke: "var(--c-ink)" }} strokeWidth="2.4" strokeLinecap="round"><path d="M20 12a8 8 0 1 1-2.3-5.7M20 4v5h-5" /></svg>
+              <Refresh2Line width="14" height="14" style={{ color: "var(--c-ink)" }} />
             )}
       </button>
       <button
@@ -43,11 +44,7 @@ export function EduBrowserBar({ nav, onBack, onMenu }: {
         aria-label="更多"
         className="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-(--c-surface) transition-transform duration-150 active:scale-[.92]"
       >
-        <svg width="16" height="16" viewBox="0 0 24 24" style={{ fill: "var(--c-ink)" }}>
-          <circle cx="5" cy="12" r="2" />
-          <circle cx="12" cy="12" r="2" />
-          <circle cx="19" cy="12" r="2" />
-        </svg>
+        <More1Line width="16" height="16" style={{ color: "var(--c-ink)" }} />
       </button>
     </div>
   );

@@ -1,3 +1,4 @@
+import RightLine from "~icons/mingcute/right-line";
 /** 关于：应用信息与开发者 */
 import { useEffect, useRef, useState } from "react";
 import { appVersion, openExternal } from "../edu/share";
@@ -22,7 +23,7 @@ function DevRow({ avatar, name, role, href }: { avatar: string; name: string; ro
           · GitHub.com
         </div>
       </div>
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" style={{ stroke: "var(--c-ink5)" }} strokeWidth="2.4" strokeLinecap="round" className="ml-3 flex-none"><path d="m9 5 7 7-7 7" /></svg>
+      <RightLine width="13" height="13" className="ml-3 flex-none" style={{ color: "var(--c-ink5)" }} />
     </button>
   );
 }

@@ -1,4 +1,13 @@
 import React from "react";
+import CalendarRemoveLine from "~icons/mingcute/calendar-x-line";
+import CheckLine from "~icons/mingcute/check-line";
+import CloseCircleLine from "~icons/mingcute/close-circle-line";
+import DownLine from "~icons/mingcute/down-line";
+import EditLine from "~icons/mingcute/edit-line";
+import TimelineLine from "~icons/mingcute/history-line";
+import NotificationOffLine from "~icons/mingcute/notification-off-line";
+import RightLine from "~icons/mingcute/right-line";
+import SearchLine from "~icons/mingcute/search-line";
 import { Sticker, stickerTilt } from "../../app/Sticker";
 import { stickerOf } from "../../domain/stickers";
 import { C, DayPicker, Nav, Phone, tint, todayIndex, TopBar } from "../shared";
@@ -12,7 +21,7 @@ export function Chips({ items, active }: { items: string[]; active: number }) {
       {items.map((t, i) => (
         <span
           key={t}
-          className={`rounded-[9px] px-2.5 py-[6px] text-[12px] font-bold ${i === active ? "bg-(--c-accent-soft) text-(--c-accent)" : "bg-(--c-surface) text-(--c-ink3)"}`}
+          className={`rounded-[9px] px-2.5 py-1.5 text-[12px] font-bold ${i === active ? "bg-(--c-accent-soft) text-(--c-accent)" : "bg-(--c-surface) text-(--c-ink3)"}`}
         >
           {t}
         </span>
@@ -29,7 +38,7 @@ export function Field({ k, v, sub, muted }: { k: string; v: string; sub?: string
         <div className={`text-[14px] font-semibold ${muted ? "text-(--c-ink4b)" : "text-(--c-ink)"}`}>{v}</div>
         {sub && <div className="mt-1 text-[11.5px] font-medium text-(--c-ink4)">{sub}</div>}
       </div>
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink5)" strokeWidth="2.4" className="ml-2 flex-none self-center"><path d="m9 5 7 7-7 7" /></svg>
+      <RightLine width="12" height="12" style={{ color: "var(--c-ink5)" }} className="ml-2 flex-none self-center" />
     </div>
   );
 }
@@ -66,7 +75,7 @@ export function EditSessionScreen() {
                 <div className="text-[13.5px] font-bold text-(--c-ink)">{t}</div>
                 <div className="mt-0.75 text-[11.5px] font-medium text-(--c-ink4)">{d}</div>
               </div>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink5)" strokeWidth="2.4" className="ml-2 flex-none"><path d="m9 5 7 7-7 7" /></svg>
+              <RightLine width="12" height="12" style={{ color: "var(--c-ink5)" }} className="ml-2 flex-none" />
             </div>
           ))}
         </div>
@@ -168,10 +177,7 @@ export function SearchScreen() {
     <Phone>
       <div className="flex-1 overflow-hidden px-4 pt-12">
         <div className="flex items-center rounded-full bg-(--c-surface) px-4 py-2.5">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink4)" strokeWidth="2.2" className="mr-2.5 flex-none">
-            <circle cx="11" cy="11" r="7" />
-            <path d="m16.5 16.5 4 4" />
-          </svg>
+          <SearchLine width="15" height="15" className="mr-2.5 flex-none text-(--c-ink4)" />
           <span className="text-[14px] font-medium text-(--c-ink)">线</span>
           <i className="ml-px h-3.75 w-[1.5px] bg-(--c-accent)" />
           <span className="ml-auto flex-none text-[12.5px] font-medium text-(--c-ink3)">取消</span>
@@ -216,10 +222,7 @@ export function SearchEmptyScreen() {
     <Phone>
       <div className="flex-1 overflow-hidden px-4 pt-12">
         <div className="flex items-center rounded-full bg-(--c-surface) px-4 py-2.5">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink4)" strokeWidth="2.2" className="mr-2.5 flex-none">
-            <circle cx="11" cy="11" r="7" />
-            <path d="m16.5 16.5 4 4" />
-          </svg>
+          <SearchLine width="15" height="15" className="mr-2.5 flex-none text-(--c-ink4)" />
           <span className="text-[14px] font-medium text-(--c-ink)">线代考试</span>
           <i className="ml-px h-3.75 w-[1.5px] bg-(--c-accent)" />
           <span className="ml-auto flex-none text-[12.5px] font-medium text-(--c-ink3)">取消</span>
@@ -232,7 +235,7 @@ export function SearchEmptyScreen() {
               <div className="truncate text-[13.5px] font-semibold text-(--c-ink)">新建待办“线代考试”</div>
               <div className="mt-0.5 text-[11.5px] font-medium text-(--c-ink4)">线性代数，考试</div>
             </div>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink5)" strokeWidth="2.4" className="ml-2 flex-none"><path d="m9 5 7 7-7 7" /></svg>
+            <RightLine width="13" height="13" style={{ color: "var(--c-ink5)" }} className="ml-2 flex-none" />
           </div>
         </div>
       </div>
@@ -242,33 +245,12 @@ export function SearchEmptyScreen() {
 
 /* ---------------- long press quick menu ---------------- */
 
-const PM_MUTE = (
-  <g key="b">
-    <path d="M12 3a6 6 0 0 0-6 6c0 5-2 6-2 6h16s-2-1-2-6a6 6 0 0 0-6-6z" />
-    <path d="M4 4l16 16" />
-  </g>
-);
-const PM_DONE = <g key="c"><path d="M20 6 9 17l-5-5" /></g>;
-const PM_LEAVE = (
-  <g key="l">
-    <rect x="3.5" y="4" width="17" height="16" rx="4" />
-    <path d="M9 12h6" />
-  </g>
-);
-const PM_HISTORY = (
-  <g key="h">
-    <path d="M4 17V7M20 17V7" />
-    <path d="m8 13 4-4 4 4" />
-  </g>
-);
-const PM_EDIT = <g key="e"><path d="M4 20h4L20 8l-4-4L4 16z" /></g>;
-
-export const pressMenu: [React.ReactNode, string, string][] = [
-  [PM_MUTE, "静音本节", "仅本次不提醒"],
-  [PM_DONE, "标记已上", "计入出勤，13 → 14 课时"],
-  [PM_LEAVE, "请假一次", "出勤记一次缺勤"],
-  [PM_HISTORY, "变更记录", "共 2 条"],
-  [PM_EDIT, "编辑课程", "时间、地点、备注"],
+export const pressMenu: [React.ComponentType<{ className?: string }>, string, string][] = [
+  [NotificationOffLine, "静音本节", "仅本次不提醒"],
+  [CheckLine, "标记已上", "计入出勤，13 → 14 课时"],
+  [CalendarRemoveLine, "请假一次", "出勤记一次缺勤"],
+  [TimelineLine, "变更记录", "共 2 条"],
+  [EditLine, "编辑课程", "时间、地点、备注"],
 ];
 
 export function LongPressScreen() {
@@ -280,7 +262,7 @@ export function LongPressScreen() {
         <div className="flex items-center justify-between px-5">
           <div className="flex items-center gap-1.5 text-[17px] font-extrabold tracking-[-.01em] text-(--c-ink)">
             第 7 周
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink4)" strokeWidth="2.6"><path d="m6 9 6 6 6-6" /></svg>
+            <DownLine width="13" height="13" style={{ color: "var(--c-ink4)" }} />
           </div>
           <div className="flex items-center gap-2.5 text-[12.5px] font-semibold text-(--c-ink3)">
             <span>单周</span>
@@ -346,17 +328,14 @@ export function LongPressScreen() {
         <div className="px-3.5 pt-1 pb-2.5">
           <div className="truncate text-[12.5px] font-medium text-(--c-ink4)">高等数学（下）&#12288;10:00</div>
         </div>
-        {pressMenu.map(([ic, t], i) => (
+        {pressMenu.map(([Icon, t], i) => (
           <div key={t} className={`mx-2 flex items-center rounded-[11px] px-2.5 py-2.25 ${i === 0 ? "bg-(--c-line2)" : ""}`}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="var(--c-ink2)" strokeWidth="1.7" strokeLinecap="round" className="mr-3 h-4.25 w-4.25 flex-none">{ic}</svg>
+            <Icon className="mr-3 h-4.25 w-4.25 flex-none text-(--c-ink2)" />
             <span className="truncate text-[14px] font-medium text-(--c-ink)">{t}</span>
           </div>
         ))}
         <div className="mx-2 mt-0.5 flex items-center rounded-[11px] px-2.5 py-2.25">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#C25B5B" strokeWidth="1.7" strokeLinecap="round" className="mr-3 h-4.25 w-4.25 flex-none">
-            <circle cx="12" cy="12" r="8.5" />
-            <path d="m9 9 6 6M15 9l-6 6" />
-          </svg>
+          <CloseCircleLine className="mr-3 h-4.25 w-4.25 flex-none text-[#C25B5B]" />
           <span className="text-[14px] font-medium text-(--c-danger)">本节停课</span>
         </div>
       </div>

@@ -1,3 +1,6 @@
+import PhoneLine from "~icons/mingcute/phone-line";
+import EditLine from "~icons/mingcute/edit-line";
+import SearchLine from "~icons/mingcute/search-line";
 import type { Snapshot } from "../../domain/engine";
 import type { Course, Task } from "../../domain/types";
 /** 课程详情：下一次上课、学期进度、出勤、待办、贴纸与隐藏 */
@@ -65,9 +68,7 @@ export function CourseDetailPage({
     ? (
         <a key="phone" href={`tel:${cur.teacherPhone}`} className="inline-flex items-center gap-1 text-(--c-accent)">
           <span className="font-semibold tabular-nums">{formatPhone(cur.teacherPhone)}</span>
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.37 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.33 1.85.57 2.81.7A2 2 0 0 1 22 16.92z" />
-          </svg>
+          <PhoneLine width="12" height="12" aria-hidden="true" />
         </a>
       )
     : null;
@@ -117,7 +118,7 @@ export function CourseDetailPage({
               onClick={onEdit}
               className="flex h-9 w-9 items-center justify-center rounded-full bg-(--c-surface) transition-transform duration-150 active:scale-[.92]"
             >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" style={{ stroke: "var(--c-accent2)" }} strokeWidth="2" strokeLinecap="round"><path d="M4 20h4L20 8l-4-4L4 16z" /></svg>
+              <EditLine width="15" height="15" style={{ color: "var(--c-accent2)" }} />
             </button>
           )}
         />
@@ -278,10 +279,7 @@ function StickerPicker({ course, onPick, onClose }: { course: Course; onPick: (i
         <>
           <SheetHead title="课程贴纸" sub={course.name} trail={<SheetClose onClick={() => dismissRef.current?.()} />} />
           <div className="mx-4 mb-3 flex items-center rounded-[14px] bg-(--c-bg) px-3.5 py-2.5">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink4)" strokeWidth="2.2" strokeLinecap="round" className="mr-2.5 flex-none">
-              <circle cx="11" cy="11" r="6.5" />
-              <path d="m20 20-3.5-3.5" />
-            </svg>
+            <SearchLine width="15" height="15" className="mr-2.5 flex-none" style={{ color: "var(--c-ink4)" }} />
             <TextInput value={q} onChange={e => setQ(e.target.value)} placeholder="搜索学科或语言" autoCapitalize="off" autoCorrect="off" spellCheck={false} />
           </div>
         </>

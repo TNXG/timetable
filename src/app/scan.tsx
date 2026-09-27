@@ -1,3 +1,6 @@
+import FlashFill from "~icons/mingcute/flash-fill";
+import CloseLine from "~icons/mingcute/close-line";
+import FlashLine from "~icons/mingcute/flash-line";
 import { useIsPresent } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { builtinRuleFor, resolveScan } from "../domain/importers/url";
@@ -155,11 +158,11 @@ export function ScanPage({ onBack, onResult }: { onBack: () => void; onResult: (
       <div className="absolute inset-0 flex flex-col">
         <div className="flex flex-none items-center justify-between bg-black px-4 pt-12 pb-4">
           <CircleBtn onClick={() => go(onBack)}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round"><path d="M6 6l12 12M18 6 6 18" /></svg>
+            <CloseLine width="14" height="14" style={{ color: "#fff" }} />
           </CircleBtn>
           <div className="text-[15px] font-bold text-white">扫码导入</div>
           <CircleBtn onClick={() => { setTorch(v => !v); void camera.torch(!torch); }}>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill={torch ? "#fff" : "none"} stroke="#fff" strokeWidth="2.2" strokeLinejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7z" /></svg>
+            {torch ? <FlashFill width="15" height="15" style={{ color: "#fff" }} /> : <FlashLine width="15" height="15" style={{ color: "#fff" }} />}
           </CircleBtn>
         </div>
 

@@ -1,3 +1,5 @@
+import LeftLine from "~icons/mingcute/left-line";
+import RightLine from "~icons/mingcute/right-line";
 import React from "react";
 import { todayDate } from "../shared";
 
@@ -34,8 +36,8 @@ export function CalendarSheet({ mode }: { mode: "day" | "week" }) {
             <span className="text-[12px] font-semibold text-(--c-ink4)">秋季学期 第 5–9 周</span>
           </div>
           <div className="flex items-center gap-4">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink4)" strokeWidth="2.4"><path d="M15 19 8 12l7-7" /></svg>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink4)" strokeWidth="2.4"><path d="m9 5 7 7-7 7" /></svg>
+            <LeftLine width="15" height="15" style={{ color: "var(--c-ink4)" }}  />
+            <RightLine width="15" height="15" style={{ color: "var(--c-ink4)" }}  />
             <span className="text-[12.5px] font-bold text-(--c-accent)">{mode === "day" ? "今天" : "本周"}</span>
           </div>
         </div>

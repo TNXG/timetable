@@ -1,3 +1,5 @@
+import PicLine from "~icons/mingcute/pic-line";
+import CloseLine from "~icons/mingcute/close-line";
 import Download2Line from "~icons/mingcute/download-2-line";
 import Delete2Line from "~icons/mingcute/delete-2-line";
 import { animate } from "motion/react";
@@ -29,10 +31,7 @@ export function TaskPhotoImg({ path, className = "", alt = "", fit = "cover" }: 
   if (!src || failed) {
     return (
       <span className={`flex items-center justify-center bg-(--c-surface2) ${className}`}>
-        <svg viewBox="0 0 24 24" fill="none" style={{ stroke: "var(--c-ink5)" }} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-4.5 w-4.5">
-          <rect x="3" y="5" width="18" height="14" rx="3" />
-          <path d="m3 16 5-4 4 3 3-2 6 4" />
-        </svg>
+        <PicLine className="h-4.5 w-4.5" style={{ color: "var(--c-ink5)" }} />
       </span>
     );
   }
@@ -128,7 +127,7 @@ export function PhotoViewer({ path, onClose, onDelete }: { path: string; onClose
         onClick={close}
         className="absolute top-12 left-5 flex h-9 w-9 items-center justify-center rounded-full bg-white/12 transition-transform duration-150 active:scale-[.92]"
       >
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round"><path d="M6 6l12 12M18 6 6 18" /></svg>
+        <CloseLine width="15" height="15" style={{ color: "#fff" }} />
       </button>
       {menu && (
         <ActionSheet

@@ -1,6 +1,7 @@
 import type { Snapshot } from "../../domain/engine";
 import type { Course, Task } from "../../domain/types";
 import { useMemo, useState } from "react";
+import RightLine from "~icons/mingcute/right-line";
 import { fmtMinutes, weekdayOf } from "../../domain/dates";
 import { suggestedDue } from "../../domain/next-class";
 import { TaskPhotoImg } from "../photo";
@@ -102,7 +103,7 @@ function InboxRow({
             {WD[weekdayOf(suggest.due)]}
             {" "}
             {fmtMinutes(suggest.dueMinutes)}
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="m9 5 7 7-7 7" /></svg>
+            <RightLine width="10" height="10" />
           </button>
         )}
       </div>
@@ -236,7 +237,7 @@ export function TodoView({
                         {" "}
                         项
                       </span>
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" style={{ stroke: "var(--c-ink5)" }} strokeWidth="2.4" className={showDone ? "rotate-90" : ""}><path d="m9 5 7 7-7 7" /></svg>
+                      <RightLine width="12" height="12" className={showDone ? "rotate-90" : ""} style={{ color: "var(--c-ink5)" }} />
                     </button>
                     {showDone && (
                       <div className="mt-2.5 space-y-2">

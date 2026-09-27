@@ -1,3 +1,4 @@
+import DownLine from "~icons/mingcute/down-line";
 import React from "react";
 import { C, dockStyle, Nav, Phone, tint } from "../shared";
 
@@ -29,7 +30,7 @@ export function WeekShell({
         <div className="flex items-center justify-between px-5">
           <div className="flex items-center gap-1.5 text-[17px] font-extrabold tracking-[-.01em] text-(--c-ink)">
             {week}
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink4)" strokeWidth="2.6"><path d="m6 9 6 6 6-6" /></svg>
+            <DownLine width="13" height="13" style={{ color: "var(--c-ink4)" }}  />
           </div>
           <div className="text-[12.5px] font-semibold" style={{ color: tone }}>{right}</div>
         </div>
@@ -160,7 +161,7 @@ export function ExamWeekScreen() {
         <div className="flex items-center justify-between px-5">
           <div className="flex items-center gap-1.5 text-[17px] font-extrabold tracking-[-.01em] text-(--c-ink)">
             第 19 周
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink4)" strokeWidth="2.6"><path d="m6 9 6 6 6-6" /></svg>
+            <DownLine width="13" height="13" style={{ color: "var(--c-ink4)" }}  />
           </div>
           <div className="text-[12.5px] font-semibold text-(--c-accent)">考试周</div>
         </div>

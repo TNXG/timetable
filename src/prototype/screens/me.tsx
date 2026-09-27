@@ -1,3 +1,5 @@
+import CameraLine from "~icons/mingcute/camera-2-line";
+import RightLine from "~icons/mingcute/right-line";
 import React from "react";
 import { Nav, Phone, SubHead } from "../shared";
 
@@ -25,17 +27,10 @@ export const meGroups: [string, [string, string][]][] = [
 
 /* ---------------- 个人资料 / 统计 / 清除数据 ---------------- */
 
-export const CAM = (
-  <g>
-    <path d="M4 8.5A2.5 2.5 0 0 1 6.5 6H8l1.2-2h5.6L16 6h1.5A2.5 2.5 0 0 1 20 8.5v8A2.5 2.5 0 0 1 17.5 19h-11A2.5 2.5 0 0 1 4 16.5z" />
-    <circle cx="12" cy="12.5" r="3.2" />
-  </g>
-);
-
 export function CamBadge({ className }: { className: string }) {
   return (
     <span className={`grid place-items-center rounded-full ${className}`}>
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">{CAM}</svg>
+      <CameraLine width="13" height="13" />
     </span>
   );
 }
@@ -148,7 +143,7 @@ export function StatsScreen() {
                 <div key={k} className={`flex items-center py-3.5 ${i ? "border-t border-(--c-surface2)" : ""}`}>
                   <span className="flex-1 text-[14px] font-semibold text-(--c-ink)">{k}</span>
                   <span className="text-[12.5px] font-medium tabular-nums text-(--c-ink4)">{v}</span>
-                  {go && <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink5)" strokeWidth="2.2" className="ml-2"><path d="m9 5 7 7-7 7" /></svg>}
+                  {go && <RightLine width="13" height="13" style={{ color: "var(--c-ink5)" }} className="ml-2" />}
                 </div>
               ))}
             </div>
@@ -221,13 +216,13 @@ export function AboutScreen() {
                     · GitHub.com
                   </div>
                 </div>
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink5)" strokeWidth="2.2" strokeLinecap="round" className="ml-3 flex-none"><path d="m9 5 7 7-7 7" /></svg>
+                <RightLine width="13" height="13" style={{ color: "var(--c-ink5)" }} strokeLinecap="round" className="ml-3 flex-none" />
               </button>
             ))}
             {["反馈问题"].map(k => (
               <div key={k} className="flex items-center py-3.5 border-t border-(--c-line2)">
                 <span className="flex-1 text-[14px] font-semibold text-(--c-ink)">{k}</span>
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink5)" strokeWidth="2.2" className="ml-2"><path d="m9 5 7 7-7 7" /></svg>
+                <RightLine width="13" height="13" style={{ color: "var(--c-ink5)" }} className="ml-2" />
               </div>
             ))}
           </div>
@@ -278,7 +273,7 @@ export function MeScreen() {
                   <div key={k} className={`flex items-center py-3.5 ${i ? "border-t border-(--c-line2)" : ""}`}>
                     <span className="flex-1 text-[14px] font-semibold text-(--c-ink)">{k}</span>
                     <span className="text-[12.5px] font-medium text-(--c-ink4)">{v}</span>
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink5)" strokeWidth="2.2" className="ml-2"><path d="m9 5 7 7-7 7" /></svg>
+                    <RightLine width="13" height="13" style={{ color: "var(--c-ink5)" }} className="ml-2" />
                   </div>
                 ))}
               </div>

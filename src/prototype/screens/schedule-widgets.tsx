@@ -1,3 +1,6 @@
+import ArrowRightLine from "~icons/mingcute/arrow-right-line";
+import AddLine from "~icons/mingcute/add-line";
+import SubtractLine from "~icons/mingcute/subtract-line";
 import React from "react";
 import { Phone, SubHead } from "../shared";
 
@@ -26,14 +29,14 @@ export function Stepper({ value, unit }: { value: number; unit?: string }) {
   return (
     <div className="flex items-center gap-1">
       <span className="flex h-7 w-7 items-center justify-center rounded-full bg-(--c-surface2)">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink)" strokeWidth="2.6" strokeLinecap="round"><path d="M5 12h14" /></svg>
+        <SubtractLine width="12" height="12" style={{ color: "var(--c-ink)" }} strokeLinecap="round" />
       </span>
       <span className="min-w-14 text-center text-[15px] font-bold tabular-nums text-(--c-ink)">
         {value}
         {unit && <span className="ml-0.5 text-[12px] font-semibold text-(--c-ink4)">{unit}</span>}
       </span>
       <span className="flex h-7 w-7 items-center justify-center rounded-full bg-(--c-surface2)">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink)" strokeWidth="2.6" strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>
+        <AddLine width="12" height="12" style={{ color: "var(--c-ink)" }} strokeLinecap="round" />
       </span>
     </div>
   );
@@ -91,7 +94,7 @@ export function ScheduleScreen({ overlay }: { overlay?: React.ReactNode }) {
                   <div className="flex items-center py-1.5">
                     <span className="w-6.5 flex-none text-[12.5px] font-bold tabular-nums text-(--c-ink4)">{r.i}</span>
                     <span className="flex-1 rounded-[10px] bg-(--c-surface2) py-1.5 text-center text-[15px] font-bold tabular-nums text-(--c-ink)">{hm(r.s)}</span>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink4)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mx-2 flex-none"><path d="M4 12h16M14 6l6 6-6 6" /></svg>
+                    <ArrowRightLine width="16" height="16" className="mx-2 flex-none text-(--c-ink4)" />
                     <span className={`flex-1 rounded-[10px] py-1.5 text-center text-[15px] tabular-nums ${r.custom ? "font-bold text-(--c-ink)" : "font-medium text-(--c-ink4)"}`} style={r.custom ? { boxShadow: "inset 0 0 0 1.5px var(--c-accent)" } : undefined}>{hm(r.e)}</span>
                     <span className={`ml-3 w-11.5 flex-none text-right text-[12px] font-semibold tabular-nums ${r.custom ? "text-(--c-accent)" : "text-(--c-ink5)"}`}>
                       {r.e - r.s}

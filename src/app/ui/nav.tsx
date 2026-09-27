@@ -1,34 +1,18 @@
+import Home2Line from "~icons/mingcute/home-2-line";
+import CalendarLine from "~icons/mingcute/calendar-line";
+import TaskLine from "~icons/mingcute/task-line";
+import Settings3Line from "~icons/mingcute/settings-3-line";
 import LeftLine from "~icons/mingcute/left-line";
 import { motion } from "motion/react";
 import React from "react";
 import { useImeShrink } from "../ime";
 import { dockStyle } from "./constants";
 
-const ICON_TODAY = <path d="M3 10.5 12 3l9 7.5V21h-6v-6H9v6H3z" key="h" />;
-const ICON_SCHEDULE = (
-  <g key="c">
-    <rect x="3" y="4" width="18" height="17" rx="4" />
-    <path d="M3 9h18M8 2v4M16 2v4" />
-  </g>
-);
-const ICON_TODO = (
-  <g key="t">
-    <path d="M9 11.5 11 14l4-5" />
-    <rect x="3.5" y="4" width="17" height="16" rx="4" />
-  </g>
-);
-const ICON_ME = (
-  <g key="s">
-    <circle cx="12" cy="12" r="3" />
-    <path d="M19 12a7 7 0 0 0-.1-1.2l2-1.6-2-3.4-2.4 1a7 7 0 0 0-2-1.2L14 3h-4l-.5 2.6a7 7 0 0 0-2 1.2l-2.4-1-2 3.4 2 1.6A7 7 0 0 0 5 12c0 .4 0 .8.1 1.2l-2 1.6 2 3.4 2.4-1a7 7 0 0 0 2 1.2L10 21h4l.5-2.6a7 7 0 0 0 2-1.2l2.4 1 2-3.4-2-1.6c.1-.4.1-.8.1-1.2z" />
-  </g>
-);
-
 export const NAV_ITEMS: [React.ReactNode, string][] = [
-  [ICON_TODAY, "今天"],
-  [ICON_SCHEDULE, "课表"],
-  [ICON_TODO, "待办"],
-  [ICON_ME, "我的"],
+  [<Home2Line />, "今天"],
+  [<CalendarLine />, "课表"],
+  [<TaskLine />, "待办"],
+  [<Settings3Line />, "我的"],
 ];
 
 export function Nav({ active, onTab, hidden }: { active: number; onTab: (i: number) => void; hidden?: boolean }) {
@@ -56,7 +40,7 @@ export function Nav({ active, onTab, hidden }: { active: number; onTab: (i: numb
                     transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                   />
                 )}
-                <svg viewBox="0 0 24 24" fill="none" stroke={on ? "var(--c-accent)" : "var(--c-ink)"} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="relative z-10 h-4.75 w-4.75 transition-colors duration-200">{ic}</svg>
+                <span className={`relative z-10 h-4.75 w-4.75 transition-colors duration-200 [&>svg]:h-full [&>svg]:w-full ${on ? "text-(--c-accent)" : "text-(--c-ink)"}`}>{ic}</span>
                 <span className={`relative z-10 text-[9.5px] font-bold transition-colors duration-200 ${on ? "text-(--c-accent)" : "text-(--c-ink)"}`}>{label}</span>
               </button>
             );

@@ -1,3 +1,4 @@
+import LeftLine from "~icons/mingcute/left-line";
 import type { Snapshot } from "../../domain/engine";
 import type { CapturedPhoto } from "../camera";
 import { useMemo, useState } from "react";
@@ -59,7 +60,7 @@ export function ReviewPage({
       <div className="flex flex-1 flex-col overflow-hidden px-5 pt-12">
         <div className="flex flex-none items-center justify-between">
           <button onClick={onBack} className="flex h-9 w-9 items-center justify-center rounded-full bg-(--c-surface) transition-transform duration-150 active:scale-[.92]">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style={{ stroke: "var(--c-ink)" }} strokeWidth="2.4"><path d="M15 19 8 12l7-7" /></svg>
+            <LeftLine width="14" height="14" style={{ color: "var(--c-ink)" }} />
           </button>
           <button onClick={onRetake} className="flex h-9 items-center rounded-full bg-(--c-surface) px-4 text-[13px] font-bold text-(--c-ink) transition-transform duration-150 active:scale-[.96]">重拍</button>
         </div>

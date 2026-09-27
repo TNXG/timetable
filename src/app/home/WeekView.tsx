@@ -1,3 +1,4 @@
+import DownLine from "~icons/mingcute/down-line";
 import type { Snapshot } from "../../domain/engine";
 import type { Occurrence } from "../../domain/types";
 import type { Rect } from "../ui";
@@ -311,7 +312,7 @@ export function WeekView({ snap, anchor, setAnchor, onPick, onMenu, onSearch, li
               {week}
               {" "}
               周
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" style={{ stroke: "var(--c-ink4)" }} strokeWidth="2.6" strokeLinecap="round"><path d="m6 9 6 6 6-6" /></svg>
+              <DownLine width={13} height={13} className="text-(--c-ink4)" />
             </button>
             <div className="flex items-center gap-2.5">
               <span className="text-[12.5px] font-semibold text-(--c-ink3)">{week % 2 === 1 ? "单周" : "双周"}</span>

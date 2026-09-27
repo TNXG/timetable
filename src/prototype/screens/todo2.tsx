@@ -1,10 +1,12 @@
+import ArrowUpLine from "~icons/mingcute/arrow-up-line";
+import RightLine from "~icons/mingcute/right-line";
 import React from "react";
 import { Board, C, CameraIcon, dockStyle, Nav, Phone } from "../shared";
 
 /* ---------------- 07b todo v2：先记下，再整理 ---------------- */
 
 export const ArrowUp = ({ stroke = "#fff" }: { stroke?: string }) => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><path d="M12 19V5M5 12l7-7 7 7" /></svg>
+  <ArrowUpLine width="16" height="16" style={{ color: stroke }} />
 );
 
 /* 板书：相机取景、照片缩略图共用一块假图 */
@@ -59,7 +61,7 @@ export function Todo2Row({ t }: { t: Todo2 }) {
         {t.suggest && (
           <div className="mt-2 inline-flex items-center gap-1 rounded-full bg-(--c-accent-soft) px-2.5 py-1.25 text-[11.5px] font-bold text-(--c-accent)">
             {t.suggest}
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="m9 5 7 7-7 7" /></svg>
+            <RightLine width="10" height="10" style={{ color: "currentColor" }}  />
           </div>
         )}
       </div>
@@ -97,7 +99,7 @@ export function Todo2List() {
         ))}
         <div className="flex items-center justify-between px-0.5 py-1">
           <span className="text-[13px] font-extrabold tracking-[-.01em] text-(--c-ink4)">已完成 4 项</span>
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink5)" strokeWidth="2.4"><path d="m9 5 7 7-7 7" /></svg>
+          <RightLine width="12" height="12" style={{ color: "var(--c-ink5)" }}  />
         </div>
       </div>
     </div>

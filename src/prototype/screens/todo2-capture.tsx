@@ -1,3 +1,9 @@
+import CameraRotateLine from "~icons/mingcute/camera-rotate-line";
+import FlashLine from "~icons/mingcute/flash-line";
+import MoreFill from "~icons/mingcute/more-1-fill";
+import CloseLine from "~icons/mingcute/close-line";
+import DownLine from "~icons/mingcute/down-line";
+import LeftLine from "~icons/mingcute/left-line";
 import type { Course } from "../shared";
 import React from "react";
 import { Board, C, CameraIcon, CourseRow, days, EmptyBlock, Nav, Phone, todayIndex } from "../shared";
@@ -10,15 +16,15 @@ export function Todo2CameraScreen() {
       <div className="relative flex flex-1 flex-col pt-12">
         <div className="flex items-center justify-between px-4">
           <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white/12">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round"><path d="M6 6l12 12M18 6 6 18" /></svg>
+            <CloseLine width="14" height="14" style={{ color: "#fff" }} strokeLinecap="round" />
           </span>
           <span className="flex items-center gap-1.5 rounded-full bg-white/12 px-3 py-1.5 text-[12.5px] font-bold text-white">
             <span className="h-1.75 w-1.75 rounded-full" style={{ background: C.math }} />
             高等数学（下）
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.6)" strokeWidth="3"><path d="m6 9 6 6 6-6" /></svg>
+            <DownLine width="10" height="10" style={{ color: "rgba(255,255,255,.6)" }}  />
           </span>
           <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white/12">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7z" /></svg>
+            <FlashLine width="15" height="15" className="text-white" />
           </span>
         </div>
 
@@ -36,10 +42,7 @@ export function Todo2CameraScreen() {
             <span className="h-15.5 w-15.5 rounded-full bg-white" />
           </span>
           <span className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-white/12">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M20 12a8 8 0 0 1-14.3 4.9M4 12a8 8 0 0 1 14.3-4.9" />
-              <path d="M4 20v-5h5M20 4v5h-5" />
-            </svg>
+            <CameraRotateLine width="20" height="20" className="text-white" />
           </span>
         </div>
       </div>
@@ -79,11 +82,11 @@ export function Todo2PickerScreen() {
       <div className="relative flex flex-1 flex-col pt-12">
         <div className="flex items-center justify-between px-4">
           <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white/12">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round"><path d="M6 6l12 12M18 6 6 18" /></svg>
+            <CloseLine width="14" height="14" style={{ color: "#fff" }} strokeLinecap="round" />
           </span>
           <span className="flex items-center gap-1.5 rounded-full bg-white/12 px-3 py-1.5 text-[12.5px] font-bold text-white">
             最近项目
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.6)" strokeWidth="3"><path d="m6 9 6 6 6-6" /></svg>
+            <DownLine width="10" height="10" style={{ color: "rgba(255,255,255,.6)" }}  />
           </span>
           <span className="w-9" />
         </div>
@@ -124,7 +127,7 @@ export function Todo2PickerScreen() {
 export function BackCircle() {
   return (
     <div className="flex h-9 w-9 items-center justify-center rounded-full bg-(--c-surface)">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink)" strokeWidth="2.4"><path d="M15 19 8 12l7-7" /></svg>
+      <LeftLine width="14" height="14" style={{ color: "var(--c-ink)" }}  />
     </div>
   );
 }
@@ -169,11 +172,7 @@ export function Todo2DetailScreen() {
         <div className="flex items-center justify-between">
           <BackCircle />
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-(--c-surface)">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="var(--c-ink)">
-              <circle cx="5" cy="12" r="2" />
-              <circle cx="12" cy="12" r="2" />
-              <circle cx="19" cy="12" r="2" />
-            </svg>
+            <MoreFill width="16" height="16" className="text-(--c-ink)" />
           </div>
         </div>
 
@@ -272,7 +271,7 @@ export function Todo2ClassEndScreen() {
                         </span>
                         <span className="flex h-8.5 flex-1 items-center justify-center rounded-full bg-(--c-surface2) text-[12.5px] font-bold text-(--c-ink)">文字</span>
                         <span className="flex h-8.5 w-8.5 items-center justify-center rounded-full bg-(--c-surface2)">
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink3)" strokeWidth="2.6" strokeLinecap="round"><path d="M6 6l12 12M18 6 6 18" /></svg>
+                          <CloseLine width="12" height="12" style={{ color: "var(--c-ink3)" }} strokeLinecap="round" />
                         </span>
                       </div>
                     </div>

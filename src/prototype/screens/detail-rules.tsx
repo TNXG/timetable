@@ -1,3 +1,9 @@
+import BookmarkFill from "~icons/mingcute/bookmark-fill";
+import CopyLine from "~icons/mingcute/copy-line";
+import LoadingLine from "~icons/mingcute/loading-3-line";
+import PhoneLine from "~icons/mingcute/phone-line";
+import LeftLine from "~icons/mingcute/left-line";
+import RightLine from "~icons/mingcute/right-line";
 import React from "react";
 import { Sticker, stickerTilt } from "../../app/Sticker";
 import { Board, C, CameraIcon, Card, Nav, Phone, tint, TopBar } from "../shared";
@@ -15,7 +21,7 @@ export function DetailScreen({ tall }: { tall?: boolean }) {
       <span>****</span>
       {" "}
       4521
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.37 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.33 1.85.57 2.81.7A2 2 0 0 1 22 16.92z" /></svg>
+      <PhoneLine width="12" height="12" aria-hidden="true" />
     </a>
   );
   return (
@@ -23,10 +29,10 @@ export function DetailScreen({ tall }: { tall?: boolean }) {
       <div className={`flex-1 space-y-3 px-4 pt-12 ${tall ? "" : "overflow-hidden"}`}>
         <div className="flex items-center justify-between px-1">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-(--c-surface)">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink)" strokeWidth="2.4"><path d="M15 19 8 12l7-7" /></svg>
+            <LeftLine width="15" height="15" style={{ color: "var(--c-ink)" }}  />
           </div>
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-(--c-surface)">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="#6D78D6" stroke="#6D78D6" strokeWidth="1.8"><path d="M6 3.5h12V21l-6-4-6 4z" /></svg>
+            <BookmarkFill width="16" height="16" style={{ color: "#6D78D6" }} />
           </div>
         </div>
 
@@ -164,7 +170,7 @@ export function AddScreen() {
       <div className="flex-1 overflow-hidden px-5 pt-12">
         <div className="flex items-center">
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-(--c-surface)">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink)" strokeWidth="2.4"><path d="M15 19 8 12l7-7" /></svg>
+            <LeftLine width="14" height="14" style={{ color: "var(--c-ink)" }}  />
           </div>
         </div>
         <h1 className="mt-4 text-[26px] font-extrabold tracking-[-.02em] text-(--c-ink)">导入课表</h1>
@@ -184,10 +190,10 @@ export function AddScreen() {
                 </div>
                 {r.running
                   ? (
-                      <svg className="ml-3 h-3.75 w-3.75 flex-none animate-spin" viewBox="0 0 24 24" fill="none" stroke="#4F5BD5" strokeWidth="2.6" strokeLinecap="round"><path d="M12 3a9 9 0 1 0 9 9" /></svg>
+                      <LoadingLine className="ml-3 h-3.75 w-3.75 flex-none animate-spin text-[#4F5BD5]" />
                     )
                   : (
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink5)" strokeWidth="2.4" className="ml-3 flex-none"><path d="m9 5 7 7-7 7" /></svg>
+                      <RightLine width="13" height="13" style={{ color: "var(--c-ink5)" }} className="ml-3 flex-none" />
                     )}
               </div>
               {r.running && (
@@ -207,7 +213,7 @@ export function AddScreen() {
                 <div className="text-[14px] font-bold text-(--c-ink)">{t}</div>
                 <div className="mt-0.5 text-[12px] font-medium text-(--c-ink4)">{d}</div>
               </div>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink5)" strokeWidth="2.4" className="flex-none"><path d="m9 5 7 7-7 7" /></svg>
+              <RightLine width="13" height="13" style={{ color: "var(--c-ink5)" }} className="flex-none" />
             </div>
           ))}
         </div>
@@ -351,10 +357,7 @@ export function AiRuleScreen() {
 
         <div className="relative mt-6 rounded-2xl bg-(--c-surface) px-4 py-4">
           <div className="absolute top-3.5 right-4">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink2)" strokeWidth="1.9">
-              <rect x="9" y="9" width="11" height="11" rx="2.5" />
-              <path d="M15 5.5A2.5 2.5 0 0 0 12.5 3h-6A3.5 3.5 0 0 0 3 6.5v6A2.5 2.5 0 0 0 5.5 15" />
-            </svg>
+            <CopyLine width="14" height="14" className="text-(--c-ink2)" />
           </div>
           {promptRows.map(({ key, spans }) => (
             <div key={key} className="pr-8 font-mono text-[11.5px] leading-[1.95]">

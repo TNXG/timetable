@@ -1,3 +1,4 @@
+import CheckLine from "~icons/mingcute/check-line";
 import type { Snapshot } from "../../domain/engine";
 import type { Course, Task } from "../../domain/types";
 import Book2Line from "~icons/mingcute/book-2-line";
@@ -78,7 +79,7 @@ export function CheckBox({ done, color }: { done: boolean; color: string }) {
       style={{ borderColor: done ? color : "var(--c-ink5)", background: done ? color : "transparent" }}
     >
       {done && (
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" style={{ stroke: "var(--c-surface)" }} strokeWidth="3.6"><path d="m6 12.5 4 4 8-9" /></svg>
+        <CheckLine width="10" height="10" style={{ color: "var(--c-surface)" }} />
       )}
     </span>
   );

@@ -1,3 +1,4 @@
+import DownLine from "~icons/mingcute/down-line";
 import React, { useLayoutEffect, useRef, useState } from "react";
 import { Sticker, stickerTilt } from "../../app/Sticker";
 import { WeekAxis, WeekCard, WeekLines } from "../../app/week-axis";
@@ -147,7 +148,7 @@ export function WeekScreen({ overlay }: { overlay?: React.ReactNode }) {
         <div className="flex items-center justify-between px-5">
           <div className="flex items-center gap-1.5 text-[17px] font-extrabold tracking-[-.01em] text-(--c-ink)">
             第 7 周
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink4)" strokeWidth="2.6"><path d="m6 9 6 6 6-6" /></svg>
+            <DownLine width="13" height="13" style={{ color: "var(--c-ink4)" }}  />
           </div>
           <div className="flex items-center gap-2.5 text-[12.5px] font-semibold text-(--c-ink3)">
             <span>单周</span>

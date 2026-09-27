@@ -1,3 +1,6 @@
+import CheckLine from "~icons/mingcute/check-line";
+import DownLine from "~icons/mingcute/down-line";
+import RightLine from "~icons/mingcute/right-line";
 import type { Ev } from "./today-week";
 import React from "react";
 import { C, DayPicker, Nav, Phone, tint, todayIndex, TopBar } from "../shared";
@@ -50,7 +53,7 @@ export function ConflictScreen({ mode = "view" }: { mode?: "view" | "pick" }) {
         <div className="flex items-center justify-between px-5">
           <div className="flex items-center gap-1.5 text-[17px] font-extrabold tracking-[-.01em] text-(--c-ink)">
             第 7 周
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink4)" strokeWidth="2.6"><path d="m6 9 6 6 6-6" /></svg>
+            <DownLine width="13" height="13" style={{ color: "var(--c-ink4)" }}  />
           </div>
           <div className="text-[12.5px] font-semibold text-(--c-amber)">1 处时间冲突</div>
         </div>
@@ -139,7 +142,7 @@ export function ConflictScreen({ mode = "view" }: { mode?: "view" | "pick" }) {
                           className="mr-3 flex h-4.25 w-4.25 flex-none items-center justify-center rounded-full border-[1.8px]"
                           style={{ borderColor: on ? color : "var(--c-radio-border)", background: on ? color : "transparent" }}
                         >
-                          {on && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.6"><path d="m6 12.5 4 4 8-9" /></svg>}
+                          {on && <CheckLine width="10" height="10" style={{ color: "#fff" }}  />}
                         </span>
                       )
                     : (
@@ -212,7 +215,7 @@ export function ChangeScreen() {
                   : (
                       <div className="mt-1.5 flex items-center gap-2.5">
                         <span className="text-[14px] font-medium text-(--c-ink4b) line-through">{from}</span>
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink5)" strokeWidth="2.4" className="flex-none"><path d="m9 5 7 7-7 7" /></svg>
+                        <RightLine width="13" height="13" style={{ color: "var(--c-ink5)" }} className="flex-none" />
                         <span className="text-[14px] font-bold text-(--c-accent)">{to}</span>
                       </div>
                     )}

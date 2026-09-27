@@ -1,3 +1,7 @@
+import CalendarLine from "~icons/mingcute/calendar-line";
+import HomeLine from "~icons/mingcute/home-1-line";
+import SettingsLine from "~icons/mingcute/settings-3-line";
+import TaskLine from "~icons/mingcute/task-line";
 import CameraLine from "~icons/mingcute/camera-line";
 import LeftLine from "~icons/mingcute/left-line";
 import React from "react";
@@ -23,33 +27,10 @@ export function Phone({ children, tall }: { children: React.ReactNode; tall?: bo
   );
 }
 
-const NAV_TODAY = <path d="M3 10.5 12 3l9 7.5V21h-6v-6H9v6H3z" key="h" />;
-const NAV_SCHEDULE = (
-  <g key="c">
-    <rect x="3" y="4" width="18" height="17" rx="4" />
-    <path d="M3 9h18M8 2v4M16 2v4" />
-  </g>
-);
-const NAV_TODO = (
-  <g key="t">
-    <path d="M9 11.5 11 14l4-5" />
-    <rect x="3.5" y="4" width="17" height="16" rx="4" />
-  </g>
-);
-const NAV_ME = (
-  <g key="s">
-    <circle cx="12" cy="12" r="3" />
-    <path d="M19 12a7 7 0 0 0-.1-1.2l2-1.6-2-3.4-2.4 1a7 7 0 0 0-2-1.2L14 3h-4l-.5 2.6a7 7 0 0 0-2 1.2l-2.4-1-2 3.4 2 1.6A7 7 0 0 0 5 12c0 .4 0 .8.1 1.2l-2 1.6 2 3.4 2.4-1a7 7 0 0 0 2 1.2L10 21h4l.5-2.6a7 7 0 0 0 2-1.2l2.4 1 2-3.4-2-1.6c.1-.4.1-.8.1-1.2z" />
-  </g>
-);
+const NAV_ICONS = [HomeLine, CalendarLine, TaskLine, SettingsLine];
 
 export function Nav({ active }: { active: number }) {
-  const items: [React.ReactNode, string][] = [
-    [NAV_TODAY, "今天"],
-    [NAV_SCHEDULE, "课表"],
-    [NAV_TODO, "待办"],
-    [NAV_ME, "我的"],
-  ];
+  const labels = ["今天", "课表", "待办", "我的"];
   return (
     <div className="pointer-events-none absolute inset-x-0 bottom-6 z-8 flex justify-center px-4">
       <div
@@ -60,12 +41,12 @@ export function Nav({ active }: { active: number }) {
           boxShadow: "var(--c-dock-shadow)",
         }}
       >
-        {items.map(([ic, label], i) => {
+        {labels.map((label, i) => {
           const on = i === active;
           return (
             <div key={label} className="relative flex flex-1 flex-col items-center gap-0.5 px-1 pt-1.5 pb-1.25">
               {on && <i className="absolute inset-x-px inset-y-0 rounded-full bg-(--c-accent-soft)" />}
-              <svg viewBox="0 0 24 24" fill="none" stroke={on ? "var(--c-accent)" : "var(--c-ink)"} strokeWidth="2.2" className="relative z-10 h-4.75 w-4.75">{ic}</svg>
+              {React.createElement(NAV_ICONS[i], { className: "relative z-10 h-4.75 w-4.75", style: { color: on ? "var(--c-accent)" : "var(--c-ink)" } })}
               <span className={`relative z-10 text-[9.5px] font-bold ${on ? "text-(--c-accent)" : "text-(--c-ink)"}`}>{label}</span>
             </div>
           );
@@ -202,10 +183,7 @@ export function DateStrip({ active }: { active: number }) {
       className="absolute inset-x-4 bottom-26 z-9 rounded-3xl px-2 py-1.5"
       trail={(
         <div className="flex w-10 flex-none items-center justify-center">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink2)" strokeWidth="1.9">
-            <rect x="3" y="4" width="18" height="17" rx="4" />
-            <path d="M3 9h18M8 2v4M16 2v4" />
-          </svg>
+          <CalendarLine className="h-[17px] w-[17px] text-(--c-ink2)" />
         </div>
       )}
     />

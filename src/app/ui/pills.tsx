@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from "motion/react";
 import React from "react";
 import ArrowUpLine from "~icons/mingcute/arrow-up-line";
+import BackLine from "~icons/mingcute/back-line";
 import CameraLine from "~icons/mingcute/camera-line";
 import { dockStyle, SHEET, tint } from "./constants";
 
@@ -131,10 +132,7 @@ export function BackPill({ show, label, bottom, onClick }: { show: boolean; labe
             className="pointer-events-auto flex h-9 items-center gap-1.5 rounded-full pr-4 pl-3 text-[13px] font-bold text-(--c-accent) transition-transform duration-150 active:scale-[.96]"
             style={dockStyle}
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M9 14 4 9l5-5" />
-              <path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11" />
-            </svg>
+            <BackLine width={14} height={14} />
             {label}
           </button>
         </motion.div>

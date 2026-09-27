@@ -1,3 +1,5 @@
+import CheckLine from "~icons/mingcute/check-line";
+import Copy2Line from "~icons/mingcute/copy-2-line";
 /** AI 转换课表：复制 Prompt → AI 输出 JSON → 粘贴 → 走 JSON 规则解析 */
 import { useRef, useState } from "react";
 import { AI_IMPORT_PROMPT } from "../../domain/ai-prompt";
@@ -74,13 +76,10 @@ export function AiImportPage({ onBack, onNext, attach }: { onBack: () => void; o
           <button onClick={copy} className="absolute top-1.5 right-1.5 flex h-10 w-10 items-center justify-center rounded-full transition-opacity active:opacity-60">
             {copied
               ? (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{ stroke: "var(--c-accent)" }} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="m5 12 5 5L20 7" /></svg>
+                  <CheckLine width="18" height="18" style={{ color: "var(--c-accent)" }} />
                 )
               : (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{ stroke: "var(--c-ink2)" }} strokeWidth="1.9">
-                    <rect x="9" y="9" width="11" height="11" rx="2.5" />
-                    <path d="M15 5.5A2.5 2.5 0 0 0 12.5 3h-6A3.5 3.5 0 0 0 3 6.5v6A2.5 2.5 0 0 0 5.5 15" />
-                  </svg>
+                  <Copy2Line width="18" height="18" style={{ color: "var(--c-ink2)" }} />
                 )}
           </button>
           <div className="relative h-42 overflow-hidden">

@@ -1,3 +1,4 @@
+import CheckLine from "~icons/mingcute/check-line";
 import type { ThemePref } from "../theme";
 import { setStickersOn, useStickersOn } from "../Sticker";
 /** 主题选择：三块小预览用各主题色板渲染，选项同提醒设置页 */
@@ -48,7 +49,7 @@ export function ThemePage({ onBack }: { onBack: () => void }) {
               >
                 <span className={`flex-1 text-[14px] font-semibold ${on ? "text-(--c-accent)" : "text-(--c-ink)"}`}>{THEME_LABEL[t]}</span>
                 {on && (
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" style={{ stroke: "var(--c-accent)" }} strokeWidth="2.6"><path d="m5 13 4.5 4.5L19 7" /></svg>
+                  <CheckLine width="15" height="15" style={{ color: "var(--c-accent)" }} />
                 )}
               </button>
             );
@@ -68,7 +69,7 @@ export function ThemePage({ onBack }: { onBack: () => void }) {
                   >
                     <span className={`flex-1 text-[14px] font-semibold ${on ? "text-(--c-accent)" : "text-(--c-ink)"}`}>{label}</span>
                     {on && (
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" style={{ stroke: "var(--c-accent)" }} strokeWidth="2.6"><path d="m5 13 4.5 4.5L19 7" /></svg>
+                      <CheckLine width="15" height="15" style={{ color: "var(--c-accent)" }} />
                     )}
                   </button>
                 );
@@ -88,7 +89,7 @@ export function ThemePage({ onBack }: { onBack: () => void }) {
               >
                 <span className={`flex-1 text-[14px] font-semibold ${on ? "text-(--c-accent)" : "text-(--c-ink)"}`}>{label}</span>
                 {on && (
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" style={{ stroke: "var(--c-accent)" }} strokeWidth="2.6"><path d="m5 13 4.5 4.5L19 7" /></svg>
+                  <CheckLine width="15" height="15" style={{ color: "var(--c-accent)" }} />
                 )}
               </button>
             );

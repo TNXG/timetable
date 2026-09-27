@@ -1,3 +1,4 @@
+import SearchLine from "~icons/mingcute/search-line";
 import type { State } from "../../domain/store";
 import type { Course, Task } from "../../domain/types";
 /** 搜索：课程、老师、教室、待办，盖在 Tab 上的浮层 */
@@ -61,10 +62,7 @@ export function SearchPalette({ state, onClose, onPickCourse, onPickTask }: { st
     <div className="flex-1 overflow-y-auto scrollbar-none">
       <div className="px-4 pt-[max(52px,calc(env(safe-area-inset-top)+22px))] pb-10">
         <div className="flex items-center rounded-full bg-(--c-surface) px-4 py-2.5">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" style={{ stroke: "var(--c-ink4)" }} strokeWidth="2.2" strokeLinecap="round" className="mr-2.5 flex-none">
-            <circle cx="11" cy="11" r="7" />
-            <path d="m16.5 16.5 4 4" />
-          </svg>
+          <SearchLine width="15" height="15" className="mr-2.5 flex-none" style={{ color: "var(--c-ink4)" }} />
           <input
             ref={inputRef}
             value={q}

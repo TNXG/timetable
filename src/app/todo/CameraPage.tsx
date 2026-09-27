@@ -1,3 +1,9 @@
+import CloseLine from "~icons/mingcute/close-line";
+import DownLine from "~icons/mingcute/down-line";
+import FlashLine from "~icons/mingcute/flash-line";
+import FlashFill from "~icons/mingcute/flash-fill";
+import PicLine from "~icons/mingcute/pic-line";
+import CameraRotateLine from "~icons/mingcute/camera-rotate-line";
 import type { Snapshot } from "../../domain/engine";
 import type { CapturedPhoto, GalleryItem } from "../camera";
 import { useIsPresent } from "motion/react";
@@ -196,7 +202,7 @@ export function CameraPage({
       <div className="absolute inset-0 flex flex-col">
         <div className="flex flex-none items-center justify-between bg-black px-4 pt-12 pb-4">
           <CircleBtn onClick={() => go(onBack)}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round"><path d="M6 6l12 12M18 6 6 18" /></svg>
+            <CloseLine width="14" height="14" style={{ color: "#fff" }} />
           </CircleBtn>
           <button
             onClick={() => go(() => setPickingCourse(true))}
@@ -204,10 +210,10 @@ export function CameraPage({
           >
             {course && <span className="h-1.75 w-1.75 rounded-full" style={{ background: course.color }} />}
             {course ? clipText(course.name) : "课程"}
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.6)" strokeWidth="3"><path d="m6 9 6 6 6-6" /></svg>
+            <DownLine width="10" height="10" style={{ color: "rgba(255,255,255,.6)" }} />
           </button>
           <CircleBtn onClick={() => { setTorch(v => !v); void camera.torch(!torch); }}>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill={torch ? "#fff" : "none"} stroke="#fff" strokeWidth="2.2" strokeLinejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7z" /></svg>
+            {torch ? <FlashFill width="15" height="15" style={{ color: "#fff" }} /> : <FlashLine width="15" height="15" style={{ color: "#fff" }} />}
           </CircleBtn>
         </div>
 
@@ -257,10 +263,7 @@ export function CameraPage({
                 )
               : (
                   <span className="flex h-full w-full items-center justify-center bg-white/12">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinejoin="round">
-                      <rect x="3" y="5" width="18" height="14" rx="3" />
-                      <path d="m3 16 5-4 4 3 3-2 6 4" />
-                    </svg>
+                    <PicLine width="18" height="18" style={{ color: "#fff" }} />
                   </span>
                 )}
           </button>
@@ -271,10 +274,7 @@ export function CameraPage({
             <span className="h-15.5 w-15.5 rounded-full bg-white" />
           </button>
           <CircleBtn size={46} onClick={() => void camera.switchCamera()}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M20 12a8 8 0 0 1-14.3 4.9M4 12a8 8 0 0 1 14.3-4.9" />
-              <path d="M4 20v-5h5M20 4v5h-5" />
-            </svg>
+            <CameraRotateLine width="20" height="20" style={{ color: "#fff" }} />
           </CircleBtn>
         </div>
       </div>

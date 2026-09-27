@@ -1,3 +1,5 @@
+import CloseLine from "~icons/mingcute/close-line";
+import CheckLine from "~icons/mingcute/check-line";
 import type { CapturedPhoto, GalleryItem, PermissionStatus } from "../camera";
 import { useCallback, useEffect, useState } from "react";
 import { camera } from "../camera";
@@ -68,7 +70,7 @@ export function PickerPage({ onBack, onDone, single }: { onBack: () => void; onD
     <Page className="bg-black">
       <div className="flex flex-none items-center justify-between px-4 pt-12">
         <CircleBtn onClick={onBack}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round"><path d="M6 6l12 12M18 6 6 18" /></svg>
+          <CloseLine width="14" height="14" style={{ color: "#fff" }} />
         </CircleBtn>
         <span className="flex items-center gap-1.5 rounded-full bg-white/12 px-3 py-1.5 text-[12.5px] font-bold text-white">最近项目</span>
         <span className="w-9" />
@@ -124,7 +126,7 @@ export function PickerPage({ onBack, onDone, single }: { onBack: () => void; onD
                             <>
                               <span className="absolute inset-0 rounded-md ring-[2.5px] ring-inset ring-(--c-accent)" style={{ background: "color-mix(in srgb, var(--c-accent) 18%, transparent)" }} />
                               <span className="absolute top-1.5 right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-(--c-accent) text-[11px] font-extrabold text-white">
-                                {single ? <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round"><path d="m5 12 5 5L20 7" /></svg> : n + 1}
+                                {single ? <CheckLine width="11" height="11" style={{ color: "#fff" }} /> : n + 1}
                               </span>
                             </>
                           )

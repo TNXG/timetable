@@ -1,3 +1,4 @@
+import ArrowRightLine from "~icons/mingcute/arrow-right-line";
 import type { ScheduleDraft } from "../domain/schedule";
 import type { Semester } from "../domain/types";
 import React, { useMemo, useRef, useState } from "react";
@@ -36,9 +37,7 @@ const COL_DUR = "ml-3 w-11.5 flex-none text-right";
 
 function ArrowIcon() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ stroke: "var(--c-ink4)" }} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mx-2 flex-none">
-      <path d="M4 12h16M14 6l6 6-6 6" />
-    </svg>
+    <ArrowRightLine width="16" height="16" className="mx-2 flex-none" style={{ color: "var(--c-ink4)" }} />
   );
 }
 

@@ -1,3 +1,4 @@
+import RightLine from "~icons/mingcute/right-line";
 import type { Minutes, Prefs } from "../domain/types";
 import { useEffect, useRef, useState } from "react";
 import { CLASS_LEADS, EARLY_LEADS, TASK_LEADS } from "../domain/types";
@@ -96,7 +97,7 @@ const GROUPS: [string, PrefKey[]][] = [
 const rowCls = (i: number) => `flex w-full items-center py-3.5 text-left transition-opacity active:opacity-60 ${i ? "border-t border-(--c-surface2)" : ""}`;
 
 const Chevron = () => (
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" style={{ stroke: "var(--c-ink5)" }} strokeWidth="2.2" className="ml-2"><path d="m9 5 7 7-7 7" /></svg>
+  <RightLine width="13" height="13" className="ml-2" style={{ color: "var(--c-ink5)" }} />
 );
 
 /** 顶部状态卡：已同步 / 未开启 / 权限被拒 */

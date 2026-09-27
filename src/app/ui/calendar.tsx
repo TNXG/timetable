@@ -1,3 +1,7 @@
+import LeftLine from "~icons/mingcute/left-line";
+import RightLine from "~icons/mingcute/right-line";
+import DownLine from "~icons/mingcute/down-line";
+import UpLine from "~icons/mingcute/up-line";
 import { AnimatePresence, motion } from "motion/react";
 import React, { useMemo, useRef, useState } from "react";
 import { weekdayOf } from "../../domain/dates";
@@ -45,11 +49,9 @@ function calendarCells(ym: string): string[] {
   return Array.from({ length: 42 }, (_, i) => addDaysStr(first, i - lead));
 }
 
-const CalArrow = ({ dir }: { dir: -1 | 1 }) => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{ stroke: "var(--c-ink)" }} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-    <path d={dir < 0 ? "m15 5-7 7 7 7" : "m9 5 7 7-7 7"} />
-  </svg>
-);
+const CalArrow = ({ dir }: { dir: -1 | 1 }) => dir < 0
+  ? <LeftLine width={18} height={18} className="text-(--c-ink)" />
+  : <RightLine width={18} height={18} className="text-(--c-ink)" />;
 
 /**
  * 月历：上面「‹ 2026年9月 ▾ ›」，点月份标题切成年/月/日滚轮；选中日主题色圆，今天主题色字。
@@ -93,7 +95,7 @@ export function Calendar({ value, onChange, today = todayYmd() }: { value: strin
                   年
                   {Number(month.slice(5, 7))}
                   月
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="var(--c-ink3)"><path d="M6 9h12l-6 7z" /></svg>
+                  <DownLine width={12} height={12} className="text-(--c-ink3)" />
                 </button>
                 <button onClick={() => goMonth(1)} className="flex h-10 w-10 items-center justify-center transition-opacity active:opacity-50"><CalArrow dir={1} /></button>
               </div>
@@ -148,7 +150,7 @@ export function Calendar({ value, onChange, today = todayYmd() }: { value: strin
                 年
                 {dm}
                 月
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="var(--c-accent)"><path d="M6 15h12l-6-7z" /></svg>
+                <UpLine width={12} height={12} className="text-(--c-accent)" />
               </button>
               <div className="flex flex-1 items-center gap-2">
                 <Wheel items={years} index={Math.max(0, Math.min(years.length - 1, dy - (y0 - 1)))} onChange={i => setYmd(y0 - 1 + i, dm, dd)} className="flex-1" />
