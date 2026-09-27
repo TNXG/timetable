@@ -1,85 +1,114 @@
 import type {
-  Course, Occurrence, Override, Semester, SessionRule, UserEntry, LocalDate,
-} from './types'
-import { addDays, dateOf, inVacation, weekOf, weekdayOf } from './dates'
-import { maskHasWeek } from './weeks'
+  Course,
+  LocalDate,
+  Occurrence,
+  Override,
+  Semester,
+  SessionRule,
+  UserEntry,
+} from "./types";
+import { addDays, dateOf, inVacation, weekdayOf, weekOf } from "./dates";
+import { maskHasWeek } from "./weeks";
 
 export interface Snapshot {
-  semester: Semester
-  courses: Course[]
-  rules: SessionRule[]
-  overrides: Override[]
-  entries: UserEntry[]
+  semester: Semester;
+  courses: Course[];
+  rules: SessionRule[];
+  overrides: Override[];
+  entries: UserEntry[];
 }
 
 function slotTime(sem: Semester, startPeriod: number, endPeriod: number) {
-  const s = sem.timeGrid.find((t) => t.index === startPeriod)
-  const e = sem.timeGrid.find((t) => t.index === endPeriod)
-  return { start: s?.start ?? 0, end: e?.end ?? 0 }
+  const s = sem.timeGrid.find(t => t.index === startPeriod);
+  const e = sem.timeGrid.find(t => t.index === endPeriod);
+  return { start: s?.start ?? 0, end: e?.end ?? 0 };
 }
 
 /** 展开某一天的全部 Occurrence（含手动条目与例外），按开始时间排序并标冲突。 */
 export function occurrencesOn(snap: Snapshot, date: LocalDate): Occurrence[] {
-  const { semester: sem } = snap
-  const adjustment = (sem.scheduleAdjustments ?? []).find((a) => a.date === date)
-  const teachingDate = adjustment?.teachingDate ?? date
-  const week = weekOf(sem, teachingDate)
-  const wd = weekdayOf(teachingDate)
-  const actualWd = weekdayOf(date)
-  const out: Occurrence[] = []
-  const mapped = !!adjustment
+  const { semester: sem } = snap;
+  const adjustment = (sem.scheduleAdjustments ?? []).find(a => a.date === date);
+  const teachingDate = adjustment?.teachingDate ?? date;
+  const week = weekOf(sem, teachingDate);
+  const wd = weekdayOf(teachingDate);
+  const actualWd = weekdayOf(date);
+  const out: Occurrence[] = [];
+  const mapped = !!adjustment;
   if (week >= 1 && week <= sem.totalWeeks && (mapped || !inVacation(sem, date))) {
     for (const rule of snap.rules) {
-      const course = snap.courses.find((c) => c.id === rule.courseId)
-      if (!course || course.hidden) continue
-      if (rule.weekday !== wd || !maskHasWeek(rule.weeksMask, week)) continue
-      const ov = snap.overrides.find((o) => o.ruleId === rule.id && o.date === teachingDate)
-      if (ov?.kind === 'moved' && (ov.newDate ?? teachingDate) !== teachingDate) continue
-      const sp = ov?.kind === 'moved' ? ov.newStartPeriod ?? rule.startPeriod : rule.startPeriod
-      const ep = ov?.kind === 'moved' ? ov.newEndPeriod ?? rule.endPeriod : rule.endPeriod
-      const t = slotTime(sem, sp, ep)
+      const course = snap.courses.find(c => c.id === rule.courseId);
+      if (!course || course.hidden)
+        continue;
+      if (rule.weekday !== wd || !maskHasWeek(rule.weeksMask, week))
+        continue;
+      const ov = snap.overrides.find(o => o.ruleId === rule.id && o.date === teachingDate);
+      if (ov?.kind === "moved" && (ov.newDate ?? teachingDate) !== teachingDate)
+        continue;
+      const sp = ov?.kind === "moved" ? ov.newStartPeriod ?? rule.startPeriod : rule.startPeriod;
+      const ep = ov?.kind === "moved" ? ov.newEndPeriod ?? rule.endPeriod : rule.endPeriod;
+      const t = slotTime(sem, sp, ep);
       out.push({
-        key: `${rule.id}@${date}`, courseId: course.id, ruleId: rule.id, name: course.name,
-        date, week, weekday: mapped ? actualWd : wd, startPeriod: sp, endPeriod: ep,
-        start: t.start, end: t.end,
-        location: (ov?.kind === 'moved' && ov.newLocation) || rule.location,
-        teacher: (ov?.kind === 'moved' && ov.newTeacher) || (rule.teacher ?? course.teacher),
+        key: `${rule.id}@${date}`,
+        courseId: course.id,
+        ruleId: rule.id,
+        name: course.name,
+        date,
+        week,
+        weekday: mapped ? actualWd : wd,
+        startPeriod: sp,
+        endPeriod: ep,
+        start: t.start,
+        end: t.end,
+        location: (ov?.kind === "moved" && ov.newLocation) || rule.location,
+        teacher: (ov?.kind === "moved" && ov.newTeacher) || (rule.teacher ?? course.teacher),
         color: course.color,
-        status: ov ? (ov.kind === 'moved' ? 'moved' : ov.kind === 'muted' ? 'normal' : ov.kind) : 'normal',
-        muted: ov?.kind === 'muted' || false, conflict: false, source: course.source,
-      })
+        status: ov ? (ov.kind === "moved" ? "moved" : ov.kind === "muted" ? "normal" : ov.kind) : "normal",
+        muted: ov?.kind === "muted" || false,
+        conflict: false,
+        source: course.source,
+      });
     }
   }
   // 调课调到 date 的
   for (const ov of snap.overrides) {
-    if (ov.kind !== 'moved' || ov.newDate !== date || ov.date === date) continue
-    const rule = snap.rules.find((r) => r.id === ov.ruleId)
-    const course = rule && snap.courses.find((c) => c.id === rule.courseId)
-    if (!rule || !course || course.hidden) continue
-    const sp = ov.newStartPeriod ?? rule.startPeriod
-    const ep = ov.newEndPeriod ?? rule.endPeriod
-    const t = slotTime(sem, sp, ep)
+    if (ov.kind !== "moved" || ov.newDate !== date || ov.date === date)
+      continue;
+    const rule = snap.rules.find(r => r.id === ov.ruleId);
+    const course = rule && snap.courses.find(c => c.id === rule.courseId);
+    if (!rule || !course || course.hidden)
+      continue;
+    const sp = ov.newStartPeriod ?? rule.startPeriod;
+    const ep = ov.newEndPeriod ?? rule.endPeriod;
+    const t = slotTime(sem, sp, ep);
     out.push({
       key: `${rule.id}@${ov.date}->${date}`,
-      courseId: course.id, ruleId: rule.id,
+      courseId: course.id,
+      ruleId: rule.id,
       name: course.name,
-      date, week, weekday: wd,
-      startPeriod: sp, endPeriod: ep,
-      start: t.start, end: t.end,
+      date,
+      week,
+      weekday: wd,
+      startPeriod: sp,
+      endPeriod: ep,
+      start: t.start,
+      end: t.end,
       location: ov.newLocation ?? rule.location,
       teacher: ov.newTeacher ?? rule.teacher ?? course.teacher,
       color: course.color,
-      status: 'moved', muted: false, conflict: false,
+      status: "moved",
+      muted: false,
+      conflict: false,
       source: course.source,
-    })
+    });
   }
   // 手动条目始终按实际日期的星期展开。
   for (const en of snap.entries) {
     const hit = en.date
       ? en.date === date
-      : en.weekday === actualWd && week >= 1 && week <= sem.totalWeeks && !inVacation(sem, date)
-    if (!hit) continue
-    const t = slotTime(sem, en.startPeriod, en.endPeriod)
+      : en.weekday === actualWd && week >= 1 && week <= sem.totalWeeks && !inVacation(sem, date);
+    if (!hit)
+      continue;
+    const t = slotTime(sem, en.startPeriod, en.endPeriod);
     out.push({
       key: `${en.id}@${date}`,
       entryId: en.id,
@@ -92,35 +121,37 @@ export function occurrencesOn(snap: Snapshot, date: LocalDate): Occurrence[] {
       start: t.start,
       end: t.end,
       location: en.location,
-      color: '#8A8E97',
-      status: 'normal',
+      color: "#8A8E97",
+      status: "normal",
       muted: false,
       conflict: false,
-      source: 'manual',
-    })
+      source: "manual",
+    });
   }
-  out.sort((a, b) => a.start - b.start || a.end - b.end)
-  markConflicts(out)
-  return out
+  out.sort((a, b) => a.start - b.start || a.end - b.end);
+  markConflicts(out);
+  return out;
 }
 
 /** from 起（含）第一个有未停课课程的日子；学期结束前都没有则为 null */
 export function firstClassDate(snap: Snapshot, from: LocalDate): LocalDate | null {
-  const end = addDays(snap.semester.startDate, snap.semester.totalWeeks * 7 - 1)
+  const end = addDays(snap.semester.startDate, snap.semester.totalWeeks * 7 - 1);
   for (let d = from; d <= end; d = addDays(d, 1)) {
-    if (occurrencesOn(snap, d).some((o) => o.status !== 'cancelled')) return d
+    if (occurrencesOn(snap, d).some(o => o.status !== "cancelled"))
+      return d;
   }
-  return null
+  return null;
 }
 
 export function markConflicts(list: Occurrence[]) {
   for (let i = 0; i < list.length; i++) {
     for (let j = i + 1; j < list.length; j++) {
-      const a = list[i], b = list[j]
-      if (a.status === 'cancelled' || b.status === 'cancelled') continue
+      const a = list[i]; const b = list[j];
+      if (a.status === "cancelled" || b.status === "cancelled")
+        continue;
       if (a.start < b.end && b.start < a.end) {
-        a.conflict = true
-        b.conflict = true
+        a.conflict = true;
+        b.conflict = true;
       }
     }
   }
@@ -128,22 +159,22 @@ export function markConflicts(list: Occurrence[]) {
 
 /** 一周展开：weekday(1-7) → Occurrence[] */
 export function occurrencesInWeek(snap: Snapshot, week: number): Map<number, Occurrence[]> {
-  const m = new Map<number, Occurrence[]>()
+  const m = new Map<number, Occurrence[]>();
   for (let wd = 1; wd <= 7; wd++) {
-    m.set(wd, occurrencesOn(snap, dateOf(snap.semester, week, wd)))
+    m.set(wd, occurrencesOn(snap, dateOf(snap.semester, week, wd)));
   }
-  return m
+  return m;
 }
 
-const normIdent = (s: string) => s.replace(/\s+/g, '')
+const normIdent = (s: string) => s.replace(/\s+/g, "");
 
 /** 课程身份键：跨导入认出同一门课。只看课名与教师，排课变动不改变身份 */
 export function identityKey(name: string, teacher: string | undefined): string {
-  return [normIdent(name), teacher ? normIdent(teacher) : ''].join('|')
+  return [normIdent(name), teacher ? normIdent(teacher) : ""].join("|");
 }
 
 /** 身份键里的课名部分，用于教师缺省或变动时按课名兜底匹配 */
 export function identityName(key: string): string {
-  const i = key.lastIndexOf('|')
-  return i < 0 ? key : key.slice(0, i)
+  const i = key.lastIndexOf("|");
+  return i < 0 ? key : key.slice(0, i);
 }

@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState } from 'react'
-import { useIsPresent } from 'motion/react'
-import { builtinRuleFor, resolveScan } from '../domain/importers/url'
-import { camera } from './camera'
-import { haptic, openAppSettings } from './widgets'
-import { Page, SLIDE } from './ui'
-import { CircleBtn, cameraLeave, layoutRect } from './todo'
+import { useIsPresent } from "motion/react";
+import { useEffect, useRef, useState } from "react";
+import { builtinRuleFor, resolveScan } from "../domain/importers/url";
+import { camera } from "./camera";
+import { cameraLeave, CircleBtn, layoutRect } from "./todo";
+import { Page, SLIDE } from "./ui";
+import { haptic, openAppSettings } from "./widgets";
 
 /* ---------------- 扫码导入 ---------------- */
 
@@ -13,117 +13,142 @@ import { CircleBtn, cameraLeave, layoutRect } from './todo'
  * 先把预览定格收起，再把内容交给对应的内置规则进入导入预览。
  */
 export function ScanPage({ onBack, onResult }: { onBack: () => void; onResult: (ruleId: string, text: string) => void }) {
-  const [denied, setDenied] = useState<PermissionState | null>(null)
-  const [granted, setGranted] = useState(false)
-  const [torch, setTorch] = useState(false)
-  const [busy, setBusy] = useState(false)
-  const [hint, setHint] = useState('')
-  const [frozen, setFrozen] = useState<string | null>(null)
-  const frame = useRef<HTMLDivElement>(null)
-  const video = useRef<HTMLDivElement>(null)
-  const mounted = useRef(true)
-  const previewOn = useRef(false)
-  const previewGen = useRef(0)
-  const frozenLoaded = useRef<(() => void) | null>(null)
-  const hintTimer = useRef(0)
-  const present = useIsPresent()
-  const live = granted && present
+  const [denied, setDenied] = useState<PermissionState | null>(null);
+  const [granted, setGranted] = useState(false);
+  const [torch, setTorch] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [hint, setHint] = useState("");
+  const [frozen, setFrozen] = useState<string | null>(null);
+  const frameRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLDivElement>(null);
+  const mountedRef = useRef(true);
+  const previewOnRef = useRef(false);
+  const previewGenRef = useRef(0);
+  const frozenLoadedRef = useRef<(() => void) | null>(null);
+  const hintTimerRef = useRef(0);
+  const present = useIsPresent();
+  const live = granted && present;
 
-  useEffect(() => () => { mounted.current = false; window.clearTimeout(hintTimer.current) }, [])
+  useEffect(() => () => { mountedRef.current = false; window.clearTimeout(hintTimerRef.current); }, []);
 
   useEffect(() => {
-    let alive = true
-    void camera.request('camera').then((s) => {
-      if (!alive) return
-      if (s !== 'granted') setDenied(s === 'blocked' ? 'blocked' : 'denied')
-      else setGranted(true)
-    })
-    return () => { alive = false }
-  }, [])
+    let alive = true;
+    void camera.request("camera").then((s) => {
+      if (!alive)
+        return;
+      if (s !== "granted")
+        setDenied(s === "blocked" ? "blocked" : "denied");
+      else setGranted(true);
+    });
+    return () => { alive = false; };
+  }, []);
 
   const startPreview = async () => {
-    if (!frame.current) return
-    const gen = ++previewGen.current
-    await camera.start('back', layoutRect(frame.current), SLIDE.duration * 1000, true)
-    if (gen !== previewGen.current || !previewOn.current) {
-      await camera.stop()
-      return
+    if (!frameRef.current)
+      return;
+    const gen = ++previewGenRef.current;
+    await camera.start("back", layoutRect(frameRef.current), SLIDE.duration * 1000, true);
+    if (gen !== previewGenRef.current || !previewOnRef.current) {
+      await camera.stop();
+      return;
     }
-    const el = camera.webPreview()
-    if (el && video.current) {
-      el.className = 'h-full w-full object-cover'
-      video.current.replaceChildren(el)
-      setFrozen(null)
+    const el = camera.webPreview();
+    if (el && videoRef.current) {
+      el.className = "h-full w-full object-cover";
+      videoRef.current.replaceChildren(el);
+      setFrozen(null);
     }
-  }
+  };
 
   const leave = async () => {
-    if (!previewOn.current) return
-    previewOn.current = false
-    previewGen.current++
-    const f = await camera.freeze()
-    if (f && mounted.current) {
+    if (!previewOnRef.current)
+      return;
+    previewOnRef.current = false;
+    previewGenRef.current++;
+    const f = await camera.freeze();
+    if (f && mountedRef.current) {
       await new Promise<void>((ok) => {
-        const t = window.setTimeout(ok, 400)
-        frozenLoaded.current = () => { window.clearTimeout(t); ok() }
-        setFrozen(f)
-      })
+        const t = window.setTimeout(ok, 400);
+        frozenLoadedRef.current = () => { window.clearTimeout(t); ok(); };
+        setFrozen(f);
+      });
     }
-    await camera.stop()
-  }
+    await camera.stop();
+  };
 
   useEffect(() => {
     if (!live) {
-      if (previewOn.current) void leave()
-      else void camera.stop()
-      return
+      if (previewOnRef.current)
+        void leave();
+      else void camera.stop();
+      return;
     }
-    previewOn.current = true
-    void startPreview().catch(() => { if (previewOn.current) setDenied('denied') })
-    return () => { if (previewOn.current) void leave() }
-  }, [live])
+    previewOnRef.current = true;
+    void startPreview().catch(() => {
+      if (previewOnRef.current)
+        setDenied("denied");
+    });
+    return () => {
+      if (previewOnRef.current)
+        void leave();
+    };
+  }, [live]);
 
   useEffect(() => {
-    cameraLeave.current = leave
-    return () => { cameraLeave.current = null }
-  }, [])
+    cameraLeave.current = leave;
+    return () => { cameraLeave.current = null; };
+  }, []);
 
   const flash = (text: string) => {
-    setHint(text)
-    window.clearTimeout(hintTimer.current)
-    hintTimer.current = window.setTimeout(() => { if (mounted.current) setHint('') }, 2200)
-  }
+    setHint(text);
+    window.clearTimeout(hintTimerRef.current);
+    hintTimerRef.current = window.setTimeout(() => {
+      if (mountedRef.current)
+        setHint("");
+    }, 2200);
+  };
 
-  const busyRef = useRef(false)
+  const busyRef = useRef(false);
+  const onResultRef = useRef(onResult);
   useEffect(() => {
-    if (!live) return
+    onResultRef.current = onResult;
+  });
+  useEffect(() => {
+    if (!live)
+      return;
     return camera.onScan((text) => {
-      if (busyRef.current || !previewOn.current) return
-      busyRef.current = true
-      setBusy(true)
-      haptic('medium')
+      if (busyRef.current || !previewOnRef.current)
+        return;
+      busyRef.current = true;
+      setBusy(true);
+      haptic("medium");
       void resolveScan(text)
         .then(async (r) => {
           if (!r) {
-            flash('不是课表二维码')
-            return
+            flash("不是课表二维码");
+            return;
           }
-          await leave()
-          onResult(builtinRuleFor(r.kind), r.text)
+          await leave();
+          onResultRef.current(builtinRuleFor(r.kind), r.text);
         })
-        .catch((e: unknown) => flash(e instanceof Error ? e.message : '读取失败'))
+        .catch((e: unknown) => flash(e instanceof Error ? e.message : "读取失败"))
         .finally(() => {
-          busyRef.current = false
-          if (mounted.current) setBusy(false)
-        })
-    })
-  }, [live])
+          busyRef.current = false;
+          if (mountedRef.current)
+            setBusy(false);
+        });
+    });
+  }, [live]);
 
   const go = (next: () => void) => {
-    if (busy) return
-    setBusy(true)
-    void leave().then(() => { next(); if (mounted.current) setBusy(false) })
-  }
+    if (busy)
+      return;
+    setBusy(true);
+    void leave().then(() => {
+      next(); if (mountedRef.current)
+        setBusy(false);
+    });
+  };
 
   return (
     <Page className="bg-transparent">
@@ -133,41 +158,43 @@ export function ScanPage({ onBack, onResult }: { onBack: () => void; onResult: (
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round"><path d="M6 6l12 12M18 6 6 18" /></svg>
           </CircleBtn>
           <div className="text-[15px] font-bold text-white">扫码导入</div>
-          <CircleBtn onClick={() => { setTorch((v) => !v); void camera.torch(!torch) }}>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill={torch ? '#fff' : 'none'} stroke="#fff" strokeWidth="2.2" strokeLinejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7z" /></svg>
+          <CircleBtn onClick={() => { setTorch(v => !v); void camera.torch(!torch); }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill={torch ? "#fff" : "none"} stroke="#fff" strokeWidth="2.2" strokeLinejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7z" /></svg>
           </CircleBtn>
         </div>
 
         <div className="relative min-h-0 flex-1 overflow-hidden">
-          <div ref={frame} className="absolute inset-y-0 inset-x-2 touch-none rounded-3xl">
-            <div ref={video} className="absolute inset-0 overflow-hidden rounded-3xl bg-black [&>video]:h-full [&>video]:w-full [&>video]:object-cover" />
+          <div ref={frameRef} className="absolute inset-y-0 inset-x-2 touch-none rounded-3xl">
+            <div ref={videoRef} className="absolute inset-0 overflow-hidden rounded-3xl bg-black [&>video]:h-full [&>video]:w-full [&>video]:object-cover" />
             {frozen && (
               <img
                 src={frozen}
                 alt=""
-                onLoad={() => { frozenLoaded.current?.(); frozenLoaded.current = null }}
+                onLoad={() => { frozenLoadedRef.current?.(); frozenLoadedRef.current = null; }}
                 className="pointer-events-none absolute inset-0 h-full w-full rounded-3xl object-cover"
               />
             )}
-            <div aria-hidden className="pointer-events-none absolute inset-0 rounded-3xl" style={{ boxShadow: '0 0 0 200vmax #000' }} />
-            <div className="pointer-events-none absolute inset-0 rounded-3xl" style={{ background: 'linear-gradient(180deg, rgba(0,0,0,.25), transparent 30%, transparent 75%, rgba(0,0,0,.35))' }} />
-            {['left-5 top-5 border-l-2 border-t-2 rounded-tl-lg', 'right-5 top-5 border-r-2 border-t-2 rounded-tr-lg', 'left-5 bottom-5 border-l-2 border-b-2 rounded-bl-lg', 'right-5 bottom-5 border-r-2 border-b-2 rounded-br-lg'].map((c) => (
+            <div aria-hidden className="pointer-events-none absolute inset-0 rounded-3xl" style={{ boxShadow: "0 0 0 200vmax #000" }} />
+            <div className="pointer-events-none absolute inset-0 rounded-3xl" style={{ background: "linear-gradient(180deg, rgba(0,0,0,.25), transparent 30%, transparent 75%, rgba(0,0,0,.35))" }} />
+            {["left-5 top-5 border-l-2 border-t-2 rounded-tl-lg", "right-5 top-5 border-r-2 border-t-2 rounded-tr-lg", "left-5 bottom-5 border-l-2 border-b-2 rounded-bl-lg", "right-5 bottom-5 border-r-2 border-b-2 rounded-br-lg"].map(c => (
               <span key={c} className={`pointer-events-none absolute h-6 w-6 border-white/80 ${c}`} />
             ))}
             {denied && (
               <div className="absolute inset-0 flex flex-col items-center justify-center rounded-3xl bg-black px-8 text-center">
                 <div className="text-[15px] font-bold text-white">相机未开启</div>
                 <div className="mt-2 text-[12.5px] font-medium text-white/60">在系统设置里允许相机，即可扫码导入</div>
-                {denied === 'blocked' ? (
-                  <button onClick={openAppSettings} className="mt-4 flex h-8.5 items-center rounded-full bg-white px-4 text-[13px] font-bold text-black">去设置</button>
-                ) : (
-                  <button
-                    onClick={() => void camera.request('camera').then((s) => { if (s === 'granted') { setDenied(null); setGranted(true) } })}
-                    className="mt-4 flex h-8.5 items-center rounded-full bg-white px-4 text-[13px] font-bold text-black"
-                  >
-                    重试
-                  </button>
-                )}
+                {denied === "blocked"
+                  ? (
+                      <button onClick={openAppSettings} className="mt-4 flex h-8.5 items-center rounded-full bg-white px-4 text-[13px] font-bold text-black">去设置</button>
+                    )
+                  : (
+                      <button
+                        onClick={() => void camera.request("camera").then((s) => { if (s === "granted") { setDenied(null); setGranted(true); } })}
+                        className="mt-4 flex h-8.5 items-center rounded-full bg-white px-4 text-[13px] font-bold text-black"
+                      >
+                        重试
+                      </button>
+                    )}
               </div>
             )}
             {granted && !camera.canScan() && (
@@ -177,12 +204,12 @@ export function ScanPage({ onBack, onResult }: { onBack: () => void; onResult: (
         </div>
 
         <div className="flex flex-none flex-col items-center bg-black px-9 pt-6 pb-12">
-          <div className="h-5 text-[13px] font-semibold text-white">{busy ? '读取中' : hint}</div>
+          <div className="h-5 text-[13px] font-semibold text-white">{busy ? "读取中" : hint}</div>
           <div className="mt-1 text-[12.5px] font-medium text-white/55">对准课表二维码（链接、JSON 或 .ics）</div>
         </div>
       </div>
     </Page>
-  )
+  );
 }
 
-type PermissionState = 'denied' | 'blocked'
+type PermissionState = "denied" | "blocked";

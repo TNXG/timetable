@@ -1,45 +1,48 @@
+import type { OcrBench, OcrDiagnostics } from "../edu-browser";
 /** 调试 · 推理：本地 OCR 的加速方式与运行耗时 */
-import { useCallback, useEffect, useState } from 'react'
-import { eduOcr, type OcrBench, type OcrDiagnostics } from '../edu-browser'
-import { Failed, Group, KV, Pending } from './kit'
-import { Page, Row, TopBar } from '../ui'
+import { useCallback, useEffect, useState } from "react";
+import { eduOcr } from "../edu-browser";
+import { Page, Row, TopBar } from "../ui";
+import { Failed, Group, KV, Pending } from "./kit";
 
 /** 一条推理路径：显示结果与耗时，失败显示原因 */
 function BenchRow({ k, note, b }: { k: string; note: string; b: OcrBench }) {
   return (
     <KV
       k={k}
-      v={b.ok ? '可用' : '不可用'}
-      sub={b.ok ? `${note} · 建立 ${b.createMs} ms · 首次 ${b.firstMs} ms · 最快 ${b.bestMs} ms` : (b.error ?? '未知错误').trim()}
-      tone={b.ok ? 'ok' : 'bad'}
+      v={b.ok ? "可用" : "不可用"}
+      sub={b.ok ? `${note} · 建立 ${b.createMs} ms · 首次 ${b.firstMs} ms · 最快 ${b.bestMs} ms` : (b.error ?? "未知错误").trim()}
+      tone={b.ok ? "ok" : "bad"}
     />
-  )
+  );
 }
 
 export function OcrPage({ onBack }: { onBack: () => void }) {
-  const [info, setInfo] = useState<OcrDiagnostics | null>(null)
-  const [error, setError] = useState('')
-  const [busy, setBusy] = useState(false)
+  const [info, setInfo] = useState<OcrDiagnostics | null>(null);
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
 
   const run = useCallback(() => {
-    setBusy(true)
-    setError('')
+    setBusy(true);
+    setError("");
     eduOcr.diagnose().then(
       (d) => {
-        setInfo(d)
-        setBusy(false)
+        setInfo(d);
+        setBusy(false);
       },
       (e: unknown) => {
-        setInfo(null)
-        setError(e instanceof Error ? e.message : '探测失败')
-        setBusy(false)
+        setInfo(null);
+        setError(e instanceof Error ? e.message : "探测失败");
+        setBusy(false);
       },
-    )
-  }, [])
+    );
+  }, []);
 
+  /* 进页面自动跑一次：放到下一帧触发，避免挂载后同帧改状态 */
   useEffect(() => {
-    run()
-  }, [run])
+    const t = window.setTimeout(run, 0);
+    return () => window.clearTimeout(t);
+  }, [run]);
 
   return (
     <Page>
@@ -51,11 +54,11 @@ export function OcrPage({ onBack }: { onBack: () => void }) {
             <Group title="当前状态">
               <KV
                 k="加速器"
-                v={info.strict.ok ? '可用' : '不可用'}
-                sub={info.strict.ok ? 'NNAPI 可独立运行' : 'NNAPI 不可用，使用 CPU'}
-                tone={info.strict.ok ? 'ok' : 'bad'}
+                v={info.strict.ok ? "可用" : "不可用"}
+                sub={info.strict.ok ? "NNAPI 可独立运行" : "NNAPI 不可用，使用 CPU"}
+                tone={info.strict.ok ? "ok" : "bad"}
               />
-              <KV k="当前会话" v={info.provider === 'nnapi' ? 'NNAPI' : 'CPU'} sub={info.provider === 'nnapi' ? '登录识别正在使用 NNAPI' : '登录识别正在使用 CPU'} />
+              <KV k="当前会话" v={info.provider === "nnapi" ? "NNAPI" : "CPU"} sub={info.provider === "nnapi" ? "登录识别正在使用 NNAPI" : "登录识别正在使用 CPU"} />
             </Group>
             <Group title="运行测试">
               <BenchRow k="NNAPI 独占" note="不使用 CPU" b={info.strict} />
@@ -65,8 +68,8 @@ export function OcrPage({ onBack }: { onBack: () => void }) {
             <Group title="运行环境">
               <KV
                 k="执行后端"
-                v={info.providers.map((p) => p.replace(/ExecutionProvider$/, '')).join(' · ') || '无'}
-                sub={info.providers.some((p) => /nnapi/i.test(p)) ? '包含 NNAPI' : '仅 CPU'}
+                v={info.providers.map(p => p.replace(/ExecutionProvider$/, "")).join(" · ") || "无"}
+                sub={info.providers.some(p => /nnapi/i.test(p)) ? "包含 NNAPI" : "仅 CPU"}
               />
               <KV k="运行时" v={`ONNX Runtime ${info.ort}`} />
             </Group>
@@ -77,5 +80,5 @@ export function OcrPage({ onBack }: { onBack: () => void }) {
         )}
       </div>
     </Page>
-  )
+  );
 }

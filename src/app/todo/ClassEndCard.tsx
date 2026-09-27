@@ -1,13 +1,13 @@
-import type { ClassMoment } from '../../domain/next-class'
-import { CameraIcon } from '../ui'
+import type { ClassMoment } from "../../domain/next-class";
+import { CameraIcon } from "../ui";
 
 /* ---------------- 今天页：刚下课那一刻 ---------------- */
 
 export function ClassEndCard({ moment, onCamera, onText, onDismiss }: {
-  moment: ClassMoment
-  onCamera: () => void
-  onText: () => void
-  onDismiss: () => void
+  moment: ClassMoment;
+  onCamera: () => void;
+  onText: () => void;
+  onDismiss: () => void;
 }) {
   return (
     <div className="-mt-4 flex">
@@ -18,7 +18,7 @@ export function ClassEndCard({ moment, onCamera, onText, onDismiss }: {
           <div className="flex items-start justify-between">
             <div className="text-[14px] font-bold tracking-[-.01em] text-(--c-ink)">刚下课，这节课有作业吗？</div>
             <button onClick={onDismiss} className="ml-2 flex-none pt-0.75">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" style={{ stroke: 'var(--c-ink5)' }} strokeWidth="2.6" strokeLinecap="round"><path d="M6 6l12 12M18 6 6 18" /></svg>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" style={{ stroke: "var(--c-ink5)" }} strokeWidth="2.6" strokeLinecap="round"><path d="M6 6l12 12M18 6 6 18" /></svg>
             </button>
           </div>
           <div className="mt-2.5 flex gap-1.5">
@@ -34,5 +34,5 @@ export function ClassEndCard({ moment, onCamera, onText, onDismiss }: {
         </div>
       </div>
     </div>
-  )
+  );
 }

@@ -1,12 +1,12 @@
-import React from 'react'
-import { C, Phone, tint } from '../shared'
+import React from "react";
+import { C, Phone, tint } from "../shared";
 
 /* ---------------- 10 widgets ---------------- */
 
-export function WCard({ children, className = '' }: { children: React.ReactNode; className?: string }) {
+export function WCard({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
     <div className={`rounded-[24px] bg-(--c-surface) p-3.5 shadow-(--c-lift-shadow) ${className}`}>{children}</div>
-  )
+  );
 }
 
 export function WHead({ d, w, sub }: { d: string; w: string; sub?: string }) {
@@ -16,7 +16,7 @@ export function WHead({ d, w, sub }: { d: string; w: string; sub?: string }) {
       <span className="text-[13px] font-semibold text-(--c-accent)">{w}</span>
       {sub && <span className="ml-auto text-[11.5px] font-semibold text-(--c-ink4)">{sub}</span>}
     </div>
-  )
+  );
 }
 
 export function WRow({ name, time, loc, color, big = true, badge }: { name: string; time?: string; loc?: string; color: string; big?: boolean; badge?: string }) {
@@ -24,7 +24,7 @@ export function WRow({ name, time, loc, color, big = true, badge }: { name: stri
     <div className="flex items-center gap-2 rounded-[10px] py-1.5 pr-2.5 pl-0" style={{ background: tint(color, 8) }}>
       <i className="my-0.75 ml-1.5 w-0.75 flex-none self-stretch rounded-full" style={{ background: color }} />
       <div className="min-w-0 flex-1">
-        <div className={`truncate ${big ? 'text-[13px]' : 'text-[12px]'} leading-[1.3] font-bold tracking-[-.01em] text-(--c-ink)`}>{name}</div>
+        <div className={`truncate ${big ? "text-[13px]" : "text-[12px]"} leading-[1.3] font-bold tracking-[-.01em] text-(--c-ink)`}>{name}</div>
         {loc && <div className="mt-px truncate text-[11px] leading-tight font-medium text-(--c-ink3)">{loc}</div>}
       </div>
       {badge && (
@@ -32,7 +32,7 @@ export function WRow({ name, time, loc, color, big = true, badge }: { name: stri
       )}
       {time && <div className="flex-none text-right text-[11.5px] leading-[1.3] font-semibold tabular-nums text-(--c-ink3)">{time}</div>}
     </div>
-  )
+  );
 }
 
 export function WidgetScreen() {
@@ -85,20 +85,24 @@ export function WidgetScreen() {
           </div>
           <div className="mt-3 flex gap-1.5">
             {[
-              ['周一', false], ['周二', true], ['周三', false], ['周四', false], ['周五', false],
+              ["周一", false],
+              ["周二", true],
+              ["周三", false],
+              ["周四", false],
+              ["周五", false],
             ].map(([w, on]) => (
-              <div key={w as string} className={`flex-1 text-center text-[11.5px] font-bold ${on ? 'text-(--c-accent)' : 'text-(--c-ink3)'}`}>{w}</div>
+              <div key={w as string} className={`flex-1 text-center text-[11.5px] font-bold ${on ? "text-(--c-accent)" : "text-(--c-ink3)"}`}>{w}</div>
             ))}
           </div>
           <div className="mt-2 flex gap-1.5">
             {([
-              [[C.eng, '大学英语', '08:00', '外语楼 105', false], [C.math, '高等数学', '10:00', '教三 302', false]],
-              [[C.eng, '大学英语', '08:00', '外语楼 105', false], [C.math, '高等数学', '10:00', '教三 302', true]],
-              [[C.ds, '数据结构', '10:00', '教一 201', false], [C.phy, '大学物理', '14:00', '理科楼 A', false]],
-              [[C.math, '高等数学', '08:00', '教三 302', false], [C.la, '线性代数', '14:00', '教三 110', false]],
-              [[C.phy, '大学物理', '08:00', '理科楼 A', false], [C.ds, '数据结构', '10:00', '机房 B2', false]],
-            ] as [string, string, string, string, boolean][][]).map((col, i) => (
-              <div key={i} className="flex flex-1 flex-col gap-1.5">
+              { id: "eng-math", items: [[C.eng, "大学英语", "08:00", "外语楼 105", false], [C.math, "高等数学", "10:00", "教三 302", false]] },
+              { id: "eng-math-now", items: [[C.eng, "大学英语", "08:00", "外语楼 105", false], [C.math, "高等数学", "10:00", "教三 302", true]] },
+              { id: "ds-phy", items: [[C.ds, "数据结构", "10:00", "教一 201", false], [C.phy, "大学物理", "14:00", "理科楼 A", false]] },
+              { id: "math-la", items: [[C.math, "高等数学", "08:00", "教三 302", false], [C.la, "线性代数", "14:00", "教三 110", false]] },
+              { id: "phy-ds", items: [[C.phy, "大学物理", "08:00", "理科楼 A", false], [C.ds, "数据结构", "10:00", "机房 B2", false]] },
+            ] as { id: string; items: [string, string, string, string, boolean][] }[]).map(({ id, items: col }) => (
+              <div key={id} className="flex flex-1 flex-col gap-1.5">
                 {col.map(([color, name, time, loc, now]) => (
                   <div
                     key={name + time}
@@ -121,9 +125,8 @@ export function WidgetScreen() {
         </WCard>
       </div>
     </Phone>
-  )
+  );
 }
-
 
 export function WidgetScreen2() {
   return (
@@ -142,18 +145,22 @@ export function WidgetScreen2() {
               <i className="absolute top-1 bottom-2 left-[3.5px] w-[1.5px] rounded-full bg-(--c-surface2)" />
               <div className="space-y-3.25">
                 {([
-                  ['10:00', '高等数学', '教三 302', C.math, 'now'],
-                  ['14:00', '数据结构', '教一 201', C.ds, 'next'],
-                  ['16:00', '体育', '东区体育馆', C.phy, 'next'],
+                  ["10:00", "高等数学", "教三 302", C.math, "now"],
+                  ["14:00", "数据结构", "教一 201", C.ds, "next"],
+                  ["16:00", "体育", "东区体育馆", C.phy, "next"],
                 ] as [string, string, string, string, string][]).map(([t, name, loc, color, st]) => (
-                  <div key={t} className="relative flex gap-2.5 pl-4.5" style={{ opacity: st === 'past' ? 0.4 : 1 }}>
+                  <div key={t} className="relative flex gap-2.5 pl-4.5" style={{ opacity: st === "past" ? 0.4 : 1 }}>
                     <i
                       className="absolute top-1 left-0 h-2 w-2 rounded-full"
-                      style={{ background: st === 'now' ? color : 'var(--c-surface)', boxShadow: `inset 0 0 0 1.5px ${st === 'now' ? color : 'var(--c-dot-border)'}` }}
+                      style={{ background: st === "now" ? color : "var(--c-surface)", boxShadow: `inset 0 0 0 1.5px ${st === "now" ? color : "var(--c-dot-border)"}` }}
                     />
                     <div className="min-w-0 flex-1">
                       <div className="truncate text-[12px] leading-tight font-bold tracking-[-.01em] text-(--c-ink)">{name}</div>
-                      <div className="mt-px truncate text-[10.5px] leading-tight font-medium tabular-nums text-(--c-ink3)">{t}　{loc}</div>
+                      <div className="mt-px truncate text-[10.5px] leading-tight font-medium tabular-nums text-(--c-ink3)">
+                        {t}
+                        {" "}
+                        {loc}
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -175,5 +182,5 @@ export function WidgetScreen2() {
 
       </div>
     </Phone>
-  )
+  );
 }

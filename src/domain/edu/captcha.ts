@@ -10,41 +10,55 @@
 
 /** 模型在这套字体上常看错的字符：乘法样子的其实是加号，破折号样子的其实是减号 */
 const CONFUSABLE: Record<string, string> = {
-  x: '+', X: '+', '×': '+', '＊': '+', '*': '+', '十': '+', '＋': '+',
-  '一': '-', '－': '-', '—': '-',
-  q: '?', Q: '?', '﹖': '?', '？': '?',
-}
+  "x": "+",
+  "X": "+",
+  "×": "+",
+  "＊": "+",
+  "*": "+",
+  "十": "+",
+  "＋": "+",
+  "一": "-",
+  "－": "-",
+  "—": "-",
+  "q": "?",
+  "Q": "?",
+  "﹖": "?",
+  "？": "?",
+};
 
-const PATTERN = /(\d{1,2})([+-])(\d{1,2})/g
-const OPERAND_MIN = 1
-const OPERAND_MAX = 19
-const ANSWER_MIN = 0
-const ANSWER_MAX = 38
+const PATTERN = /(\d{1,2})([+-])(\d{1,2})/g;
+const OPERAND_MIN = 1;
+const OPERAND_MAX = 19;
+const ANSWER_MIN = 0;
+const ANSWER_MAX = 38;
 
 export function captchaAnswer(text: string): string | null {
-  let clean = ''
+  let clean = "";
   for (const ch of text) {
-    const mapped = CONFUSABLE[ch] ?? ch
-    if (/[0-9+\-=?]/.test(mapped)) clean += mapped
+    const mapped = CONFUSABLE[ch] ?? ch;
+    if (/[0-9+\-=?]/.test(mapped))
+      clean += mapped;
   }
-  const at = clean.indexOf('=')
-  return pick(at >= 0 ? clean.slice(0, at) : clean)
+  const at = clean.indexOf("=");
+  return pick(at >= 0 ? clean.slice(0, at) : clean);
 }
 
 /** 在 = 前的文本里找合法算式：非重叠、取最长（并列取最左） */
 function pick(s: string): string | null {
-  let best: string | null = null
-  let bestLen = 0
+  let best: string | null = null;
+  let bestLen = 0;
   for (const m of s.matchAll(PATTERN)) {
-    const a = Number(m[1])
-    const b = Number(m[3])
-    if (a < OPERAND_MIN || a > OPERAND_MAX || b < OPERAND_MIN || b > OPERAND_MAX) continue
-    const v = m[2] === '+' ? a + b : a - b
-    if (v < ANSWER_MIN || v > ANSWER_MAX) continue
+    const a = Number(m[1]);
+    const b = Number(m[3]);
+    if (a < OPERAND_MIN || a > OPERAND_MAX || b < OPERAND_MIN || b > OPERAND_MAX)
+      continue;
+    const v = m[2] === "+" ? a + b : a - b;
+    if (v < ANSWER_MIN || v > ANSWER_MAX)
+      continue;
     if (m[0].length > bestLen) {
-      bestLen = m[0].length
-      best = String(v)
+      bestLen = m[0].length;
+      best = String(v);
     }
   }
-  return best
+  return best;
 }

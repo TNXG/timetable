@@ -1,9 +1,9 @@
-export { KIND_LABEL, dueText, CircleBtn, layoutRect, cameraLeave } from './shared'
-export { TaskRow, TodoView } from './TodoView'
-export { ComposeOverlay } from './ComposeOverlay'
-export { CameraPage } from './CameraPage'
-export { PickerPage } from './PickerPage'
-export { ReviewPage } from './ReviewPage'
-export { TaskDetailPage } from './TaskDetailPage'
-export { ClassEndCard } from './ClassEndCard'
-export { CourseTasks } from './CourseTasks'
+export { CameraPage } from "./CameraPage";
+export { ClassEndCard } from "./ClassEndCard";
+export { ComposeOverlay } from "./ComposeOverlay";
+export { CourseTasks } from "./CourseTasks";
+export { PickerPage } from "./PickerPage";
+export { ReviewPage } from "./ReviewPage";
+export { cameraLeave, CircleBtn, dueText, KIND_LABEL, layoutRect } from "./shared";
+export { TaskDetailPage } from "./TaskDetailPage";
+export { TaskRow, TodoView } from "./TodoView";

@@ -1,42 +1,44 @@
-import type { Diagnostic, TimeSlot } from '../types'
-import type { RuleCourse, RuleOutput } from '../importer'
-import { parseWeekExpr, maskToWeeks } from '../weeks'
+import type { RuleCourse, RuleOutput } from "../importer";
+import type { Diagnostic, TimeSlot } from "../types";
+import { maskToWeeks, parseWeekExpr } from "../weeks";
 
 /**
  * 正方新版（jwglxt）个人课表接口 `kbcx/xskbcx_cxXsgrkb.html` 返回的一条课。
  * 只取排课字段；`xsxx`（学生信息）等不在这里，脚本侧也不回传。
  */
 export interface ZfKb {
-  kcmc?: string // 课程名
-  xm?: string // 教师
-  cdmc?: string // 教室
-  xqj?: string | number // 星期 1-7
-  jcs?: string // 节次 "3-4" / "0304"
-  zcd?: string // 周次 "1-8周(单),10-16周"
-  kcxszc?: string // 课程学时组成（不用）
-  xqmc?: string // 校区（不用）
+  kcmc?: string; // 课程名
+  xm?: string; // 教师
+  cdmc?: string; // 教室
+  xqj?: string | number; // 星期 1-7
+  jcs?: string; // 节次 "3-4" / "0304"
+  zcd?: string; // 周次 "1-8周(单),10-16周"
+  kcxszc?: string; // 课程学时组成（不用）
+  xqmc?: string; // 校区（不用）
 }
 
 export interface ZfTerm {
-  xnm: string // 学年，"2025" 表示 2025-2026 学年
-  xqm: string // 学期代码：3 / 12 / 16
+  xnm: string; // 学年，"2025" 表示 2025-2026 学年
+  xqm: string; // 学期代码：3 / 12 / 16
 }
 
-const XQM_NAME: Record<string, string> = { '3': '第 1 学期', '12': '第 2 学期', '16': '第 3 学期' }
+const XQM_NAME: Record<string, string> = { 3: "第 1 学期", 12: "第 2 学期", 16: "第 3 学期" };
 
 export function termLabel(t: ZfTerm): string {
-  const y = Number(t.xnm)
-  const name = XQM_NAME[t.xqm] ?? `学期 ${t.xqm}`
-  return Number.isFinite(y) ? `${y}–${y + 1} 学年 ${name}` : `${t.xnm} ${name}`
+  const y = Number(t.xnm);
+  const name = XQM_NAME[t.xqm] ?? `学期 ${t.xqm}`;
+  return Number.isFinite(y) ? `${y}–${y + 1} 学年 ${name}` : `${t.xnm} ${name}`;
 }
 
 /** 没有下拉框可读时按当前月份猜学期：9 月起上学期，2 月起下学期 */
 export function guessTerm(now = new Date()): ZfTerm {
-  const y = now.getFullYear()
-  const m = now.getMonth() + 1
-  if (m >= 9) return { xnm: String(y), xqm: '3' }
-  if (m >= 2) return { xnm: String(y - 1), xqm: '12' }
-  return { xnm: String(y - 1), xqm: '3' }
+  const y = now.getFullYear();
+  const m = now.getMonth() + 1;
+  if (m >= 9)
+    return { xnm: String(y), xqm: "3" };
+  if (m >= 2)
+    return { xnm: String(y - 1), xqm: "12" };
+  return { xnm: String(y - 1), xqm: "3" };
 }
 
 /**
@@ -44,93 +46,98 @@ export function guessTerm(now = new Date()): ZfTerm {
  * 无法解析的段原样丢弃并计入 error 便于诊断。
  */
 export function zcdToWeeks(zcd: string): { weeks: string; error?: string } {
-  const segs = zcd.split(/[,，;；]/).map((s) => s.trim()).filter(Boolean)
-  let mask = 0n
-  let error: string | undefined
+  const segs = zcd.split(/[,，;；]/).map(s => s.trim()).filter(Boolean);
+  let mask = 0n;
+  let error: string | undefined;
   for (const seg of segs) {
     /* zf 的段有「第16周」这类带「第」的写法，引擎解析器不认，剥掉 */
-    const r = parseWeekExpr(seg.replace(/^第/, ''))
-    if (r.error) error = r.error
-    mask |= r.mask
+    const r = parseWeekExpr(seg.replace(/^第/, ""));
+    if (r.error)
+      error = r.error;
+    mask |= r.mask;
   }
-  return { weeks: maskToWeeks(mask).join(','), error }
+  return { weeks: maskToWeeks(mask).join(","), error };
 }
 
 /** 节次串："3-4" → [3,4]；"0304" → [3,4]；"5" → [5,5] */
 export function parseJcs(jcs: string): [number, number] | null {
-  const s = jcs.trim()
-  const m = s.match(/^(\d{1,2})\s*[-–—~]\s*(\d{1,2})$/)
+  const s = jcs.trim();
+  const m = s.match(/^(\d{1,2})\s*[-–—~]\s*(\d{1,2})$/);
   if (m) {
-    const a = Number(m[1])
-    const b = Number(m[2])
-    return a >= 1 && b >= a ? [a, b] : null
+    const a = Number(m[1]);
+    const b = Number(m[2]);
+    return a >= 1 && b >= a ? [a, b] : null;
   }
   if (/^\d{4,}$/.test(s) && s.length % 2 === 0) {
-    const ns: number[] = []
-    for (let i = 0; i < s.length; i += 2) ns.push(Number(s.slice(i, i + 2)))
-    const a = Math.min(...ns)
-    const b = Math.max(...ns)
-    return a >= 1 ? [a, b] : null
+    const ns: number[] = [];
+    for (let i = 0; i < s.length; i += 2) ns.push(Number(s.slice(i, i + 2)));
+    const a = Math.min(...ns);
+    const b = Math.max(...ns);
+    return a >= 1 ? [a, b] : null;
   }
   if (/^\d{1,2}$/.test(s)) {
-    const n = Number(s)
-    return n >= 1 ? [n, n] : null
+    const n = Number(s);
+    return n >= 1 ? [n, n] : null;
   }
-  return null
+  return null;
 }
 
-const clean = (v: unknown) => (typeof v === 'string' ? v.replace(/\s+/g, ' ').trim() : v == null ? '' : String(v))
+const clean = (v: unknown) => (typeof v === "string" ? v.replace(/\s+/g, " ").trim() : v == null ? "" : String(v));
 
 /** 日课表行（kbcx/xskbcx_cxRjc.html，POST xnm/xqm）→ 作息表：qssj 含整段 "10:00 - 10:45"（jssj 可能空着兜尾） */
 export function zfTimeGrid(rows: unknown): TimeSlot[] | undefined {
-  if (!Array.isArray(rows)) return undefined
-  const grid: TimeSlot[] = []
+  if (!Array.isArray(rows))
+    return undefined;
+  const grid: TimeSlot[] = [];
   for (const row of rows) {
-    const r = (row ?? {}) as { jcmc?: unknown; qssj?: unknown; jssj?: unknown }
-    const index = Number(clean(r.jcmc))
-    const times = [...String(r.qssj ?? '').matchAll(/(\d{1,2}):(\d{2})/g), ...String(r.jssj ?? '').matchAll(/(\d{1,2}):(\d{2})/g)].map((m) => Number(m[1]) * 60 + Number(m[2]))
-    const start = times[0]
-    const end = times[times.length - 1]
-    if (!(index >= 1) || start == null || end == null || end <= start) continue
-    grid.push({ index, start, end })
+    const r = (row ?? {}) as { jcmc?: unknown; qssj?: unknown; jssj?: unknown };
+    const index = Number(clean(r.jcmc));
+    const times = [...String(r.qssj ?? "").matchAll(/(\d{1,2}):(\d{2})/g), ...String(r.jssj ?? "").matchAll(/(\d{1,2}):(\d{2})/g)].map(m => Number(m[1]) * 60 + Number(m[2]));
+    const start = times[0];
+    const end = times[times.length - 1];
+    if (!(index >= 1) || start == null || end == null || end <= start)
+      continue;
+    grid.push({ index, start, end });
   }
-  if (grid.length === 0) return undefined
-  return grid.sort((a, b) => a.index - b.index)
+  if (grid.length === 0)
+    return undefined;
+  return grid.sort((a, b) => a.index - b.index);
 }
 
 /** 接口 JSON（或其 kbList）→ 规则输出；钟点不在本接口，来自 cxRjc（zfTimeGrid） */
 export function parseZfKbList(input: unknown): RuleOutput {
   const list: unknown[] = Array.isArray(input)
     ? input
-    : input && typeof input === 'object' && Array.isArray((input as { kbList?: unknown }).kbList)
+    : input && typeof input === "object" && Array.isArray((input as { kbList?: unknown }).kbList)
       ? (input as { kbList: unknown[] }).kbList
-      : []
-  const courses: RuleCourse[] = []
-  const diagnostics: Diagnostic[] = []
+      : [];
+  const courses: RuleCourse[] = [];
+  const diagnostics: Diagnostic[] = [];
   list.forEach((item, i) => {
-    const k = (item ?? {}) as ZfKb
-    const name = clean(k.kcmc)
-    const row = i + 1
+    const k = (item ?? {}) as ZfKb;
+    const name = clean(k.kcmc);
+    const row = i + 1;
     if (!name) {
-      diagnostics.push({ level: 'warn', code: 'EMPTY_NAME', message: `第 ${row} 条没有课程名，已跳过`, at: { row } })
-      return
+      diagnostics.push({ level: "warn", code: "EMPTY_NAME", message: `第 ${row} 条没有课程名，已跳过`, at: { row } });
+      return;
     }
-    const weekday = Number(k.xqj)
+    const weekday = Number(k.xqj);
     if (!(weekday >= 1 && weekday <= 7)) {
-      diagnostics.push({ level: 'warn', code: 'BAD_WEEKDAY', message: `「${name}」星期无法识别：${clean(k.xqj)}`, at: { row } })
-      return
+      diagnostics.push({ level: "warn", code: "BAD_WEEKDAY", message: `「${name}」星期无法识别：${clean(k.xqj)}`, at: { row } });
+      return;
     }
-    const jc = parseJcs(clean(k.jcs))
+    const jc = parseJcs(clean(k.jcs));
     if (!jc) {
-      diagnostics.push({ level: 'warn', code: 'BAD_PERIOD', message: `「${name}」节次无法识别：${clean(k.jcs)}`, at: { row } })
-      return
+      diagnostics.push({ level: "warn", code: "BAD_PERIOD", message: `「${name}」节次无法识别：${clean(k.jcs)}`, at: { row } });
+      return;
     }
-    const { weeks, error } = zcdToWeeks(clean(k.zcd))
+    const { weeks, error } = zcdToWeeks(clean(k.zcd));
     if (!weeks) {
-      diagnostics.push({ level: 'warn', code: 'BAD_WEEKS', message: `「${name}」周次无法识别：${clean(k.zcd)}`, at: { row } })
-      return
+      diagnostics.push({ level: "warn", code: "BAD_WEEKS", message: `「${name}」周次无法识别：${clean(k.zcd)}`, at: { row } });
+      return;
     }
-    if (error) diagnostics.push({ level: 'info', code: 'WEEKS_PARTIAL', message: `「${name}」周次部分无法识别：${clean(k.zcd)}`, at: { row } })
+    if (error)
+      diagnostics.push({ level: "info", code: "WEEKS_PARTIAL", message: `「${name}」周次部分无法识别：${clean(k.zcd)}`, at: { row } });
     const course: RuleCourse = {
       name,
       weekday,
@@ -138,13 +145,16 @@ export function parseZfKbList(input: unknown): RuleOutput {
       endPeriod: jc[1],
       weeks,
       raw: { kcmc: name, xqj: String(weekday), jcs: clean(k.jcs), zcd: clean(k.zcd) },
-    }
-    const teacher = clean(k.xm)
-    const location = clean(k.cdmc)
-    if (teacher) course.teacher = teacher
-    if (location) course.location = location
-    courses.push(course)
-  })
-  if (list.length === 0) diagnostics.push({ level: 'error', code: 'EMPTY', message: '接口没有返回课程' })
-  return { courses, diagnostics }
+    };
+    const teacher = clean(k.xm);
+    const location = clean(k.cdmc);
+    if (teacher)
+      course.teacher = teacher;
+    if (location)
+      course.location = location;
+    courses.push(course);
+  });
+  if (list.length === 0)
+    diagnostics.push({ level: "error", code: "EMPTY", message: "接口没有返回课程" });
+  return { courses, diagnostics };
 }

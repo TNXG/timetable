@@ -1,39 +1,43 @@
-import React from 'react'
-import { Phone, Nav, SubHead } from '../shared'
+import React from "react";
+import { Nav, Phone, SubHead } from "../shared";
 
 /* ---------------- 08 me ---------------- */
 
 export const meGroups: [string, [string, string][]][] = [
-  ['课表', [
-    ['当前课表', '2025 秋季学期'],
-    ['导入规则', '正方教务 通用规则 v2.3'],
-    ['作息时间', ''],
+  ["课表", [
+    ["当前课表", "2025 秋季学期"],
+    ["导入规则", "正方教务 通用规则 v2.3"],
+    ["作息时间", ""],
   ]],
-  ['提醒', [
-    ['上课提醒', '课前 15 分钟'],
-    ['作业提醒', '截止前 1 天、2 小时'],
+  ["提醒", [
+    ["上课提醒", "课前 15 分钟"],
+    ["作业提醒", "截止前 1 天、2 小时"],
   ]],
-  ['其他', [
-    ['外观', '跟随系统'],
-    ['分享课表', ''],
+  ["其他", [
+    ["外观", "跟随系统"],
+    ["分享课表", ""],
   ]],
-  ['高级', [
-    ['关于', ''],
-    ['清除数据', ''],
+  ["高级", [
+    ["关于", ""],
+    ["清除数据", ""],
   ]],
-]
+];
 
 /* ---------------- 个人资料 / 统计 / 清除数据 ---------------- */
 
-
-export const CAM = <g><path d="M4 8.5A2.5 2.5 0 0 1 6.5 6H8l1.2-2h5.6L16 6h1.5A2.5 2.5 0 0 1 20 8.5v8A2.5 2.5 0 0 1 17.5 19h-11A2.5 2.5 0 0 1 4 16.5z" /><circle cx="12" cy="12.5" r="3.2" /></g>
+export const CAM = (
+  <g>
+    <path d="M4 8.5A2.5 2.5 0 0 1 6.5 6H8l1.2-2h5.6L16 6h1.5A2.5 2.5 0 0 1 20 8.5v8A2.5 2.5 0 0 1 17.5 19h-11A2.5 2.5 0 0 1 4 16.5z" />
+    <circle cx="12" cy="12.5" r="3.2" />
+  </g>
+);
 
 export function CamBadge({ className }: { className: string }) {
   return (
     <span className={`grid place-items-center rounded-full ${className}`}>
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">{CAM}</svg>
     </span>
-  )
+  );
 }
 
 export function ProfileScreen() {
@@ -58,16 +62,16 @@ export function ProfileScreen() {
         </div>
       </div>
     </Phone>
-  )
+  );
 }
 
 /* [颜色, 课名, 已上, 全部, 老师, 学分, 每周节数, 请假次数] */
 export const statsCourses: [string, string, number, number, string, number, number, number][] = [
-  ['var(--c-accent)', '高等数学', 36, 96, '王建国', 4, 6, 2],
-  ['var(--c-rose)', '线性代数', 24, 64, '刘娜', 3, 4, 0],
-  ['var(--c-amber)', '大学英语', 24, 64, '周敏', 2, 4, 0],
-  ['#4F8A6B', '数据结构', 20, 64, '张伟', 3, 4, 1],
-]
+  ["var(--c-accent)", "高等数学", 36, 96, "王建国", 4, 6, 2],
+  ["var(--c-rose)", "线性代数", 24, 64, "刘娜", 3, 4, 0],
+  ["var(--c-amber)", "大学英语", 24, 64, "周敏", 2, 4, 0],
+  ["#4F8A6B", "数据结构", 20, 64, "张伟", 3, 4, 1],
+];
 
 export function StatsScreen() {
   return (
@@ -84,24 +88,54 @@ export function StatsScreen() {
               <div className="h-full w-1/3 rounded-full bg-(--c-ink)" />
             </div>
             <div className="mt-3.5 flex gap-3 text-[12.5px] font-medium tabular-nums text-(--c-ink3)">
-              <span>12 门课</span><span>24 学分</span><span>每周 22 节</span>
+              <span>12 门课</span>
+              <span>24 学分</span>
+              <span>每周 22 节</span>
             </div>
           </div>
           <div className="mt-5">
             <div className="px-0.5 text-[12px] font-bold tracking-[-.01em] text-(--c-ink5)">必修</div>
             <div className="mt-2 rounded-[18px] bg-(--c-surface) px-4">
               {statsCourses.map(([c, n, done, total, t, cr, w, leave], i) => (
-                <div key={n} className={`py-3.5 ${i ? 'border-t border-(--c-surface2)' : ''}`}>
+                <div key={n} className={`py-3.5 ${i ? "border-t border-(--c-surface2)" : ""}`}>
                   <div className="flex items-baseline">
                     <span className="flex-1 text-[14px] font-semibold text-(--c-ink)">{n}</span>
-                    <span className="ml-3 text-[12.5px] font-semibold tabular-nums text-(--c-ink3)">{done} / {total} 节</span>
+                    <span className="ml-3 text-[12.5px] font-semibold tabular-nums text-(--c-ink3)">
+                      {done}
+                      {" "}
+                      /
+                      {" "}
+                      {total}
+                      {" "}
+                      节
+                    </span>
                   </div>
                   <div className="mt-2 h-1 overflow-hidden rounded-full bg-(--c-surface2)">
                     <div className="h-full rounded-full" style={{ width: `${(done / total) * 100}%`, background: c }} />
                   </div>
                   <div className="mt-1.5 flex items-baseline text-[12px] font-medium tabular-nums text-(--c-ink4)">
-                    <span className="flex flex-1 gap-2.5"><span>{t}</span><span>{cr} 学分</span><span>每周 {w} 节</span></span>
-                    {leave > 0 && <span className="ml-3 text-(--c-danger)">请假 {leave} 次</span>}
+                    <span className="flex flex-1 gap-2.5">
+                      <span>{t}</span>
+                      <span>
+                        {cr}
+                        {" "}
+                        学分
+                      </span>
+                      <span>
+                        每周
+                        {w}
+                        {" "}
+                        节
+                      </span>
+                    </span>
+                    {leave > 0 && (
+                      <span className="ml-3 text-(--c-danger)">
+                        请假
+                        {leave}
+                        {" "}
+                        次
+                      </span>
+                    )}
                   </div>
                 </div>
               ))}
@@ -110,8 +144,8 @@ export function StatsScreen() {
           <div className="mt-5">
             <div className="px-0.5 text-[12px] font-bold tracking-[-.01em] text-(--c-ink5)">本学期</div>
             <div className="mt-2 rounded-[18px] bg-(--c-surface) px-4">
-              {([['第一节有课', '每周 3 天', false], ['作业', '5 / 7 已完成', true], ['考试', '2 场', true], ['请假', '3 次', true], ['调课', '1 次', true]] as [string, string, boolean][]).map(([k, v, go], i) => (
-                <div key={k} className={`flex items-center py-3.5 ${i ? 'border-t border-(--c-surface2)' : ''}`}>
+              {([["第一节有课", "每周 3 天", false], ["作业", "5 / 7 已完成", true], ["考试", "2 场", true], ["请假", "3 次", true], ["调课", "1 次", true]] as [string, string, boolean][]).map(([k, v, go], i) => (
+                <div key={k} className={`flex items-center py-3.5 ${i ? "border-t border-(--c-surface2)" : ""}`}>
                   <span className="flex-1 text-[14px] font-semibold text-(--c-ink)">{k}</span>
                   <span className="text-[12.5px] font-medium tabular-nums text-(--c-ink4)">{v}</span>
                   {go && <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink5)" strokeWidth="2.2" className="ml-2"><path d="m9 5 7 7-7 7" /></svg>}
@@ -122,7 +156,7 @@ export function StatsScreen() {
         </div>
       </div>
     </Phone>
-  )
+  );
 }
 
 export function EraseScreen() {
@@ -132,8 +166,8 @@ export function EraseScreen() {
         <SubHead title="清除数据" sub="卸载应用不会移除系统日历中的内容。" />
         <div className="mt-6 px-5">
           <div className="rounded-[18px] bg-(--c-surface) px-4">
-            {['课表、课程和调整', '作业和照片', '系统日历中由本应用创建的日历'].map((t, i) => (
-              <div key={t} className={`py-3.5 text-[14px] font-semibold text-(--c-ink) ${i ? 'border-t border-(--c-line2)' : ''}`}>{t}</div>
+            {["课表、课程和调整", "作业和照片", "系统日历中由本应用创建的日历"].map((t, i) => (
+              <div key={t} className={`py-3.5 text-[14px] font-semibold text-(--c-ink) ${i ? "border-t border-(--c-line2)" : ""}`}>{t}</div>
             ))}
           </div>
         </div>
@@ -143,7 +177,7 @@ export function EraseScreen() {
         <button className="w-full rounded-[18px] bg-(--c-danger) py-3.75 text-[15px] font-bold text-white">清除全部数据</button>
       </div>
     </Phone>
-  )
+  );
 }
 
 /* ---------------- 关于 ---------------- */
@@ -161,11 +195,11 @@ export function AboutScreen() {
         <div className="mt-8 px-5">
           <div className="rounded-[18px] bg-(--c-surface) px-4">
             {([
-              ['1.4.78', '版本'],
-              ['GPL-3.0', '开源协议'],
-              ['github.com/TNXG/timetable', '代码仓库'],
+              ["1.4.78", "版本"],
+              ["GPL-3.0", "开源协议"],
+              ["github.com/TNXG/timetable", "代码仓库"],
             ] as [string, string][]).map(([v, label], i) => (
-              <div key={label} className={`py-3.5 ${i ? 'border-t border-(--c-line2)' : ''}`}>
+              <div key={label} className={`py-3.5 ${i ? "border-t border-(--c-line2)" : ""}`}>
                 <div className="truncate text-[15px] font-semibold text-(--c-ink)">{v}</div>
                 <div className="mt-0.5 text-[11.5px] font-medium text-(--c-ink4)">{label}</div>
               </div>
@@ -174,20 +208,24 @@ export function AboutScreen() {
           <div className="mt-5 px-0.5 text-[12px] font-bold tracking-[-.01em] text-(--c-ink4)">开发者</div>
           <div className="mt-2 overflow-hidden rounded-[18px] bg-(--c-surface) px-4">
             {([
-              ['TNXG', '维护者', 'https://api-space.tnxg.top/avatar?s=qq'],
-              ['Shuakami', '原作者', 'https://api-space.tnxg.top/images/proxy?url=https%3A%2F%2Favatars.githubusercontent.com%2Fu%2F149454909%3Fv%3D4'],
+              ["TNXG", "维护者", "https://api-space.tnxg.top/avatar?s=qq"],
+              ["Shuakami", "原作者", "https://api-space.tnxg.top/images/proxy?url=https%3A%2F%2Favatars.githubusercontent.com%2Fu%2F149454909%3Fv%3D4"],
             ] as [string, string, string][]).map(([name, role, avatar]) => (
-              <button key={name} className={`flex w-full items-center py-3.5 text-left ${name === 'Shuakami' ? 'border-t border-(--c-line2)' : ''}`}>
+              <button key={name} className={`flex w-full items-center py-3.5 text-left ${name === "Shuakami" ? "border-t border-(--c-line2)" : ""}`}>
                 <img src={avatar} alt="" className="h-10 w-10 flex-none rounded-full bg-(--c-surface2) object-cover" />
                 <div className="ml-3 min-w-0 flex-1">
                   <div className="truncate text-[14px] font-bold text-(--c-ink)">{name}</div>
-                  <div className="mt-0.5 truncate text-[12px] font-medium text-(--c-ink4)">{role} · GitHub.com</div>
+                  <div className="mt-0.5 truncate text-[12px] font-medium text-(--c-ink4)">
+                    {role}
+                    {" "}
+                    · GitHub.com
+                  </div>
                 </div>
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink5)" strokeWidth="2.2" strokeLinecap="round" className="ml-3 flex-none"><path d="m9 5 7 7-7 7" /></svg>
               </button>
             ))}
-            {['反馈问题'].map((k) => (
-              <div key={k} className={`flex items-center py-3.5 border-t border-(--c-line2)`}>
+            {["反馈问题"].map(k => (
+              <div key={k} className="flex items-center py-3.5 border-t border-(--c-line2)">
                 <span className="flex-1 text-[14px] font-semibold text-(--c-ink)">{k}</span>
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink5)" strokeWidth="2.2" className="ml-2"><path d="m9 5 7 7-7 7" /></svg>
               </div>
@@ -196,7 +234,7 @@ export function AboutScreen() {
         </div>
       </div>
     </Phone>
-  )
+  );
 }
 
 export function MeScreen() {
@@ -224,8 +262,8 @@ export function MeScreen() {
 
         <div className="px-5">
           <div className="flex rounded-[18px] bg-(--c-surface) px-4 py-3.5">
-            {[['18', '门课'], ['24', '学分'], ['86%', '出勤']].map(([n, l], i) => (
-              <div key={l} className={`flex-1 ${i ? 'border-l border-(--c-surface2)' : ''}`}>
+            {[["18", "门课"], ["24", "学分"], ["86%", "出勤"]].map(([n, l], i) => (
+              <div key={l} className={`flex-1 ${i ? "border-l border-(--c-surface2)" : ""}`}>
                 <div className="text-center text-[17px] font-extrabold tabular-nums text-(--c-ink)">{n}</div>
                 <div className="mt-0.5 text-center text-[11px] font-semibold text-(--c-ink4)">{l}</div>
               </div>
@@ -237,7 +275,7 @@ export function MeScreen() {
               <div className="px-0.5 text-[12px] font-bold tracking-[-.01em] text-(--c-ink4)">{g}</div>
               <div className="mt-2 rounded-[18px] bg-(--c-surface) px-4">
                 {rows.map(([k, v], i) => (
-                  <div key={k} className={`flex items-center py-3.5 ${i ? 'border-t border-(--c-line2)' : ''}`}>
+                  <div key={k} className={`flex items-center py-3.5 ${i ? "border-t border-(--c-line2)" : ""}`}>
                     <span className="flex-1 text-[14px] font-semibold text-(--c-ink)">{k}</span>
                     <span className="text-[12.5px] font-medium text-(--c-ink4)">{v}</span>
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink5)" strokeWidth="2.2" className="ml-2"><path d="m9 5 7 7-7 7" /></svg>
@@ -250,9 +288,9 @@ export function MeScreen() {
       </div>
       <div
         className="pointer-events-none absolute inset-x-0 bottom-0 z-7 h-37.5"
-        style={{ background: 'var(--c-fade)' }}
+        style={{ background: "var(--c-fade)" }}
       />
       <Nav active={3} />
     </Phone>
-  )
+  );
 }

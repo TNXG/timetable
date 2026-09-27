@@ -1,41 +1,40 @@
-import React from 'react'
-import { C, Phone, Nav, dockStyle, CameraIcon, Board } from '../shared'
+import React from "react";
+import { Board, C, CameraIcon, dockStyle, Nav, Phone } from "../shared";
 
 /* ---------------- 07b todo v2：先记下，再整理 ---------------- */
 
-
-export const ArrowUp = ({ stroke = '#fff' }: { stroke?: string }) => (
+export const ArrowUp = ({ stroke = "#fff" }: { stroke?: string }) => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><path d="M12 19V5M5 12l7-7 7 7" /></svg>
-)
+);
 
 /* 板书：相机取景、照片缩略图共用一块假图 */
 
-export type Todo2 = {
-  title: string
-  course: string
-  color: string
-  due: string
-  left?: string
-  leftTone?: 'rose' | 'ink'
-  exam?: boolean
-  photo?: boolean
-  suggest?: string
+export interface Todo2 {
+  title: string;
+  course: string;
+  color: string;
+  due: string;
+  left?: string;
+  leftTone?: "rose" | "ink";
+  exam?: boolean;
+  photo?: boolean;
+  suggest?: string;
 }
 
 export const todo2Groups: [string, Todo2[]][] = [
-  ['待整理', [
-    { title: '板书', course: '大学英语（三）', color: C.eng, due: '09:38 拍下', photo: true, suggest: '下次课前，周四 08:00' },
+  ["待整理", [
+    { title: "板书", course: "大学英语（三）", color: C.eng, due: "09:38 拍下", photo: true, suggest: "下次课前，周四 08:00" },
   ]],
-  ['今天', [
-    { title: '习题册 P41–P45 第 3、5、7 题', course: '高等数学（下）', color: C.math, due: '今晚 23:00', left: '还剩 11 小时', leftTone: 'rose', photo: true },
-    { title: '实验报告：单摆测重力加速度', course: '大学物理', color: C.phy, due: '课上交 14:00', left: '带纸质版' },
+  ["今天", [
+    { title: "习题册 P41–P45 第 3、5、7 题", course: "高等数学（下）", color: C.math, due: "今晚 23:00", left: "还剩 11 小时", leftTone: "rose", photo: true },
+    { title: "实验报告：单摆测重力加速度", course: "大学物理", color: C.phy, due: "课上交 14:00", left: "带纸质版" },
   ]],
-  ['这周', [
-    { title: '期中考试 1–5 章', course: '线性代数', color: C.la, due: '周五 14:00', left: '3 天后', exam: true },
-    { title: '第 4 次上机：红黑树插入', course: '数据结构', color: C.ds, due: '周六 23:59', photo: true },
-    { title: '背完 Unit 6 词表', course: '大学英语（三）', color: C.eng, due: '周日' },
+  ["这周", [
+    { title: "期中考试 1–5 章", course: "线性代数", color: C.la, due: "周五 14:00", left: "3 天后", exam: true },
+    { title: "第 4 次上机：红黑树插入", course: "数据结构", color: C.ds, due: "周六 23:59", photo: true },
+    { title: "背完 Unit 6 词表", course: "大学英语（三）", color: C.eng, due: "周日" },
   ]],
-]
+];
 
 export function Todo2Row({ t }: { t: Todo2 }) {
   return (
@@ -43,16 +42,19 @@ export function Todo2Row({ t }: { t: Todo2 }) {
       <span className="mt-0.5 h-4.25 w-4.25 flex-none rounded-md border-[1.6px] border-(--c-ink5)" />
       <div className="ml-3 min-w-0 flex-1">
         <div className="flex items-center gap-1.5">
-          <span className={`truncate text-[14px] font-bold tracking-[-.01em] ${t.suggest ? 'text-(--c-ink3)' : 'text-(--c-ink)'}`}>{t.title}</span>
+          <span className={`truncate text-[14px] font-bold tracking-[-.01em] ${t.suggest ? "text-(--c-ink3)" : "text-(--c-ink)"}`}>{t.title}</span>
           {t.exam && <span className="flex-none rounded-[5px] bg-(--c-rose-soft) px-1.5 py-0.5 text-[10px] font-extrabold text-(--c-rose)">考试</span>}
         </div>
         <div className="mt-1.25 flex items-center gap-1.5 text-[12px] font-medium text-(--c-ink4)">
           <span className="h-1.75 w-1.75 flex-none rounded-full" style={{ background: t.color }} />
           <span className="truncate">{t.course}</span>
-          <span className="flex-none tabular-nums text-(--c-ink3)">· {t.due}</span>
+          <span className="flex-none tabular-nums text-(--c-ink3)">
+            ·
+            {t.due}
+          </span>
         </div>
         {t.left && (
-          <div className={`mt-1 text-[12px] font-semibold tabular-nums ${t.leftTone === 'rose' ? 'text-(--c-rose)' : 'text-(--c-ink3)'}`}>{t.left}</div>
+          <div className={`mt-1 text-[12px] font-semibold tabular-nums ${t.leftTone === "rose" ? "text-(--c-rose)" : "text-(--c-ink3)"}`}>{t.left}</div>
         )}
         {t.suggest && (
           <div className="mt-2 inline-flex items-center gap-1 rounded-full bg-(--c-accent-soft) px-2.5 py-1.25 text-[11.5px] font-bold text-(--c-accent)">
@@ -63,7 +65,7 @@ export function Todo2Row({ t }: { t: Todo2 }) {
       </div>
       {t.photo && <Board className="ml-3 h-14 w-14 flex-none rounded-[10px]" zoom={0.2} />}
     </div>
-  )
+  );
 }
 
 export function Todo2List() {
@@ -84,9 +86,13 @@ export function Todo2List() {
           <div key={g} className="mb-5">
             <div className="flex items-baseline justify-between px-0.5">
               <span className="text-[13px] font-extrabold tracking-[-.01em] text-(--c-ink)">{g}</span>
-              <span className="text-[11.5px] font-semibold tabular-nums text-(--c-ink4)">{list.length} 项</span>
+              <span className="text-[11.5px] font-semibold tabular-nums text-(--c-ink4)">
+                {list.length}
+                {" "}
+                项
+              </span>
             </div>
-            <div className="mt-2.5 space-y-2">{list.map((t) => <Todo2Row key={t.title + t.course} t={t} />)}</div>
+            <div className="mt-2.5 space-y-2">{list.map(t => <Todo2Row key={t.title + t.course} t={t} />)}</div>
           </div>
         ))}
         <div className="flex items-center justify-between px-0.5 py-1">
@@ -95,7 +101,7 @@ export function Todo2List() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 /* 底部胶囊：相机 + 一句话，压在 Nav 上面 */
@@ -107,35 +113,40 @@ export function Composer() {
         <span className="flex-1 pl-1 text-[15px] font-medium text-(--c-ink4)">新待办</span>
       </div>
     </div>
-  )
+  );
 }
 
 export function Todo2Screen() {
   return (
     <Phone>
       <Todo2List />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-7 h-47.5" style={{ background: 'var(--c-fade)' }} />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-7 h-47.5" style={{ background: "var(--c-fade)" }} />
       <Composer />
       <Nav active={2} />
     </Phone>
-  )
+  );
 }
 
 /* iOS 风格键盘占位 */
-export function Keyboard() {
-  const Key = ({ w = 32, dark, children }: { w?: number; dark?: boolean; children?: React.ReactNode }) => (
+function Key({ w = 32, dark, children }: { w?: number; dark?: boolean; children?: React.ReactNode }) {
+  return (
     <span
-      className={`flex h-[42px] items-center justify-center rounded-md text-[16px] font-medium text-(--c-ink) ${dark ? 'bg-[#ACB1BA]' : 'bg-white'}`}
-      style={{ width: w, boxShadow: '0 1px 0 rgba(0,0,0,.25)' }}
-    >{children}</span>
-  )
+      className={`flex h-[42px] items-center justify-center rounded-md text-[16px] font-medium text-(--c-ink) ${dark ? "bg-[#ACB1BA]" : "bg-white"}`}
+      style={{ width: w, boxShadow: "0 1px 0 rgba(0,0,0,.25)" }}
+    >
+      {children}
+    </span>
+  );
+}
+
+export function Keyboard() {
   return (
     <div className="absolute inset-x-0 bottom-0 z-8 bg-[#D1D4DA] px-0.75 pt-2 pb-9.5">
-      <div className="flex justify-center gap-1.5">{'qwertyuiop'.split('').map((k) => <Key key={k}>{k}</Key>)}</div>
-      <div className="mt-2.75 flex justify-center gap-1.5">{'asdfghjkl'.split('').map((k) => <Key key={k}>{k}</Key>)}</div>
+      <div className="flex justify-center gap-1.5">{"qwertyuiop".split("").map(k => <Key key={k}>{k}</Key>)}</div>
+      <div className="mt-2.75 flex justify-center gap-1.5">{"asdfghjkl".split("").map(k => <Key key={k}>{k}</Key>)}</div>
       <div className="mt-2.75 flex justify-center gap-1.5">
         <Key w={42} dark>⇧</Key>
-        {'zxcvbnm'.split('').map((k) => <Key key={k}>{k}</Key>)}
+        {"zxcvbnm".split("").map(k => <Key key={k}>{k}</Key>)}
         <Key w={42} dark>⌫</Key>
       </div>
       <div className="mt-2.75 flex justify-center gap-1.5">
@@ -145,16 +156,16 @@ export function Keyboard() {
       </div>
       <div className="mx-auto mt-4 h-1.25 w-33.5 rounded-full bg-(--c-ink)/85" />
     </div>
-  )
+  );
 }
 
-export function Chip2({ color, children, tone = 'plain' }: { color?: string; children: React.ReactNode; tone?: 'plain' | 'accent' }) {
+export function Chip2({ color, children, tone = "plain" }: { color?: string; children: React.ReactNode; tone?: "plain" | "accent" }) {
   return (
-    <span className={`inline-flex h-7.5 items-center gap-1.5 rounded-full px-3 text-[12.5px] font-bold ${tone === 'accent' ? 'bg-(--c-accent-soft) text-(--c-accent)' : 'bg-(--c-surface2) text-(--c-ink2)'}`}>
+    <span className={`inline-flex h-7.5 items-center gap-1.5 rounded-full px-3 text-[12.5px] font-bold ${tone === "accent" ? "bg-(--c-accent-soft) text-(--c-accent)" : "bg-(--c-surface2) text-(--c-ink2)"}`}>
       {color && <span className="h-1.75 w-1.75 rounded-full" style={{ background: color }} />}
       {children}
     </span>
-  )
+  );
 }
 
 /* 点开胶囊：键盘顶上来，胶囊展开成一段话 + 默认带上的课程/截止 */
@@ -180,7 +191,7 @@ export function Todo2ComposeScreen() {
       </div>
       <Keyboard />
     </Phone>
-  )
+  );
 }
 
 /* 相机：黑底、取景框、圆快门；课程默认带上，顶部可换 */

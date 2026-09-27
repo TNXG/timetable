@@ -1,52 +1,58 @@
+import type { PageCapture, ProbeResult } from "../../domain/edu/scripts";
+import type { EduSystemId } from "../../domain/edu/systems";
 /** 未识别：页面地址与系统猜测，给更新、反馈、调试包三个出口 */
-import { useEffect, useState } from 'react'
-import { SYSTEM_LABEL, scrubUrl, type EduSystemId } from '../../domain/edu/systems'
-import type { PageCapture, ProbeResult } from '../../domain/edu/scripts'
-import { LATEST_RELEASE_API, RELEASES_URL, isNewer, issueUrl } from '../../domain/edu/release'
-import { nativeToast } from '../widgets'
-import { Page, Row, TopBar } from '../ui'
-import { appVersion, openExternal, shareDebug } from './share'
+import { useEffect, useState } from "react";
+import { isNewer, issueUrl, LATEST_RELEASE_API, RELEASES_URL } from "../../domain/edu/release";
+import { scrubUrl, SYSTEM_LABEL } from "../../domain/edu/systems";
+import { Page, Row, TopBar } from "../ui";
+import { nativeToast } from "../widgets";
+import { appVersion, openExternal, shareDebug } from "./share";
 
 export interface EduFailInfo {
-  url: string
-  system: EduSystemId | null
+  url: string;
+  system: EduSystemId | null;
   /** 点导入时页面的正文文字；给「让 AI 转换」用 */
-  text: string
+  text: string;
   /** 点导入时的页面快照；给「导出页面调试包」用 */
-  capture: PageCapture | null
-  probe: ProbeResult | null
+  capture: PageCapture | null;
+  probe: ProbeResult | null;
 }
 
 async function latestRelease(): Promise<{ tag: string; url: string } | null> {
   try {
-    const res = await fetch(LATEST_RELEASE_API, { headers: { Accept: 'application/vnd.github+json' } })
-    if (!res.ok) return null
-    const j: unknown = await res.json()
-    if (typeof j !== 'object' || j === null) return null
-    const o = j as Record<string, unknown>
-    if (typeof o.tag_name !== 'string') return null
-    return { tag: o.tag_name, url: typeof o.html_url === 'string' ? o.html_url : RELEASES_URL }
+    const res = await fetch(LATEST_RELEASE_API, { headers: { Accept: "application/vnd.github+json" } });
+    if (!res.ok)
+      return null;
+    const j: unknown = await res.json();
+    if (typeof j !== "object" || j === null)
+      return null;
+    const o = j as Record<string, unknown>;
+    if (typeof o.tag_name !== "string")
+      return null;
+    return { tag: o.tag_name, url: typeof o.html_url === "string" ? o.html_url : RELEASES_URL };
   } catch {
-    return null
+    return null;
   }
 }
 
 export function EduFailPage({ info, onBack }: { info: EduFailInfo; onBack: () => void }) {
-  const [version, setVersion] = useState('')
-  const [update, setUpdate] = useState<string | null>(null)
+  const [version, setVersion] = useState("");
+  const [update, setUpdate] = useState<string | null>(null);
 
   useEffect(() => {
-    let alive = true
+    let alive = true;
     void (async () => {
-      const [v, latest] = await Promise.all([appVersion(), latestRelease()])
-      if (!alive) return
-      setVersion(v)
-      if (latest && v && isNewer(latest.tag, v)) setUpdate(latest.url)
-    })()
+      const [v, latest] = await Promise.all([appVersion(), latestRelease()]);
+      if (!alive)
+        return;
+      setVersion(v);
+      if (latest && v && isNewer(latest.tag, v))
+        setUpdate(latest.url);
+    })();
     return () => {
-      alive = false
-    }
-  }, [])
+      alive = false;
+    };
+  }, []);
 
   return (
     <Page>
@@ -56,7 +62,7 @@ export function EduFailPage({ info, onBack }: { info: EduFailInfo; onBack: () =>
 
           <div className="mt-6 rounded-2xl bg-(--c-surface) px-4 py-3.5">
             <div className="text-[11.5px] font-semibold text-(--c-ink4)">页面</div>
-            <div className="mt-1.5 truncate font-mono text-[12.5px] text-(--c-ink)">{scrubUrl(info.url).replace(/^https?:\/\//, '')}</div>
+            <div className="mt-1.5 truncate font-mono text-[12.5px] text-(--c-ink)">{scrubUrl(info.url).replace(/^https?:\/\//, "")}</div>
             {info.system && <div className="mt-1 text-[11.5px] font-medium text-(--c-ink4)">{SYSTEM_LABEL[info.system]}</div>}
           </div>
 
@@ -68,8 +74,9 @@ export function EduFailPage({ info, onBack }: { info: EduFailInfo; onBack: () =>
                 title="导出页面调试包"
                 desc="当前页面的 HTML，一个 .html 文件"
                 onClick={() => {
-                  const c = info.capture
-                  if (c) void shareDebug(c, info.system, info.probe).catch(() => nativeToast('导出失败'))
+                  const c = info.capture;
+                  if (c)
+                    void shareDebug(c, info.system, info.probe).catch(() => nativeToast("导出失败"));
                 }}
               />
             )}
@@ -81,5 +88,5 @@ export function EduFailPage({ info, onBack }: { info: EduFailInfo; onBack: () =>
         </div>
       </div>
     </Page>
-  )
+  );
 }

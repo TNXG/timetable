@@ -1,6 +1,6 @@
-import React from 'react'
+import React from "react";
 
-export type EmptyKind = 'free' | 'none' | 'todo' | 'term' | 'holiday' | 'search'
+export type EmptyKind = "free" | "none" | "todo" | "term" | "holiday" | "search";
 
 export function EmptyArt({ kind }: { kind: EmptyKind }) {
   const art: Record<EmptyKind, React.ReactNode> = {
@@ -47,12 +47,12 @@ export function EmptyArt({ kind }: { kind: EmptyKind }) {
         <path d="M16 21h10" />
       </>
     ),
-  }
+  };
   return (
     <svg viewBox="0 0 48 48" fill="none" stroke="var(--c-ink3)" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="h-13 w-13">
       {art[kind]}
     </svg>
-  )
+  );
 }
 
 export function EmptyBlock({
@@ -61,16 +61,16 @@ export function EmptyBlock({
   desc,
   actions,
   icons,
-  className = 'px-8',
+  className = "px-8",
   onSurface,
 }: {
-  kind: EmptyKind
-  title: string
-  desc?: string
-  actions: string[]
-  icons?: React.ReactNode[]
-  className?: string
-  onSurface?: boolean
+  kind: EmptyKind;
+  title: string;
+  desc?: string;
+  actions: string[];
+  icons?: React.ReactNode[];
+  className?: string;
+  onSurface?: boolean;
 }) {
   return (
     <div className={`flex flex-col ${className}`}>
@@ -81,7 +81,7 @@ export function EmptyBlock({
         {actions.map((a, i) => (
           <span
             key={a}
-            className={`flex h-[34px] items-center gap-1.5 rounded-full text-[13px] font-bold ${i === 0 ? 'bg-(--c-accent) text-white' : `${onSurface ? 'bg-(--c-surface2)' : 'bg-(--c-surface)'} text-(--c-ink)`} ${icons?.[i] ? 'pl-3 pr-3.5' : 'px-3.5'}`}
+            className={`flex h-[34px] items-center gap-1.5 rounded-full text-[13px] font-bold ${i === 0 ? "bg-(--c-accent) text-white" : `${onSurface ? "bg-(--c-surface2)" : "bg-(--c-surface)"} text-(--c-ink)`} ${icons?.[i] ? "pl-3 pr-3.5" : "px-3.5"}`}
           >
             {icons?.[i]}
             {a}
@@ -89,6 +89,5 @@ export function EmptyBlock({
         ))}
       </div>
     </div>
-  )
+  );
 }
-

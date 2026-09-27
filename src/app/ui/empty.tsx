@@ -1,6 +1,6 @@
-import React from 'react'
+import React from "react";
 
-export type EmptyKind = 'free' | 'none' | 'todo' | 'term' | 'holiday' | 'search'
+export type EmptyKind = "free" | "none" | "todo" | "term" | "holiday" | "search";
 
 export function EmptyArt({ kind }: { kind: EmptyKind }) {
   const art: Record<EmptyKind, React.ReactNode> = {
@@ -48,23 +48,23 @@ export function EmptyArt({ kind }: { kind: EmptyKind }) {
         <path d="M16 21h10" />
       </>
     ),
-  }
+  };
   return (
-    <svg viewBox="0 0 48 48" fill="none" style={{ stroke: 'var(--c-ink3)' }} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="h-13 w-13">
+    <svg viewBox="0 0 48 48" fill="none" style={{ stroke: "var(--c-ink3)" }} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="h-13 w-13">
       {art[kind]}
     </svg>
-  )
+  );
 }
 
-export type EmptyAction = [label: string, onClick: () => void, icon?: React.ReactNode]
+export type EmptyAction = [label: string, onClick: () => void, icon?: React.ReactNode];
 
-export function EmptyBlock({ kind, title, desc, actions, className = 'px-5', onSurface }: {
-  kind: EmptyKind
-  title: string
-  desc?: string
-  actions?: EmptyAction[]
-  className?: string
-  onSurface?: boolean
+export function EmptyBlock({ kind, title, desc, actions, className = "px-5", onSurface }: {
+  kind: EmptyKind;
+  title: string;
+  desc?: string;
+  actions?: EmptyAction[];
+  className?: string;
+  onSurface?: boolean;
 }) {
   return (
     <div className={`flex flex-col ${className}`}>
@@ -77,7 +77,7 @@ export function EmptyBlock({ kind, title, desc, actions, className = 'px-5', onS
             <button
               key={label}
               onClick={fn}
-              className={`flex h-[34px] items-center gap-1.5 rounded-full text-[13px] font-bold transition-transform duration-150 active:scale-[.96] ${i === 0 ? 'bg-(--c-accent) text-white' : `${onSurface ? 'bg-(--c-surface2)' : 'bg-(--c-surface)'} text-(--c-ink)`} ${icon ? 'pl-3 pr-3.5' : 'px-3.5'}`}
+              className={`flex h-[34px] items-center gap-1.5 rounded-full text-[13px] font-bold transition-transform duration-150 active:scale-[.96] ${i === 0 ? "bg-(--c-accent) text-white" : `${onSurface ? "bg-(--c-surface2)" : "bg-(--c-surface)"} text-(--c-ink)`} ${icon ? "pl-3 pr-3.5" : "px-3.5"}`}
             >
               {icon}
               {label}
@@ -86,5 +86,5 @@ export function EmptyBlock({ kind, title, desc, actions, className = 'px-5', onS
         </div>
       )}
     </div>
-  )
+  );
 }

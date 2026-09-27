@@ -1,12 +1,10 @@
-import { useEffect, useRef, useState, type MutableRefObject } from 'react'
-import { AnimatePresence } from 'motion/react'
-import { diffDays } from '../domain/dates'
-import { store } from './store'
-import { defaultSemester, mondayOf, todayStr } from './semester'
-import { DateInput, Field, Page, PrimaryButton, Row, TextAction, TopBar, md } from './ui'
-import { DEFAULT_PLUGIN } from '../domain/edu/plugin'
-
-const WEEKS = 20
+import type { MutableRefObject } from "react";
+import { AnimatePresence } from "motion/react";
+import { useState } from "react";
+import { diffDays } from "../domain/dates";
+import { DEFAULT_PLUGIN } from "../domain/edu/plugin";
+import { mondayOf, todayStr } from "./semester";
+import { DateInput, Field, md, Page, PrimaryButton, Row, TextAction, TopBar } from "./ui";
 
 /** 开学日期，落到所在周的周一 */
 export function StartDateField({ value, onChange }: { value: string; onChange: (d: string) => void }) {
@@ -16,11 +14,11 @@ export function StartDateField({ value, onChange }: { value: string; onChange: (
         <DateInput value={value} onChange={onChange} />
       </Field>
     </div>
-  )
+  );
 }
 
 export function currentWeek(startDate: string): number {
-  return Math.floor(diffDays(todayStr(), startDate) / 7) + 1
+  return Math.floor(diffDays(todayStr(), startDate) / 7) + 1;
 }
 
 function Step({ title, sub, onBack, footer, children }: { title: string; sub?: string; onBack?: () => void; footer: React.ReactNode; children: React.ReactNode }) {
@@ -32,18 +30,19 @@ function Step({ title, sub, onBack, footer, children }: { title: string; sub?: s
       </div>
       <div className="flex-none px-5 pb-[max(22px,env(safe-area-inset-bottom))]">{footer}</div>
     </Page>
-  )
+  );
 }
 
 /** 首次进入：登录（默认学校，作息/姓名随导入自动带出；开学日期在导入后补全），同一套推入 */
 export default function Onboarding({ onDone, initialStep = 0, backRef }: { onDone: (ruleId: string | null) => void; initialStep?: number; backRef?: MutableRefObject<() => boolean> }) {
-  const [step, setStep] = useState(initialStep)
+  const [step, setStep] = useState(initialStep);
   if (backRef) {
     backRef.current = () => {
-      if (step <= 0) return false
-      setStep(step - 1)
-      return true
-    }
+      if (step <= 0)
+        return false;
+      setStep(step - 1);
+      return true;
+    };
   }
 
   return (
@@ -71,19 +70,19 @@ export default function Onboarding({ onDone, initialStep = 0, backRef }: { onDon
             title="登录"
             sub="使用学号和统一身份认证密码"
             onBack={() => setStep(0)}
-            footer={
+            footer={(
               <div className="flex justify-center gap-8">
-                <TextAction tone="mute" onClick={() => onDone('manual')}>手动添加</TextAction>
+                <TextAction tone="mute" onClick={() => onDone("manual")}>手动添加</TextAction>
                 <TextAction tone="mute" onClick={() => onDone(null)}>稍后</TextAction>
               </div>
-            }
+            )}
           >
             <div className="divide-y divide-(--c-surface2) overflow-hidden rounded-2xl bg-(--c-surface)">
-              <Row title={DEFAULT_PLUGIN.name} badge="默认" onClick={() => onDone('edu')} />
+              <Row title={DEFAULT_PLUGIN.name} badge="默认" onClick={() => onDone("edu")} />
             </div>
           </Step>
         )}
       </AnimatePresence>
     </div>
-  )
+  );
 }

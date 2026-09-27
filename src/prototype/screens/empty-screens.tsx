@@ -1,15 +1,17 @@
-import React from 'react'
-import { C, Phone, Nav, DateStrip, TopBar, EmptyBlock } from '../shared'
+import React from "react";
+import { C, DateStrip, EmptyBlock, Nav, Phone, TopBar } from "../shared";
 
 /* ---------------- empty & error states ---------------- */
-
 
 export function FreeDayScreen() {
   return (
     <Phone>
       <div className="flex-1 overflow-hidden pt-12">
         <div className="px-5">
-          <h1 className="text-[26px] font-extrabold tracking-[-.02em] text-(--c-ink)">10月18日 <span className="font-bold text-(--c-ink4)">周六</span></h1>
+          <h1 className="text-[26px] font-extrabold tracking-[-.02em] text-(--c-ink)">
+            10月18日
+            <span className="font-bold text-(--c-ink4)">周六</span>
+          </h1>
           <div className="mt-2 flex items-center gap-2.5 text-[12.5px] font-semibold text-(--c-ink3)">
             <span>第 7 周</span>
             <span className="h-3 w-px bg-(--c-line)" />
@@ -23,7 +25,7 @@ export function FreeDayScreen() {
           kind="free"
           title="今天没有课，好耶"
           desc="周末到了，不如去做点感兴趣的事，出去走走。"
-          actions={['本周课表', '待办']}
+          actions={["本周课表", "待办"]}
         />
 
         <div className="mt-10 px-5">
@@ -45,7 +47,7 @@ export function FreeDayScreen() {
       <DateStrip active={5} />
       <Nav active={0} />
     </Phone>
-  )
+  );
 }
 
 export function NoDataScreen() {
@@ -53,7 +55,10 @@ export function NoDataScreen() {
     <Phone>
       <div className="flex-1 overflow-hidden pt-12">
         <div className="px-5">
-          <h1 className="text-[26px] font-extrabold tracking-[-.02em] text-(--c-ink)">10月14日 <span className="font-bold text-(--c-ink4)">周二</span></h1>
+          <h1 className="text-[26px] font-extrabold tracking-[-.02em] text-(--c-ink)">
+            10月14日
+            <span className="font-bold text-(--c-ink4)">周二</span>
+          </h1>
           <div className="mt-2 text-[12.5px] font-semibold text-(--c-ink4)">暂无课表</div>
         </div>
         <EmptyBlock
@@ -61,19 +66,19 @@ export function NoDataScreen() {
           kind="none"
           title="让课表就位"
           desc="一键导入，或是手动创建。随后的日程追踪与准时提醒，皆会为你准备就绪。"
-          actions={['导入课表', '手动添加']}
+          actions={["导入课表", "手动添加"]}
         />
       </div>
       <Nav active={0} />
     </Phone>
-  )
+  );
 }
 
 export const failedRows: [string, string][] = [
-  ['高等数学（下）', '周次写成 2-16双，规则没认出来'],
-  ['大学体育（羽毛球）', '这门课没有节次'],
-  ['形势与政策', '一行里写了两个上课时间'],
-]
+  ["高等数学（下）", "周次写成 2-16双，规则没认出来"],
+  ["大学体育（羽毛球）", "这门课没有节次"],
+  ["形势与政策", "一行里写了两个上课时间"],
+];
 
 export function PartialFailScreen() {
   return (
@@ -87,8 +92,8 @@ export function PartialFailScreen() {
             <span className="text-[11.5px] font-semibold tabular-nums text-(--c-ink4)">用时 6 秒</span>
           </div>
           <div className="mt-3 flex h-0.75 overflow-hidden rounded-full bg-(--c-surface2)">
-            <i className="block h-full" style={{ width: '86%', background: '#4F5BD5' }} />
-            <i className="block h-full" style={{ width: '14%', background: '#E8C39A' }} />
+            <i className="block h-full" style={{ width: "86%", background: "#4F5BD5" }} />
+            <i className="block h-full" style={{ width: "14%", background: "#E8C39A" }} />
           </div>
           <div className="mt-2.5 flex items-baseline gap-4 text-[11.5px] font-semibold tabular-nums">
             <span className="text-(--c-accent)">成功 18 门</span>
@@ -112,5 +117,5 @@ export function PartialFailScreen() {
       </div>
       <Nav active={1} />
     </Phone>
-  )
+  );
 }

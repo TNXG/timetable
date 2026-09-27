@@ -1,4 +1,4 @@
-import type { Minutes, TimeSlot } from './types'
+import type { Minutes, TimeSlot } from "./types";
 
 /**
  * 周视图的纵轴：按节次分段的分段线性时间轴。
@@ -6,92 +6,101 @@ import type { Minutes, TimeSlot } from './types'
  * 落在节次之外的时间（早课、晚自习）按真实时长线性延伸。任意时刻都能映射到唯一纵坐标，卡片高度仍随时长单调增长。
  */
 export interface AxisSeg {
-  kind: 'period' | 'gap' | 'pad'
-  t0: Minutes
-  t1: Minutes
-  y0: number
-  y1: number
+  kind: "period" | "gap" | "pad";
+  t0: Minutes;
+  t1: Minutes;
+  y0: number;
+  y1: number;
   /** period：节次序号 */
-  index?: number
+  index?: number;
   /** gap：长课间的名字（午休 / 晚饭）；不在饭点的长课间没名字，只留带 */
-  label?: string
+  label?: string;
   /** gap：是否长课间（单独成带） */
-  wide?: boolean
+  wide?: boolean;
 }
 
 export interface TimeAxis {
-  segs: AxisSeg[]
-  height: number
-  y(t: Minutes): number
+  segs: AxisSeg[];
+  height: number;
+  y: (t: Minutes) => number;
 }
 
 /** 行高上限：两行课名 + 两行地点 */
-export const AXIS_ROW = 60
+export const AXIS_ROW = 60;
 /** 行高下限：空行、连堂课的后半节；左侧序号 + 时刻刚好放下 */
-export const AXIS_ROW_MIN = 32
-export const AXIS_GAP = 6
-export const AXIS_WIDE_GAP = 30
+export const AXIS_ROW_MIN = 32;
+export const AXIS_GAP = 6;
+export const AXIS_WIDE_GAP = 30;
 /** 卡片相对节次边界的内缩：相邻两节连排时上下各留这么多 */
-export const CARD_INSET = 1.5
-export const AXIS_PAD_PER_HOUR = 42
+export const CARD_INSET = 1.5;
+export const AXIS_PAD_PER_HOUR = 42;
 /** 达到这个长度的课间单独成带并标注 */
-export const AXIS_WIDE_MIN = 45
+export const AXIS_WIDE_MIN = 45;
 
 /** 长课间的名字按它的中点落在哪个饭点：11:00–14:30 午休，16:30–19:30 晚饭；上午晚开、晚自习前的空档不起名 */
 export function gapLabel(prevEnd: Minutes, gap: Minutes): string | undefined {
-  const mid = prevEnd + gap / 2
-  if (mid >= 11 * 60 && mid <= 14 * 60 + 30) return '午休'
-  if (mid >= 16 * 60 + 30 && mid <= 19 * 60 + 30) return '晚饭'
-  return undefined
+  const mid = prevEnd + gap / 2;
+  if (mid >= 11 * 60 && mid <= 14 * 60 + 30)
+    return "午休";
+  if (mid >= 16 * 60 + 30 && mid <= 19 * 60 + 30)
+    return "晚饭";
+  return undefined;
 }
 
-function linear(t0: Minutes, t1: Minutes, y0: number, kind: AxisSeg['kind']): AxisSeg {
-  return { kind, t0, t1, y0, y1: y0 + ((t1 - t0) / 60) * AXIS_PAD_PER_HOUR }
+function linear(t0: Minutes, t1: Minutes, y0: number, kind: AxisSeg["kind"]): AxisSeg {
+  return { kind, t0, t1, y0, y1: y0 + ((t1 - t0) / 60) * AXIS_PAD_PER_HOUR };
 }
 
 export function buildAxis(grid: TimeSlot[], span?: { start: Minutes; end: Minutes }, rows?: Map<number, number>): TimeAxis {
-  const slots = [...grid].filter((s) => s.end > s.start).sort((a, b) => a.start - b.start)
-  const rowH = (index: number) => (rows ? Math.min(AXIS_ROW, Math.max(AXIS_ROW_MIN, Math.ceil(rows.get(index) ?? 0))) : AXIS_ROW)
-  const segs: AxisSeg[] = []
-  let y = 0
+  const slots = [...grid].filter(s => s.end > s.start).sort((a, b) => a.start - b.start);
+  const rowH = (index: number) => (rows ? Math.min(AXIS_ROW, Math.max(AXIS_ROW_MIN, Math.ceil(rows.get(index) ?? 0))) : AXIS_ROW);
+  const segs: AxisSeg[] = [];
+  let y = 0;
   const push = (s: AxisSeg) => {
-    segs.push(s)
-    y = s.y1
-  }
+    segs.push(s);
+    y = s.y1;
+  };
 
   if (slots.length === 0) {
-    const t0 = Math.min(8 * 60, span?.start ?? 8 * 60)
-    const t1 = Math.max(20 * 60, span?.end ?? 20 * 60)
-    push(linear(t0, t1, 0, 'pad'))
+    const t0 = Math.min(8 * 60, span?.start ?? 8 * 60);
+    const t1 = Math.max(20 * 60, span?.end ?? 20 * 60);
+    push(linear(t0, t1, 0, "pad"));
   } else {
-    if (span && span.start < slots[0].start) push(linear(Math.floor(span.start / 60) * 60, slots[0].start, 0, 'pad'))
-    let cursor = slots[0].start
+    if (span && span.start < slots[0].start)
+      push(linear(Math.floor(span.start / 60) * 60, slots[0].start, 0, "pad"));
+    let cursor = slots[0].start;
     slots.forEach((s, i) => {
-      const t0 = Math.max(s.start, cursor)
+      const t0 = Math.max(s.start, cursor);
       if (i > 0) {
-        const gap = t0 - cursor
-        if (gap >= AXIS_WIDE_MIN) push({ kind: 'gap', t0: cursor, t1: t0, y0: y, y1: y + AXIS_WIDE_GAP, wide: true, label: gapLabel(cursor, gap) })
-        else if (gap > 0) push({ kind: 'gap', t0: cursor, t1: t0, y0: y, y1: y + AXIS_GAP })
+        const gap = t0 - cursor;
+        if (gap >= AXIS_WIDE_MIN)
+          push({ kind: "gap", t0: cursor, t1: t0, y0: y, y1: y + AXIS_WIDE_GAP, wide: true, label: gapLabel(cursor, gap) });
+        else if (gap > 0)
+          push({ kind: "gap", t0: cursor, t1: t0, y0: y, y1: y + AXIS_GAP });
       }
       if (s.end > t0) {
-        push({ kind: 'period', t0, t1: s.end, y0: y, y1: y + rowH(s.index), index: s.index })
-        cursor = s.end
+        push({ kind: "period", t0, t1: s.end, y0: y, y1: y + rowH(s.index), index: s.index });
+        cursor = s.end;
       }
-    })
-    if (span && span.end > cursor) push(linear(cursor, Math.ceil(span.end / 60) * 60, y, 'pad'))
+    });
+    if (span && span.end > cursor)
+      push(linear(cursor, Math.ceil(span.end / 60) * 60, y, "pad"));
   }
 
-  const first = segs[0]
-  const last = segs[segs.length - 1]
+  const first = segs[0];
+  const last = segs[segs.length - 1];
   const yOf = (t: Minutes): number => {
-    if (t <= first.t0) return first.y0 - ((first.t0 - t) / 60) * AXIS_PAD_PER_HOUR
-    if (t >= last.t1) return last.y1 + ((t - last.t1) / 60) * AXIS_PAD_PER_HOUR
+    if (t <= first.t0)
+      return first.y0 - ((first.t0 - t) / 60) * AXIS_PAD_PER_HOUR;
+    if (t >= last.t1)
+      return last.y1 + ((t - last.t1) / 60) * AXIS_PAD_PER_HOUR;
     for (const s of segs) {
-      if (t >= s.t0 && t <= s.t1) return s.y0 + ((t - s.t0) / (s.t1 - s.t0)) * (s.y1 - s.y0)
+      if (t >= s.t0 && t <= s.t1)
+        return s.y0 + ((t - s.t0) / (s.t1 - s.t0)) * (s.y1 - s.y0);
     }
-    return last.y1
-  }
-  return { segs, height: y, y: yOf }
+    return last.y1;
+  };
+  return { segs, height: y, y: yOf };
 }
 
 /**
@@ -100,74 +109,82 @@ export function buildAxis(grid: TimeSlot[], span?: { start: Minutes; end: Minute
  * 一节课（60 - 3 内缩）恰好放下两行课名 + 两行地点。
  */
 export interface CardFit {
-  nameLines: number
-  locLines: number
-  dense: boolean
+  nameLines: number;
+  locLines: number;
+  dense: boolean;
 }
 
-export const CARD_LINE = 12.35
-export const CARD_LOC_LINE = 10.625
-export const CARD_LOC_GAP = 2
-export const CARD_PAD = 4
-export const CARD_PAD_DENSE = 2
-export const CARD_PAD_X = 4
-export const CARD_NAME_PX = 9.5
-export const CARD_LOC_PX = 8.5
+export const CARD_LINE = 12.35;
+export const CARD_LOC_LINE = 10.625;
+export const CARD_LOC_GAP = 2;
+export const CARD_PAD = 4;
+export const CARD_PAD_DENSE = 2;
+export const CARD_PAD_X = 4;
+export const CARD_NAME_PX = 9.5;
+export const CARD_LOC_PX = 8.5;
 
 /** 粗估单字宽度（em，按粗体偏宽估）：全角 1，大写 0.72，数字 0.64，小写 0.58，空格 0.3，其余 ASCII 0.6 */
 function charEm(ch: string): number {
-  const c = ch.codePointAt(0) ?? 0
-  if (c === 0x20) return 0.3
-  if (c < 0x80) return /[A-Z]/.test(ch) ? 0.72 : /[0-9]/.test(ch) ? 0.64 : /[a-z]/.test(ch) ? 0.58 : 0.6
-  return 1
+  const c = ch.codePointAt(0) ?? 0;
+  if (c === 0x20)
+    return 0.3;
+  if (c < 0x80)
+    return /[A-Z]/.test(ch) ? 0.72 : /\d/.test(ch) ? 0.64 : /[a-z]/.test(ch) ? 0.58 : 0.6;
+  return 1;
 }
 
 export function textWidth(s: string, px: number): number {
-  let w = 0
-  for (const ch of s) w += charEm(ch)
-  return w * px
+  let w = 0;
+  for (const ch of s) w += charEm(ch);
+  return w * px;
 }
 
 /** 折行单位：全角字逐字，英数连续段整体，空格单独一项 */
 function tokens(s: string): string[] {
-  return s.match(/\s+|[^\s\u0080-\uffff]+|./gu) ?? []
+  return s.match(/\s+|[^\s\u0080-\uFFFF]+|./gu) ?? [];
 }
 
 /** 按 overflow-wrap:anywhere 贪心折行后的行数：优先在空格/全角字之间换行，英数段放不下整行时才拆字 */
 function linesFor(s: string, px: number, w: number): number {
-  if (!s) return 0
-  const max = Math.max(1, w)
-  let lines = 1
-  let cur = 0
-  let space = 0
+  if (!s)
+    return 0;
+  const max = Math.max(1, w);
+  let lines = 1;
+  let cur = 0;
+  let space = 0;
   for (const t of tokens(s)) {
     if (/^\s+$/.test(t)) {
-      if (cur > 0) space = textWidth(t, px)
-      continue
+      if (cur > 0)
+        space = textWidth(t, px);
+      continue;
     }
-    const tw = textWidth(t, px)
+    const tw = textWidth(t, px);
     if (cur > 0 && cur + space + tw > max) {
-      lines++
-      cur = 0
-    } else cur += space
-    space = 0
+      lines++;
+      cur = 0;
+    } else {
+      cur += space;
+    }
+    space = 0;
     if (tw > max) {
       for (const ch of t) {
-        const cw = charEm(ch) * px
+        const cw = charEm(ch) * px;
         if (cur > 0 && cur + cw > max) {
-          lines++
-          cur = 0
+          lines++;
+          cur = 0;
         }
-        cur += cw
+        cur += cw;
       }
-    } else cur += tw
+    } else {
+      cur += tw;
+    }
   }
-  return lines
+  return lines;
 }
 
 /** 一行摆不下两个字的窄卡里空格只会白占一行，直接去掉 */
 function locBase(loc: string, aw: number): string {
-  return aw < CARD_LOC_PX * 2 ? loc.replace(/\s+/g, '') : loc
+  return aw < CARD_LOC_PX * 2 ? loc.replace(/\s+/g, "") : loc;
 }
 
 /**
@@ -175,23 +192,25 @@ function locBase(loc: string, aw: number): string {
  * 而不是让排版从尾部省略掉最有用的房号。
  */
 export function fitLoc(loc: string, lines: number, w: number): string {
-  const aw = w - CARD_PAD_X * 2
-  const tight = loc.replace(/\s+/g, '')
-  const base = locBase(loc, aw)
-  if (lines < 1 || linesFor(base, CARD_LOC_PX, aw) <= lines) return base
-  if (linesFor(tight, CARD_LOC_PX, aw) <= lines) return tight
-  const chars = [...tight]
-  let i = chars.length
-  while (i > 1 && linesFor('…' + chars.slice(i - 1).join(''), CARD_LOC_PX, aw) <= lines) i--
-  return '…' + chars.slice(i).join('')
+  const aw = w - CARD_PAD_X * 2;
+  const tight = loc.replace(/\s+/g, "");
+  const base = locBase(loc, aw);
+  if (lines < 1 || linesFor(base, CARD_LOC_PX, aw) <= lines)
+    return base;
+  if (linesFor(tight, CARD_LOC_PX, aw) <= lines)
+    return tight;
+  const chars = [...tight];
+  let i = chars.length;
+  while (i > 1 && linesFor(`…${chars.slice(i - 1).join("")}`, CARD_LOC_PX, aw) <= lines) i--;
+  return `…${chars.slice(i).join("")}`;
 }
 
 /** 一张卡想完整显示需要的高度（含上下内缩）：课名最多两行，地点最多两行 */
 export function cardNeed(w: number, name: string, loc?: string): number {
-  const aw = w - CARD_PAD_X * 2
-  const nameLines = Math.min(2, linesFor(name, CARD_NAME_PX, aw))
-  const locLines = loc ? Math.min(2, linesFor(locBase(loc, aw), CARD_LOC_PX, aw)) : 0
-  return CARD_PAD * 2 + nameLines * CARD_LINE + (locLines > 0 ? CARD_LOC_GAP + locLines * CARD_LOC_LINE : 0) + CARD_INSET * 2
+  const aw = w - CARD_PAD_X * 2;
+  const nameLines = Math.min(2, linesFor(name, CARD_NAME_PX, aw));
+  const locLines = loc ? Math.min(2, linesFor(locBase(loc, aw), CARD_LOC_PX, aw)) : 0;
+  return CARD_PAD * 2 + nameLines * CARD_LINE + (locLines > 0 ? CARD_LOC_GAP + locLines * CARD_LOC_LINE : 0) + CARD_INSET * 2;
 }
 
 /**
@@ -199,31 +218,35 @@ export function cardNeed(w: number, name: string, loc?: string): number {
  * 所以连堂课的后半节不会被擑高。结果交给 buildAxis，在那里夹到 [AXIS_ROW_MIN, AXIS_ROW]。
  */
 export function rowHeights(grid: TimeSlot[], cards: { start: Minutes; end: Minutes; name: string; loc?: string }[], w: number): Map<number, number> {
-  const rows = new Map<number, number>()
+  const rows = new Map<number, number>();
   for (const c of cards) {
-    const covered = grid.filter((s) => s.start < c.end && c.start < s.end)
-    if (covered.length === 0) continue
-    const per = (cardNeed(w, c.name, c.loc) - AXIS_GAP * (covered.length - 1)) / covered.length
-    for (const s of covered) rows.set(s.index, Math.max(rows.get(s.index) ?? 0, per))
+    const covered = grid.filter(s => s.start < c.end && c.start < s.end);
+    if (covered.length === 0)
+      continue;
+    const per = (cardNeed(w, c.name, c.loc) - AXIS_GAP * (covered.length - 1)) / covered.length;
+    for (const s of covered) rows.set(s.index, Math.max(rows.get(s.index) ?? 0, per));
   }
-  return rows
+  return rows;
 }
 
 export function cardFit(h: number, w: number, name: string, loc?: string): CardFit | null {
-  const aw = w - CARD_PAD_X * 2
-  const needName = linesFor(name, CARD_NAME_PX, aw)
-  const needLoc = loc ? linesFor(locBase(loc, aw), CARD_LOC_PX, aw) : 0
+  const aw = w - CARD_PAD_X * 2;
+  const needName = linesFor(name, CARD_NAME_PX, aw);
+  const needLoc = loc ? linesFor(locBase(loc, aw), CARD_LOC_PX, aw) : 0;
 
-  if (h < 17) return null
-  if (h < 26) return { nameLines: 1, locLines: 0, dense: true }
-  const budget = h - CARD_PAD * 2
-  const maxName = Math.floor(budget / CARD_LINE)
-  if (maxName < 1) return { nameLines: 1, locLines: 0, dense: true }
+  if (h < 17)
+    return null;
+  if (h < 26)
+    return { nameLines: 1, locLines: 0, dense: true };
+  const budget = h - CARD_PAD * 2;
+  const maxName = Math.floor(budget / CARD_LINE);
+  if (maxName < 1)
+    return { nameLines: 1, locLines: 0, dense: true };
   /* 有地点时先给地点留够位（最多两行），课名用剩下的；连一行地点都留不出时课名至少一行 */
-  const locWant = Math.min(needLoc, 2)
-  const nameCap = needLoc > 0 ? Math.max(1, Math.floor((budget - CARD_LOC_GAP - locWant * CARD_LOC_LINE) / CARD_LINE)) : maxName
-  const nameLines = Math.min(needName, nameCap)
-  const rest = budget - nameLines * CARD_LINE - CARD_LOC_GAP
-  const locLines = needLoc > 0 ? Math.min(needLoc, Math.max(0, Math.floor(rest / CARD_LOC_LINE))) : 0
-  return { nameLines, locLines, dense: false }
+  const locWant = Math.min(needLoc, 2);
+  const nameCap = needLoc > 0 ? Math.max(1, Math.floor((budget - CARD_LOC_GAP - locWant * CARD_LOC_LINE) / CARD_LINE)) : maxName;
+  const nameLines = Math.min(needName, nameCap);
+  const rest = budget - nameLines * CARD_LINE - CARD_LOC_GAP;
+  const locLines = needLoc > 0 ? Math.min(needLoc, Math.max(0, Math.floor(rest / CARD_LOC_LINE))) : 0;
+  return { nameLines, locLines, dense: false };
 }

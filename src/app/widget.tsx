@@ -1,16 +1,16 @@
+import type { Snapshot } from "../domain/engine";
+import type { WidgetStyle } from "../domain/types";
 /** 桌面小组件：四种样式的实时预览，点一下加到桌面 */
-import { useEffect, useMemo, useState } from 'react'
-import type { WidgetStyle } from '../domain/types'
-import type { Snapshot } from '../domain/engine'
-import { addDays, dateOf, fmtMinutes, weekOf } from '../domain/dates'
-import { occurrencesOn } from '../domain/engine'
-import { store, useStore } from './store'
-import { addWidgetToHome, syncWidgets, widgetPinSupported } from './widgets'
-import { BackButton, Page, StickyHead, WD, tint } from './ui'
-import { todayStr } from './semester'
+import { useEffect, useMemo, useState } from "react";
+import { addDays, dateOf, fmtMinutes, weekOf } from "../domain/dates";
+import { occurrencesOn } from "../domain/engine";
+import { todayStr } from "./semester";
+import { store } from "./store";
+import { BackButton, Page, StickyHead, tint, WD } from "./ui";
+import { addWidgetToHome, syncWidgets } from "./widgets";
 
-function WCard({ children, className = '' }: { children: React.ReactNode; className?: string }) {
-  return <div className={`rounded-[24px] bg-(--c-surface) p-3.5 shadow-[0_6px_20px_rgba(0,0,0,.10)] ${className}`}>{children}</div>
+function WCard({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return <div className={`rounded-[24px] bg-(--c-surface) p-3.5 shadow-[0_6px_20px_rgba(0,0,0,.10)] ${className}`}>{children}</div>;
 }
 
 function WHead({ d, w, sub }: { d: string; w: string; sub?: string }) {
@@ -20,7 +20,7 @@ function WHead({ d, w, sub }: { d: string; w: string; sub?: string }) {
       <span className="text-[13px] font-semibold text-(--c-accent)">{w}</span>
       {sub && <span className="ml-auto text-[11.5px] font-semibold text-(--c-ink4)">{sub}</span>}
     </div>
-  )
+  );
 }
 
 function WRow({ name, time, loc, color, big = true }: { name: string; time?: string; loc?: string; color: string; big?: boolean }) {
@@ -28,132 +28,140 @@ function WRow({ name, time, loc, color, big = true }: { name: string; time?: str
     <div className="flex items-center gap-2 rounded-[10px] py-1.5 pr-2.5 pl-0" style={{ background: tint(color, 8) }}>
       <i className="my-0.75 ml-1.5 w-0.75 flex-none self-stretch rounded-full" style={{ background: color }} />
       <div className="min-w-0 flex-1">
-        <div className={`truncate ${big ? 'text-[13px]' : 'text-[12px]'} leading-[1.3] font-bold tracking-[-.01em] text-(--c-ink)`}>{name}</div>
+        <div className={`truncate ${big ? "text-[13px]" : "text-[12px]"} leading-[1.3] font-bold tracking-[-.01em] text-(--c-ink)`}>{name}</div>
         {loc && <div className="mt-px truncate text-[11px] leading-tight font-medium text-(--c-ink3)">{loc}</div>}
       </div>
       {time && <div className="flex-none text-right text-[11.5px] leading-[1.3] font-semibold tabular-nums text-(--c-ink3)">{time}</div>}
     </div>
-  )
+  );
 }
 
-
-function Pick({ style, onAdd, children, className = '' }: { style: WidgetStyle; onAdd: (s: WidgetStyle) => void; children: React.ReactNode; className?: string }) {
+function Pick({ style, onAdd, children, className = "" }: { style: WidgetStyle; onAdd: (s: WidgetStyle) => void; children: React.ReactNode; className?: string }) {
   return (
     <button onClick={() => onAdd(style)} className={`text-left transition-transform active:scale-[.985] ${className}`}>
       {children}
     </button>
-  )
+  );
 }
 
 export function WidgetPage({ snap, onBack }: { snap: Snapshot; onBack: () => void }) {
-  const state = useStore()
-  const [pinnable, setPinnable] = useState(false)
-
   useEffect(() => {
-    void widgetPinSupported().then(setPinnable)
-    void syncWidgets()
-  }, [])
+    void syncWidgets();
+  }, []);
 
-  const today = todayStr()
-  const tomorrow = addDays(today, 1)
-  const now = new Date()
-  const nowMin = now.getHours() * 60 + now.getMinutes()
+  const today = todayStr();
+  const tomorrow = addDays(today, 1);
+  const [now] = useState(() => new Date());
+  const nowMin = now.getHours() * 60 + now.getMinutes();
 
-  const list = useMemo(() => occurrencesOn(snap, today).filter((o) => o.status !== 'cancelled'), [snap, today])
-  const tlist = useMemo(() => occurrencesOn(snap, tomorrow).filter((o) => o.status !== 'cancelled'), [snap, tomorrow])
-  const week = Math.max(1, Math.min(snap.semester.totalWeeks, weekOf(snap.semester, today)))
+  const list = useMemo(() => occurrencesOn(snap, today).filter(o => o.status !== "cancelled"), [snap, today]);
+  const tlist = useMemo(() => occurrencesOn(snap, tomorrow).filter(o => o.status !== "cancelled"), [snap, tomorrow]);
+  const week = Math.max(1, Math.min(snap.semester.totalWeeks, weekOf(snap.semester, today)));
   const cols = useMemo(
     () => [1, 2, 3, 4, 5].map((wd) => {
-      const date = dateOf(snap.semester, week, wd)
-      return { date, items: occurrencesOn(snap, date).filter((o) => o.status !== 'cancelled') }
+      const date = dateOf(snap.semester, week, wd);
+      return { date, items: occurrencesOn(snap, date).filter(o => o.status !== "cancelled") };
     }),
     [snap, week],
-  )
-  const cur = list.find((o) => o.start <= nowMin && nowMin < o.end)
-  const next = list.find((o) => o.start > nowMin) ?? tlist[0]
-  const remain = list.filter((o) => o.end > nowMin)
-  const left = remain.length
-  const dayNum = String(Number(today.slice(8)))
-  const wdName = WD[((new Date(`${today}T00:00`).getDay() + 6) % 7) + 1]
+  );
+  const cur = list.find(o => o.start <= nowMin && nowMin < o.end);
+  const next = list.find(o => o.start > nowMin) ?? tlist[0];
+  const remain = list.filter(o => o.end > nowMin);
+  const left = remain.length;
+  const dayNum = String(Number(today.slice(8)));
+  const wdName = WD[((new Date(`${today}T00:00`).getDay() + 6) % 7) + 1];
 
   const add = (style: WidgetStyle) => {
-    store.setPrefs({ widgetStyle: style })
-    void addWidgetToHome(style)
-  }
+    store.setPrefs({ widgetStyle: style });
+    void addWidgetToHome(style);
+  };
 
   const preview = (style: WidgetStyle) => {
     switch (style) {
-      case 'today':
+      case "today":
         return (
           <WCard className="h-40.5 w-40.5">
-            <WHead d={dayNum} w={wdName} sub={left > 0 ? `还剩 ${left} 节` : '没有课了'} />
+            <WHead d={dayNum} w={wdName} sub={left > 0 ? `还剩 ${left} 节` : "没有课了"} />
             <div className="mt-2.5 space-y-1.5">
-              {remain.slice(0, 2).map((o) => (
+              {remain.slice(0, 2).map(o => (
                 <WRow key={o.key} name={o.name} loc={o.location ?? undefined} time={fmtMinutes(o.start)} color={o.color} big={false} />
               ))}
             </div>
           </WCard>
-        )
-      case 'next':
+        );
+      case "next":
         return (
           <WCard className="flex h-40.5 w-40.5 flex-col">
-            <div className="text-[11.5px] font-bold text-(--c-ink3)">{cur ? '上课中' : '下一节'}</div>
+            <div className="text-[11.5px] font-bold text-(--c-ink3)">{cur ? "上课中" : "下一节"}</div>
             <div className="mt-1 flex items-baseline gap-1">
               <span className="text-[38px] leading-none font-semibold tracking-[-.035em] tabular-nums text-(--c-ink)">
-                {cur ? Math.max(1, cur.end - nowMin) : next ? Math.max(1, next.start - nowMin) : '—'}
+                {cur ? Math.max(1, cur.end - nowMin) : next ? Math.max(1, next.start - nowMin) : "—"}
               </span>
-              <span className="text-[13px] font-semibold text-(--c-ink3)">{cur ? '分钟后下课' : next ? '分钟后' : '没有课'}</span>
+              <span className="text-[13px] font-semibold text-(--c-ink3)">{cur ? "分钟后下课" : next ? "分钟后" : "没有课"}</span>
             </div>
             <div className="mt-auto">
               {(cur ?? next) && (
                 <WRow
                   name={(cur ?? next)!.name}
-                  loc={[(cur ?? next)!.location, (cur ?? next)!.teacher].filter(Boolean).join('　') || undefined}
+                  loc={[(cur ?? next)!.location, (cur ?? next)!.teacher].filter(Boolean).join("　") || undefined}
                   color={(cur ?? next)!.color}
                   big={false}
                 />
               )}
             </div>
           </WCard>
-        )
-      case 'twoDays':
+        );
+      case "twoDays":
         return (
           <WCard className="flex h-40.5 w-full gap-3.5">
             <div className="min-w-0 flex-1">
-              <WHead d={dayNum} w={wdName} sub={left > 0 ? `还剩 ${left} 节` : '没有课了'} />
+              <WHead d={dayNum} w={wdName} sub={left > 0 ? `还剩 ${left} 节` : "没有课了"} />
               <div className="mt-2.5 space-y-1.5">
-                {remain.slice(0, 2).map((o) => (
+                {remain.slice(0, 2).map(o => (
                   <WRow key={o.key} name={o.name} time={fmtMinutes(o.start)} color={o.color} big={false} />
                 ))}
               </div>
             </div>
             <div className="min-w-0 flex-1">
-              <div className="text-[12px] font-bold text-(--c-ink4)">明天{tlist.length > 0 ? ` ${tlist.length} 节` : '没有课'}</div>
+              <div className="text-[12px] font-bold text-(--c-ink4)">
+                明天
+                {tlist.length > 0 ? ` ${tlist.length} 节` : "没有课"}
+              </div>
               <div className="mt-2.5 space-y-1.5">
-                {tlist.slice(0, 2).map((o) => (
+                {tlist.slice(0, 2).map(o => (
                   <WRow key={o.key} name={o.name} time={fmtMinutes(o.start)} color={o.color} big={false} />
                 ))}
               </div>
             </div>
           </WCard>
-        )
-      case 'week':
+        );
+      case "week":
         return (
           <WCard className="w-full px-3.5 pt-3.5 pb-4">
             <div className="flex items-baseline">
-              <span className="text-[17px] font-semibold tracking-[-.02em] text-(--c-ink)">第 {week} 周</span>
-              <span className="ml-2 text-[12px] font-semibold text-(--c-ink4)">{Number(today.slice(5, 7))}月{dayNum}日</span>
+              <span className="text-[17px] font-semibold tracking-[-.02em] text-(--c-ink)">
+                第
+                {week}
+                {" "}
+                周
+              </span>
+              <span className="ml-2 text-[12px] font-semibold text-(--c-ink4)">
+                {Number(today.slice(5, 7))}
+                月
+                {dayNum}
+                日
+              </span>
             </div>
             <div className="mt-3 flex gap-1.5">
-              {[1, 2, 3, 4, 5].map((wd) => (
-                <div key={wd} className={`flex-1 text-center text-[11.5px] font-bold ${cols[wd - 1].date === today ? 'text-(--c-accent)' : 'text-(--c-ink3)'}`}>{WD[wd]}</div>
+              {[1, 2, 3, 4, 5].map(wd => (
+                <div key={wd} className={`flex-1 text-center text-[11.5px] font-bold ${cols[wd - 1].date === today ? "text-(--c-accent)" : "text-(--c-ink3)"}`}>{WD[wd]}</div>
               ))}
             </div>
             <div className="mt-2 flex gap-1.5">
-              {cols.map((col) => (
+              {cols.map(col => (
                 <div key={col.date} className="flex flex-1 flex-col gap-1.5">
                   {col.items.slice(0, 2).map((o) => {
-                    const isNow = col.date === today && o.start <= nowMin && nowMin < o.end
+                    const isNow = col.date === today && o.start <= nowMin && nowMin < o.end;
                     return (
                       <div
                         key={o.key}
@@ -162,17 +170,17 @@ export function WidgetPage({ snap, onBack }: { snap: Snapshot; onBack: () => voi
                       >
                         <div className="truncate text-[11px] leading-tight font-bold" style={{ color: `color-mix(in srgb, ${o.color} 88%, var(--c-ink))` }}>{o.name}</div>
                         <div className="mt-1.5 text-[10px] leading-[1.3] font-semibold tabular-nums text-(--c-ink3)">{fmtMinutes(o.start)}</div>
-                        <div className="mt-px truncate text-[10px] leading-[1.3] font-medium text-(--c-ink4)">{o.location ?? ''}</div>
+                        <div className="mt-px truncate text-[10px] leading-[1.3] font-medium text-(--c-ink4)">{o.location ?? ""}</div>
                       </div>
-                    )
+                    );
                   })}
                 </div>
               ))}
             </div>
           </WCard>
-        )
+        );
     }
-  }
+  };
 
   return (
     <Page className="bg-[#5d6d55]">
@@ -187,14 +195,13 @@ export function WidgetPage({ snap, onBack }: { snap: Snapshot; onBack: () => voi
         <h1 className="px-1 text-[26px] font-extrabold tracking-[-.02em] text-white">桌面小组件</h1>
         <div className="mt-5">
           <div className="flex gap-3.5">
-            <Pick style="today" onAdd={add}>{preview('today')}</Pick>
-            <Pick style="next" onAdd={add}>{preview('next')}</Pick>
+            <Pick style="today" onAdd={add}>{preview("today")}</Pick>
+            <Pick style="next" onAdd={add}>{preview("next")}</Pick>
           </div>
-          <Pick style="twoDays" onAdd={add} className="mt-3.5 block w-full">{preview('twoDays')}</Pick>
-          <Pick style="week" onAdd={add} className="mt-3.5 block w-full">{preview('week')}</Pick>
+          <Pick style="twoDays" onAdd={add} className="mt-3.5 block w-full">{preview("twoDays")}</Pick>
+          <Pick style="week" onAdd={add} className="mt-3.5 block w-full">{preview("week")}</Pick>
         </div>
       </div>
     </Page>
-  )
+  );
 }
-

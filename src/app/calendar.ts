@@ -1,106 +1,112 @@
-import { useSyncExternalStore } from 'react'
-import { Capacitor, registerPlugin } from '@capacitor/core'
-import { EXAM_CALENDAR, TASK_CALENDAR, WEEK_CALENDAR, calendarsFor, isCourseCalendar, planCalendar, type CalendarEventBody, type CalendarSpec, type DesiredEvent } from '../domain/calendar-plan'
-import { eventHash, summarize, type CalendarSummary } from '../domain/calendar-summary'
-import { dateOf, fromDate } from '../domain/dates'
-import { DEFAULT_COURSE_COLOR } from '../domain/palette'
-import { store } from './store'
+import type { CalendarEventBody, CalendarSpec, DesiredEvent } from "../domain/calendar-plan";
+import type { CalendarSummary } from "../domain/calendar-summary";
+import { Capacitor, registerPlugin } from "@capacitor/core";
+import { useSyncExternalStore } from "react";
+import { calendarsFor, EXAM_CALENDAR, isCourseCalendar, planCalendar, TASK_CALENDAR, WEEK_CALENDAR } from "../domain/calendar-plan";
+import { eventHash, summarize } from "../domain/calendar-summary";
+import { dateOf, fromDate } from "../domain/dates";
+import { DEFAULT_COURSE_COLOR } from "../domain/palette";
+import { store } from "./store";
 
 /* 系统日历：课、作业、考试各写进应用自己的一本本地日历，提醒由系统日历发出。
    这里只做两件事：把 Store 投影成期望事件集合，和日历里现有的比出差异后一次写入。
    映射关系（key / hash）就存在日历事件上，没有第二份状态。 */
 
-export type CalendarPermission = 'granted' | 'prompt' | 'denied' | 'unsupported'
+export type CalendarPermission = "granted" | "prompt" | "denied" | "unsupported";
 
 interface RemoteEvent {
-  id: number
-  calendarId: number
-  key: string
-  hash: string
+  id: number;
+  calendarId: number;
+  key: string;
+  hash: string;
 }
 
 interface WriteItem {
-  calendarId: number
-  key: string
-  hash: string
-  event: CalendarEventBody
-  reminders: number[]
+  calendarId: number;
+  key: string;
+  hash: string;
+  event: CalendarEventBody;
+  reminders: number[];
 }
 
 interface TtCalendarPlugin {
-  checkPermission(): Promise<{ status: CalendarPermission }>
-  requestPermission(): Promise<{ status: CalendarPermission }>
+  checkPermission: () => Promise<{ status: CalendarPermission }>;
+  requestPermission: () => Promise<{ status: CalendarPermission }>;
   /** archived：不在期望集合里、但课已全部上完的课程日历，原生隐起来而不删，里面的事件不参与同步 */
-  ensureCalendars(o: { calendars: (CalendarSpec & { color: string; visible: boolean })[] }): Promise<{ ids: Record<string, number>; archived?: number[] }>
-  readAll(): Promise<{ events: RemoteEvent[] }>
-  apply(o: { inserts: WriteItem[]; updates: (WriteItem & { id: number })[]; deletes: number[] }): Promise<{ inserted: number; updated: number; deleted: number }>
-  removeAll(): Promise<void>
-  hasCalendarApp(): Promise<{ available: boolean }>
-  openCalendar(o: { at: number }): Promise<void>
-  openAppSettings(): Promise<void>
+  ensureCalendars: (o: { calendars: (CalendarSpec & { color: string; visible: boolean })[] }) => Promise<{ ids: Record<string, number>; archived?: number[] }>;
+  readAll: () => Promise<{ events: RemoteEvent[] }>;
+  apply: (o: { inserts: WriteItem[]; updates: (WriteItem & { id: number })[]; deletes: number[] }) => Promise<{ inserted: number; updated: number; deleted: number }>;
+  removeAll: () => Promise<void>;
+  hasCalendarApp: () => Promise<{ available: boolean }>;
+  openCalendar: (o: { at: number }) => Promise<void>;
+  openAppSettings: () => Promise<void>;
 }
 
-const TtCalendar = registerPlugin<TtCalendarPlugin>('TtCalendar')
+const TtCalendar = registerPlugin<TtCalendarPlugin>("TtCalendar");
 
-const DEBOUNCE_MS = 800
-const CHUNK = 50
+const DEBOUNCE_MS = 800;
+const CHUNK = 50;
 
-export const calendarSupported = () => Capacitor.getPlatform() === 'android'
+export const calendarSupported = () => Capacitor.getPlatform() === "android";
 
 /* ---------------- 状态（给设置页） ---------------- */
 
 export interface CalendarStatus {
-  permission: CalendarPermission
-  syncing: boolean
+  permission: CalendarPermission;
+  syncing: boolean;
   /** 最近一次成功写入后日历里的内容 */
-  summary: CalendarSummary | null
-  lastSyncAt: number | null
-  failed: boolean
+  summary: CalendarSummary | null;
+  lastSyncAt: number | null;
+  failed: boolean;
 }
 
-let status: CalendarStatus = { permission: calendarSupported() ? 'prompt' : 'unsupported', syncing: false, summary: null, lastSyncAt: null, failed: false }
-const listeners = new Set<() => void>()
+let status: CalendarStatus = { permission: calendarSupported() ? "prompt" : "unsupported", syncing: false, summary: null, lastSyncAt: null, failed: false };
+const listeners = new Set<() => void>();
 
 function setStatus(patch: Partial<CalendarStatus>) {
-  status = { ...status, ...patch }
-  listeners.forEach((l) => l())
+  status = { ...status, ...patch };
+  listeners.forEach(l => l());
 }
 
 export function useCalendarStatus(): CalendarStatus {
   return useSyncExternalStore(
     (fn) => {
-      listeners.add(fn)
-      return () => { listeners.delete(fn) }
+      listeners.add(fn);
+      return () => { listeners.delete(fn); };
     },
     () => status,
-  )
+  );
 }
 
 /* ---------------- 权限 ---------------- */
 
 export async function calendarPermission(): Promise<CalendarPermission> {
-  if (!calendarSupported()) return 'unsupported'
+  if (!calendarSupported())
+    return "unsupported";
   try {
-    const { status: s } = await TtCalendar.checkPermission()
-    setStatus({ permission: s })
-    return s
+    const { status: s } = await TtCalendar.checkPermission();
+    setStatus({ permission: s });
+    return s;
   } catch {
-    return 'denied'
+    return "denied";
   }
 }
 
 /** 弹系统权限框；拿到后立刻写入；系统已不再弹框时直接去设置 */
 export async function requestCalendarPermission(): Promise<CalendarPermission> {
-  if (!calendarSupported()) return 'unsupported'
+  if (!calendarSupported())
+    return "unsupported";
   try {
-    const { status: s } = await TtCalendar.requestPermission()
-    setStatus({ permission: s })
-    if (s === 'granted') await syncCalendar()
-    else if ((await TtCalendar.checkPermission()).status === 'denied') await openCalendarSettings()
-    return s
+    const { status: s } = await TtCalendar.requestPermission();
+    setStatus({ permission: s });
+    if (s === "granted")
+      await syncCalendar();
+    else if ((await TtCalendar.checkPermission()).status === "denied")
+      await openCalendarSettings();
+    return s;
   } catch {
-    setStatus({ permission: 'denied' })
-    return 'denied'
+    setStatus({ permission: "denied" });
+    return "denied";
   }
 }
 
@@ -108,135 +114,147 @@ export async function requestCalendarPermission(): Promise<CalendarPermission> {
 
 /* 日历颜色是日历自己的属性，不随应用深浅色 / 系统配色变：固定一套，写进去后就不再动 */
 const FIXED_COLORS: Record<string, string> = {
-  [TASK_CALENDAR]: '#B98A2F',
-  [EXAM_CALENDAR]: '#C9526C',
-  [WEEK_CALENDAR]: '#8A8E97',
-}
+  [TASK_CALENDAR]: "#B98A2F",
+  [EXAM_CALENDAR]: "#C9526C",
+  [WEEK_CALENDAR]: "#8A8E97",
+};
 /** 每门课一本（课程颜色），作业 / 考试 / 周次各一本；学期结束后课程日历从日历列表里隐起来 */
 function withColors(specs: CalendarSpec[], semesterEnded: boolean): (CalendarSpec & { color: string; visible: boolean })[] {
-  return specs.map((c) => ({
+  return specs.map(c => ({
     ...c,
     color: c.color ?? FIXED_COLORS[c.slug] ?? DEFAULT_COURSE_COLOR,
     visible: !(semesterEnded && isCourseCalendar(c.slug)),
-  }))
+  }));
 }
 
 function toWrite(e: DesiredEvent, ids: Record<string, number>): WriteItem {
-  return { calendarId: ids[e.calendar], key: e.key, hash: eventHash(e), event: e.event, reminders: e.reminders }
+  return { calendarId: ids[e.calendar], key: e.key, hash: eventHash(e), event: e.event, reminders: e.reminders };
 }
 
 function chunks<T>(list: T[], n: number): T[][] {
-  const out: T[][] = []
-  for (let i = 0; i < list.length; i += n) out.push(list.slice(i, i + n))
-  return out
+  const out: T[][] = [];
+  for (let i = 0; i < list.length; i += n) out.push(list.slice(i, i + n));
+  return out;
 }
 
-let running: Promise<void> | null = null
-let again = false
+let running: Promise<void> | null = null;
+let again = false;
 
 async function doSync(): Promise<void> {
-  const perm = await calendarPermission()
-  if (perm !== 'granted') return
-  setStatus({ syncing: true })
+  const perm = await calendarPermission();
+  if (perm !== "granted")
+    return;
+  setStatus({ syncing: true });
   try {
-    const snap = store.snapshot()
-    const desired = planCalendar(snap, store.state.tasks, store.state.prefs, new Date())
-    const ended = !!snap && fromDate(new Date()) > dateOf(snap.semester, snap.semester.totalWeeks, 7)
-    const { ids, archived = [] } = await TtCalendar.ensureCalendars({ calendars: withColors(calendarsFor(desired, snap), ended) })
-    const { events: remote } = await TtCalendar.readAll()
+    const snap = store.snapshot();
+    const desired = planCalendar(snap, store.state.tasks, store.state.prefs, new Date());
+    const ended = !!snap && fromDate(new Date()) > dateOf(snap.semester, snap.semester.totalWeeks, 7);
+    const { ids, archived = [] } = await TtCalendar.ensureCalendars({ calendars: withColors(calendarsFor(desired, snap), ended) });
+    const { events: remote } = await TtCalendar.readAll();
 
-    const skip = new Set(archived)
-    const byKey = new Map<string, RemoteEvent>()
-    const deletes: number[] = []
+    const skip = new Set(archived);
+    const byKey = new Map<string, RemoteEvent>();
+    const deletes: number[] = [];
     for (const r of remote) {
-      if (skip.has(r.calendarId)) continue
+      if (skip.has(r.calendarId))
+        continue;
       // 同一个 key 出现两次（异常情况）：留一条，其余删掉
-      if (!r.key || byKey.has(r.key)) deletes.push(r.id)
-      else byKey.set(r.key, r)
+      if (!r.key || byKey.has(r.key))
+        deletes.push(r.id);
+      else byKey.set(r.key, r);
     }
-    const inserts: WriteItem[] = []
-    const updates: (WriteItem & { id: number })[] = []
+    const inserts: WriteItem[] = [];
+    const updates: (WriteItem & { id: number })[] = [];
     for (const e of desired) {
-      const w = toWrite(e, ids)
-      const r = byKey.get(e.key)
-      if (!r) inserts.push(w)
-      else {
-        byKey.delete(e.key)
+      const w = toWrite(e, ids);
+      const r = byKey.get(e.key);
+      if (!r) {
+        inserts.push(w);
+      } else {
+        byKey.delete(e.key);
         // 换了本日历（作业改成考试）就删掉重建，其余内容变了原地改
         if (r.calendarId !== w.calendarId) {
-          deletes.push(r.id)
-          inserts.push(w)
-        } else if (r.hash !== w.hash) updates.push({ ...w, id: r.id })
+          deletes.push(r.id);
+          inserts.push(w);
+        } else if (r.hash !== w.hash) {
+          updates.push({ ...w, id: r.id });
+        }
       }
     }
-    for (const r of byKey.values()) deletes.push(r.id)
+    for (const r of byKey.values()) deletes.push(r.id);
 
     if (inserts.length + updates.length + deletes.length > 0) {
       try {
-        await TtCalendar.apply({ inserts, updates, deletes })
+        await TtCalendar.apply({ inserts, updates, deletes });
       } catch {
         // 整批失败就拆小批重试，让一条坏数据只影响它自己
-        for (const d of chunks(deletes, CHUNK)) await TtCalendar.apply({ inserts: [], updates: [], deletes: d }).catch(() => undefined)
-        for (const u of chunks(updates, CHUNK)) await TtCalendar.apply({ inserts: [], updates: u, deletes: [] }).catch(() => undefined)
-        for (const i of chunks(inserts, CHUNK)) await TtCalendar.apply({ inserts: i, updates: [], deletes: [] }).catch(() => undefined)
+        for (const d of chunks(deletes, CHUNK)) await TtCalendar.apply({ inserts: [], updates: [], deletes: d }).catch(() => undefined);
+        for (const u of chunks(updates, CHUNK)) await TtCalendar.apply({ inserts: [], updates: u, deletes: [] }).catch(() => undefined);
+        for (const i of chunks(inserts, CHUNK)) await TtCalendar.apply({ inserts: i, updates: [], deletes: [] }).catch(() => undefined);
       }
     }
-    setStatus({ summary: summarize(desired), lastSyncAt: Date.now(), failed: false })
+    setStatus({ summary: summarize(desired), lastSyncAt: Date.now(), failed: false });
   } catch {
-    setStatus({ failed: true })
+    setStatus({ failed: true });
   } finally {
-    setStatus({ syncing: false })
+    setStatus({ syncing: false });
   }
 }
 
 /** 把 Store 里的当前状态写进系统日历；并发调用合并成一次，进行中再来一次就排队 */
 export function syncCalendar(): Promise<void> {
-  if (!calendarSupported()) return Promise.resolve()
+  if (!calendarSupported())
+    return Promise.resolve();
   if (running) {
-    again = true
-    return running
+    again = true;
+    return running;
   }
   running = (async () => {
     do {
-      again = false
-      await doSync()
-    } while (again)
-  })().finally(() => { running = null })
-  return running
+      again = false;
+      await doSync();
+    } while (again);
+  })().finally(() => { running = null; });
+  return running;
 }
 
-let timer: number | null = null
+let timer: number | null = null;
 
 /** Store 变化后延迟一小会再写，连续编辑只写一次 */
 export function scheduleCalendarSync(): void {
-  if (!calendarSupported()) return
-  if (timer != null) window.clearTimeout(timer)
+  if (!calendarSupported())
+    return;
+  if (timer != null)
+    window.clearTimeout(timer);
   timer = window.setTimeout(() => {
-    timer = null
-    void syncCalendar()
-  }, DEBOUNCE_MS)
+    timer = null;
+    void syncCalendar();
+  }, DEBOUNCE_MS);
 }
 
 /** 删掉应用在系统日历里建的全部日历（含已归档的） */
 export async function clearCalendar(): Promise<void> {
-  if (!calendarSupported()) return
+  if (!calendarSupported())
+    return;
   if (timer != null) {
-    window.clearTimeout(timer)
-    timer = null
+    window.clearTimeout(timer);
+    timer = null;
   }
-  if (running) await running.catch(() => undefined)
+  if (running)
+    await running.catch(() => undefined);
   try {
-    await TtCalendar.removeAll()
+    await TtCalendar.removeAll();
   } catch {
     /* 忽略 */
   }
-  setStatus({ summary: null, lastSyncAt: null, failed: false })
+  setStatus({ summary: null, lastSyncAt: null, failed: false });
 }
 
 export async function openCalendarSettings(): Promise<void> {
-  if (!calendarSupported()) return
+  if (!calendarSupported())
+    return;
   try {
-    await TtCalendar.openAppSettings()
+    await TtCalendar.openAppSettings();
   } catch {
     /* 忽略 */
   }
@@ -245,20 +263,22 @@ export async function openCalendarSettings(): Promise<void> {
 /* ---------------- 打开系统日历 ---------------- */
 
 export async function hasCalendarApp(): Promise<boolean> {
-  if (!calendarSupported()) return false
+  if (!calendarSupported())
+    return false;
   try {
-    return (await TtCalendar.hasCalendarApp()).available
+    return (await TtCalendar.hasCalendarApp()).available;
   } catch {
-    return false
+    return false;
   }
 }
 
 export async function openSystemCalendar(at: number = Date.now()): Promise<boolean> {
-  if (!calendarSupported()) return false
+  if (!calendarSupported())
+    return false;
   try {
-    await TtCalendar.openCalendar({ at })
-    return true
+    await TtCalendar.openCalendar({ at });
+    return true;
   } catch {
-    return false
+    return false;
   }
 }
