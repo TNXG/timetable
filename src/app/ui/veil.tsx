@@ -1,6 +1,6 @@
 import type { MotionValue } from "motion/react";
 import { motion, useMotionValue } from "motion/react";
-import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useImeShrink } from "../ime";
 import { FADE } from "./constants";
@@ -167,13 +167,11 @@ export function StickyHead({ children, bleed = 0, feather, className = "" }: {
   const veil = useVeilOpacity(ref);
   const [host, setHost] = useState<HTMLElement | null>(null);
   const [h, setH] = useState(0);
-  /* 标题区挂到滚动容器外层：backdrop-filter 不在 sticky 里，慢滚也能实时取到下面的内容 */
   /* 标题区挂到滚动容器外层：backdrop-filter 不在 sticky 里，慢滚也能实时取到下面的内容。
-     用回调 ref 在提交阶段就位，避免在 effect 里同步落状态 */
-  const setBox = useCallback((node: HTMLDivElement | null) => {
-    boxRef.current = node;
-    const sc = scrollParent(node);
-    setHost((node?.closest("[data-veil-host]") as HTMLElement | null) ?? sc?.parentElement ?? null);
+     host 从占位节点解析——占位节点始终挂载；head 依赖 host 才渲染，从它解析会互相等待 */
+  useLayoutEffect(() => {
+    const sc = scrollParent(ref.current);
+    setHost((ref.current?.closest("[data-veil-host]") as HTMLElement | null) ?? sc?.parentElement ?? null);
   }, []);
   useLayoutEffect(() => {
     const el = boxRef.current;
@@ -185,7 +183,7 @@ export function StickyHead({ children, bleed = 0, feather, className = "" }: {
     return () => ro.disconnect();
   }, [host]);
   const head = (
-    <div ref={setBox} className={`absolute inset-x-0 top-0 z-[30] isolate pt-[max(52px,calc(env(safe-area-inset-top)+22px))] pb-3 ${className}`}>
+    <div ref={boxRef} className={`absolute inset-x-0 top-0 z-[30] isolate pt-[max(52px,calc(env(safe-area-inset-top)+22px))] pb-3 ${className}`}>
       <TopVeil bleed={bleed} feather={feather} progress={veil} />
       {children}
     </div>

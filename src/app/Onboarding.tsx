@@ -3,7 +3,8 @@ import { AnimatePresence } from "motion/react";
 import { useState } from "react";
 import { diffDays } from "../domain/dates";
 import { DEFAULT_PLUGIN } from "../domain/edu/plugin";
-import { mondayOf, todayStr } from "./semester";
+import { defaultSemester, mondayOf, todayStr } from "./semester";
+import { store } from "./store";
 import { DateInput, Field, md, Page, PrimaryButton, Row, TextAction, TopBar } from "./ui";
 
 /** 开学日期，落到所在周的周一 */
@@ -73,7 +74,14 @@ export default function Onboarding({ onDone, initialStep = 0, backRef }: { onDon
             footer={(
               <div className="flex justify-center gap-8">
                 <TextAction tone="mute" onClick={() => onDone("manual")}>手动添加</TextAction>
-                <TextAction tone="mute" onClick={() => onDone(null)}>稍后</TextAction>
+                {/* 稍后：默认学期先行，整份引导完成 */}
+                <TextAction
+                  tone="mute"
+                  onClick={() => {
+                    store.setSemester({ ...defaultSemester(mondayOf(todayStr())), totalWeeks: 20 });
+                    onDone(null);
+                  }}
+                >稍后</TextAction>
               </div>
             )}
           >

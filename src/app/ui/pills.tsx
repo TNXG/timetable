@@ -1,17 +1,12 @@
 import { AnimatePresence, motion } from "motion/react";
 import React from "react";
+import ArrowUpLine from "~icons/mingcute/arrow-up-line";
+import CameraLine from "~icons/mingcute/camera-line";
 import { dockStyle, SHEET, tint } from "./constants";
 
-export const CameraIcon = ({ size = 18, stroke = "var(--c-ink)" }: { size?: number; stroke?: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" style={{ stroke }} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round">
-    <path d="M4 9a2.5 2.5 0 0 1 2.5-2.5H8l1.1-1.7c.3-.5.8-.8 1.4-.8h3c.6 0 1.1.3 1.4.8L16 6.5h1.5A2.5 2.5 0 0 1 20 9v7.5a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 16.5z" />
-    <circle cx="12" cy="12.6" r="3.1" />
-  </svg>
-);
+export const CameraIcon = ({ size = 18, stroke = "var(--c-ink)" }: { size?: number; stroke?: string }) => <CameraLine width={size} height={size} className="" style={{ color: stroke }} />;
 
-export const ArrowUpIcon = ({ stroke = "#fff" }: { stroke?: string }) => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ stroke }} strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><path d="M12 19V5M5 12l7-7 7 7" /></svg>
-);
+export const ArrowUpIcon = ({ stroke = "#fff" }: { stroke?: string }) => <ArrowUpLine width={16} height={16} style={{ color: stroke }} />;
 
 /** 课程名放进胶囊时的字数上限，超出截掉加“…” */
 export const CHIP_MAX = 8;
@@ -33,7 +28,7 @@ export function Chip({ color, children, tone = "plain", onClick, shrink = false 
   return (
     <Tag
       onClick={onClick}
-      className={`inline-flex h-[30px] max-w-[160px] min-w-0 ${shrink ? "shrink" : "flex-none"} items-center gap-1.5 rounded-full px-3 text-[12.5px] font-bold ${tone === "accent" ? "bg-(--c-accent-soft) text-(--c-accent)" : "bg-(--c-surface2) text-(--c-ink2)"} ${onClick ? "transition-transform duration-150 active:scale-[.96]" : ""}`}
+      className={`inline-flex h-7.5 max-w-40 min-w-0 ${shrink ? "shrink" : "flex-none"} items-center gap-1.5 rounded-full px-3 text-[12.5px] font-bold ${tone === "accent" ? "bg-(--c-accent-soft) text-(--c-accent)" : "bg-(--c-surface2) text-(--c-ink2)"} ${onClick ? "transition-transform duration-150 active:scale-[.96]" : ""}`}
     >
       {color && <span className="h-1.75 w-1.75 flex-none rounded-full" style={{ background: color }} />}
       <span className="min-w-0 truncate">{children}</span>

@@ -1,12 +1,13 @@
 import type { Snapshot } from "../../domain/engine";
 import type { Task } from "../../domain/types";
 import type { ActionItem } from "../ui";
+import Delete2Line from "~icons/mingcute/delete-2-line";
 import { useEffect, useState } from "react";
 import { camera } from "../camera";
 import { PhotoViewer, TaskPhotoImg } from "../photo";
 import { todayStr } from "../semester";
 import { store, useStore } from "../store";
-import { ActionSheet, CameraIcon, ICON, Page } from "../ui";
+import { ActionSheet, CameraIcon, Page } from "../ui";
 import { haptic, nativeToast } from "../widgets";
 import { CheckBox, MetaChips, toggleDone, useMeta } from "./shared";
 
@@ -58,7 +59,7 @@ export function TaskDetailPage({
     store.removePhoto(cur.id, id);
   };
   const taskMenu: ActionItem[][] = [
-    [{ title: "删除待办", icon: ICON.trash, danger: true, onClick: () => void removeTask() }],
+    [{ title: "删除待办", icon: <Delete2Line />, danger: true, onClick: () => void removeTask() }],
   ];
 
   return (

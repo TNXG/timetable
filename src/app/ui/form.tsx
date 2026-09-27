@@ -10,7 +10,7 @@ export function Chips({ items, active, onPick }: { items: string[]; active: numb
         <button
           key={t}
           onClick={() => onPick(i)}
-          className={`rounded-[9px] px-2.5 py-[6px] text-[12px] font-bold transition-colors ${i === active ? "bg-(--c-accent-soft) text-(--c-accent)" : "bg-(--c-surface) text-(--c-ink3)"}`}
+          className={`rounded-[9px] px-2.5 py-1.5 text-[12px] font-bold transition-colors ${i === active ? "bg-(--c-accent-soft) text-(--c-accent)" : "bg-(--c-surface) text-(--c-ink3)"}`}
         >
           {t}
         </button>
@@ -119,7 +119,7 @@ export function Stepper({ value, unit, min, max, step = 1, onChange }: { value: 
   const btn = (dir: -1 | 1, path: string) => (
     <button
       onClick={() => go(dir)}
-      className={`flex h-[28px] w-[28px] items-center justify-center rounded-full bg-(--c-surface2) transition-transform duration-150 active:scale-[.92] ${(dir < 0 ? value - step < min : value + step > max) ? "opacity-40" : ""}`}
+      className={`flex h-7 w-7 items-center justify-center rounded-full bg-(--c-surface2) transition-transform duration-150 active:scale-[.92] ${(dir < 0 ? value - step < min : value + step > max) ? "opacity-40" : ""}`}
     >
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink)" strokeWidth="2.6" strokeLinecap="round"><path d={path} /></svg>
     </button>
@@ -142,9 +142,9 @@ export function Switch({ on, onChange }: { on: boolean; onChange: (v: boolean) =
       role="switch"
       aria-checked={on}
       onClick={() => { haptic("light"); onChange(!on); }}
-      className={`relative h-[26px] w-[44px] flex-none rounded-full transition-colors duration-200 ${on ? "bg-(--c-accent)" : "bg-(--c-line)"}`}
+      className={`relative h-6.5 w-11 flex-none rounded-full transition-colors duration-200 ${on ? "bg-(--c-accent)" : "bg-(--c-line)"}`}
     >
-      <i className={`absolute top-[3px] h-[20px] w-[20px] rounded-full bg-white transition-[left] duration-200 ${on ? "left-5.25" : "left-0.75"}`} />
+      <i className={`absolute top-0.75 h-5 w-5 rounded-full bg-white transition-[left] duration-200 ${on ? "left-5.25" : "left-0.75"}`} />
     </button>
   );
 }

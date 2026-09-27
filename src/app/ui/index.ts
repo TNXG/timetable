@@ -2,7 +2,7 @@ export { ActionSheet, Loader, MenuRow, PrimaryButton, SheetClose, SheetHead, She
 export type { ActionItem } from "./actions";
 export { addDaysStr, CAL_H, CAL_ROW, Calendar, DateSheet, daysInMonth, SWAP, SwapLayer, TimeSheet, TimeWheels, todayYmd, ymd, ymOf } from "./calendar";
 export { dockStyle, FADE, LIFT, md, SHEET, SLIDE, SPRING, tint, WD, WD_SHORT } from "./constants";
-export { Chevron, ICON, PopHead, PopItem, RadioRow, SearchButton, SubPage } from "./controls";
+export { Chevron, PopHead, PopItem, RadioRow, SearchButton, SubPage } from "./controls";
 export { EmptyArt, EmptyBlock } from "./empty";
 export type { EmptyAction, EmptyKind } from "./empty";
 export { Chips, DateInput, Field, Row, SelectInput, Stepper, Switch, TextInput, TimeInput } from "./form";

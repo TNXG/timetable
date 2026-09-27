@@ -1,3 +1,5 @@
+import CameraLine from "~icons/mingcute/camera-line";
+import LeftLine from "~icons/mingcute/left-line";
 import React from "react";
 import { Sticker } from "../app/Sticker";
 import { stickerOf } from "../domain/stickers";
@@ -294,7 +296,7 @@ export function TopBar({ title, sub }: { title: string; sub?: string }) {
     <>
       <div className="flex items-center">
         <div className="flex h-9 w-9 items-center justify-center rounded-full bg-(--c-surface)">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink)" strokeWidth="2.4"><path d="M15 19 8 12l7-7" /></svg>
+          <LeftLine width={14} height={14} className="text-(--c-ink)" />
         </div>
       </div>
       <h1 className="mt-4 text-[26px] font-extrabold tracking-[-.02em] text-(--c-ink)">{title}</h1>
@@ -303,12 +305,7 @@ export function TopBar({ title, sub }: { title: string; sub?: string }) {
   );
 }
 
-export const CameraIcon = ({ size = 18, stroke = "var(--c-ink)" }: { size?: number; stroke?: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round">
-    <path d="M4 9a2.5 2.5 0 0 1 2.5-2.5H8l1.1-1.7c.3-.5.8-.8 1.4-.8h3c.6 0 1.1.3 1.4.8L16 6.5h1.5A2.5 2.5 0 0 1 20 9v7.5a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 16.5z" />
-    <circle cx="12" cy="12.6" r="3.1" />
-  </svg>
-);
+export const CameraIcon = ({ size = 18, stroke = "var(--c-ink)" }: { size?: number; stroke?: string }) => <CameraLine width={size} height={size} style={{ color: stroke }} />;
 
 export function Board({ className = "", zoom = 1, tilt, top = 0 }: { className?: string; zoom?: number; tilt?: boolean; top?: number }) {
   return (
@@ -332,7 +329,7 @@ export function SubHead({ title, sub }: { title: string; sub?: string }) {
   return (
     <div className="px-5">
       <div className="flex h-9 w-9 items-center justify-center rounded-full bg-(--c-surface)">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink)" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M15 19 8 12l7-7" /></svg>
+        <LeftLine width={14} height={14} className="text-(--c-ink)" />
       </div>
       <h1 className="mt-4 text-[26px] font-extrabold tracking-[-.02em] text-(--c-ink)">{title}</h1>
       {sub && <div className="mt-1.5 text-[13px] leading-normal font-medium text-(--c-ink4)">{sub}</div>}

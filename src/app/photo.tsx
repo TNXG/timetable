@@ -1,8 +1,10 @@
+import Download2Line from "~icons/mingcute/download-2-line";
+import Delete2Line from "~icons/mingcute/delete-2-line";
 import { animate } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { camera } from "./camera";
 import { loadPhotoSrc, photoSrc } from "./photo-src";
-import { ActionSheet, FADE, ICON, useBackClose } from "./ui";
+import { ActionSheet, FADE, useBackClose } from "./ui";
 import { haptic, nativeToast } from "./widgets";
 
 /** 待办照片：路径异步转成可显示的地址，文件不在时留占位 */
@@ -132,8 +134,8 @@ export function PhotoViewer({ path, onClose, onDelete }: { path: string; onClose
         <ActionSheet
           title="照片"
           groups={[
-            [{ title: "保存到相册", icon: ICON.download, onClick: () => void save() }],
-            onDelete ? [{ title: "删除这张", icon: ICON.trash, danger: true, onClick: () => { onDelete(); haptic("warning"); nativeToast("已删除"); close(); } }] : [],
+            [{ title: "保存到相册", icon: <Download2Line />, onClick: () => void save() }],
+            onDelete ? [{ title: "删除这张", icon: <Delete2Line />, danger: true, onClick: () => { onDelete(); haptic("warning"); nativeToast("已删除"); close(); } }] : [],
           ]}
           onClose={() => setMenu(false)}
         />

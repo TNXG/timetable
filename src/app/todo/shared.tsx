@@ -1,5 +1,8 @@
 import type { Snapshot } from "../../domain/engine";
 import type { Course, Task } from "../../domain/types";
+import Book2Line from "~icons/mingcute/book-2-line";
+import FileLine from "~icons/mingcute/file-line";
+import Flag2Line from "~icons/mingcute/flag-2-line";
 import type { ActionItem } from "../ui";
 import React, { useMemo, useRef, useState } from "react";
 import { fmtMinutes, weekdayOf } from "../../domain/dates";
@@ -13,7 +16,6 @@ import {
   Calendar,
   Chip,
   clipText,
-  ICON,
   md,
   PrimaryButton,
   Sheet,
@@ -163,7 +165,7 @@ export function CourseSheet({ courses, cid, onPick, onClose }: { courses: Course
   return <ActionSheet title="课程" groups={[items]} onClose={onClose} />;
 }
 
-const KIND_ICON: Record<Task["kind"], React.ReactNode> = { homework: ICON.book, exam: ICON.flag, memo: ICON.note };
+const KIND_ICON: Record<Task["kind"], React.ReactNode> = { homework: <Book2Line />, exam: <Flag2Line />, memo: <FileLine /> };
 
 function KindSheet({ kind, onPick, onClose }: { kind: Task["kind"]; onPick: (k: Task["kind"]) => void; onClose: () => void }) {
   const items: ActionItem[] = KINDS.map(k => ({ title: KIND_LABEL[k], icon: KIND_ICON[k], selected: k === kind, onClick: () => onPick(k) }));

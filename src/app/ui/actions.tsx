@@ -1,3 +1,5 @@
+import CheckLine from "~icons/mingcute/check-line";
+import CloseLine from "~icons/mingcute/close-line";
 import React, { useRef } from "react";
 import { Sheet } from "./sheet";
 
@@ -16,7 +18,7 @@ export function SheetHead({ title, sub, trail }: { title: string; sub?: string; 
 export function MenuRow({ icon, title, desc, onClick, danger, first }: { icon: React.ReactNode; title: string; desc?: string; onClick: () => void; danger?: boolean; first?: boolean }) {
   return (
     <button onClick={onClick} className={`mx-3 flex w-[calc(100%-24px)] items-center rounded-[13px] px-3 py-[10px] text-left transition-colors active:bg-(--c-surface2) ${first ? "bg-(--c-bg)" : ""}`}>
-      <svg viewBox="0 0 24 24" fill="none" stroke={danger ? "var(--c-danger)" : "var(--c-ink2)"} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" className="mr-3 h-4.25 w-4.25 flex-none">{icon}</svg>
+      <span className={`mr-3 flex h-4.25 w-4.25 flex-none items-center justify-center ${danger ? "text-(--c-danger)" : "text-(--c-ink2)"}`}>{icon}</span>
       <div className="min-w-0 flex-1">
         <div className={`truncate text-[14px] font-medium ${danger ? "text-(--c-danger)" : "text-(--c-ink)"}`}>{title}</div>
         {desc && <div className="mt-0.5 truncate text-[11.5px] font-medium text-(--c-ink4)">{desc}</div>}
@@ -97,44 +99,36 @@ export interface ActionItem {
 export function SheetClose({ onClick }: { onClick: () => void }) {
   return (
     <button onClick={onClick} className="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-(--c-surface2) transition-transform duration-150 active:scale-[.92]">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" style={{ stroke: "var(--c-ink)" }} strokeWidth="2.4" strokeLinecap="round"><path d="M6 6l12 12M18 6 6 18" /></svg>
+      <CloseLine width={15} height={15} className="text-(--c-ink)" />
     </button>
   );
 }
 
 export function SheetRow({ item, onPick }: { item: ActionItem; onPick: (it: ActionItem) => void }) {
-  const tone = item.danger ? "var(--c-danger)" : item.selected ? "var(--c-accent)" : "var(--c-ink2)";
+  const tone = item.danger ? "text-(--c-danger)" : item.selected ? "text-(--c-accent)" : "text-(--c-ink2)";
   return (
     <button onClick={() => onPick(item)} className="flex h-13 w-full items-center rounded-[14px] px-3 text-left transition-colors active:bg-(--c-surface2)">
       {item.icon
-        ? (
-            <svg viewBox="0 0 24 24" fill="none" stroke={tone} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="mr-3.5 h-4.75 w-4.75 flex-none">{item.icon}</svg>
-          )
-        : (
-            <span className="mr-3.5 h-4.75 w-4.75 flex-none rounded-full border-[1.8px] border-dashed border-(--c-ink5)" />
-          )}
+        ? <span className={`mr-3.5 flex h-4.75 w-4.75 flex-none items-center justify-center ${tone}`}>{item.icon}</span>
+        : <span className="mr-3.5 h-4.75 w-4.75 flex-none rounded-full border-[1.8px] border-dashed border-(--c-ink5)" />}
       <span className={`min-w-0 flex-1 truncate text-[15px] font-medium ${item.danger ? "text-(--c-danger)" : "text-(--c-ink)"}`}>{item.title}</span>
       {item.value != null && <span className="ml-3 flex-none text-[14px] font-medium tabular-nums text-(--c-ink4)">{item.value}</span>}
       {!item.danger && <Tick on={!!item.selected} multi={item.multi} className="ml-3" />}
     </button>
   );
 }
-
 /** 行尾选中标记：占位宽度固定，选不选都不挤动左边；多选是方框，单选是勾 */
 export function Tick({ on, multi, className = "" }: { on: boolean; multi?: boolean; className?: string }) {
   if (multi) {
     return (
-      <span
-        className={`flex h-[20px] w-[20px] flex-none items-center justify-center rounded-[6px] border-[1.6px] transition-colors duration-150 ${on ? "border-(--c-accent) bg-(--c-accent)" : "border-(--c-ink5) bg-transparent"} ${className}`}
-      >
-        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className={`h-[12px] w-[12px] transition-opacity duration-150 ${on ? "opacity-100" : "opacity-0"}`}><path d="m5 13 4.5 4.5L19 7" /></svg>
+      <span className={`flex h-[20px] w-[20px] flex-none items-center justify-center rounded-[6px] border-[1.6px] transition-colors duration-150 ${on ? "border-(--c-accent) bg-(--c-accent)" : "border-(--c-ink5) bg-transparent"} ${className}`}>
+        <CheckLine className={`h-[12px] w-[12px] text-white transition-opacity duration-150 ${on ? "opacity-100" : "opacity-0"}`} />
       </span>
     );
   }
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="var(--c-accent)" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" className={`h-[16px] w-[16px] flex-none transition-opacity duration-150 ${on ? "opacity-100" : "opacity-0"} ${className}`}><path d="m5 13 4.5 4.5L19 7" /></svg>
-  );
+  return <CheckLine className={`h-[16px] w-[16px] flex-none text-(--c-accent) transition-opacity duration-150 ${on ? "opacity-100" : "opacity-0"} ${className}`} />;
 }
+
 
 export function ActionSheet({ groups, onClose, title }: { groups: ActionItem[][]; onClose: () => void; title: string }) {
   const dismissRef = useRef<(() => void) | null>(null);

@@ -68,7 +68,7 @@ export function TodayView({
       return;
     if (glidingRef.current) {
       window.clearTimeout(glidingRef.current);
-      glidingRef.current = window.setTimeout(() => { glidingRef.current = 0; }, 120);
+      glidingRef.current = window.setTimeout(() => { glidingRef.current = 0; onScroll(); }, 120);
       return;
     }
     let cur = anchor;
@@ -88,9 +88,11 @@ export function TodayView({
     const el = sc?.querySelector<HTMLElement>(`[data-day="${d}"]`);
     if (sc && el) {
       setView(d);
-      glidingRef.current = window.setTimeout(() => { glidingRef.current = 0; }, 120);
+      window.clearTimeout(glidingRef.current);
+      glidingRef.current = window.setTimeout(() => { glidingRef.current = 0; onScroll(); }, 120);
       sc.scrollTo({ top: Math.max(0, dayTop(sc, el) - 8), behavior: "smooth" });
     } else if (d === anchor) {
+      setView(d);
       sc?.scrollTo({ top: 0, behavior: "smooth" });
     } else {
       setAnchor(d);
@@ -115,11 +117,13 @@ export function TodayView({
     scrollRef.current?.scrollTo({ top: 0 });
   }, [anchor]);
 
-  const week = weekOf(snap.semester, anchor);
+  const shown = days.find(day => day.date === view);
+  const shownOcc = shown?.occ ?? occurrencesOn(snap, view);
+  const shownWeek = weekOf(snap.semester, view);
   const vac = inVacation(snap.semester, anchor);
   const head = days[0]?.occ ?? [];
-  const remain = anchor === today ? head.filter(o => o.end > now && o.status !== "cancelled").length : head.length;
-  const inTerm = week >= 1 && week <= snap.semester.totalWeeks;
+  const remain = view === today ? shownOcc.filter(o => o.end > now && o.status !== "cancelled").length : shownOcc.length;
+  const inTerm = shownWeek >= 1 && shownWeek <= snap.semester.totalWeeks;
   const nothingAtAll = snap.courses.length === 0 && snap.entries.length === 0;
   /* 刚下课那一刻：时间线里那节课下面直接给出记录入口 */
   const ended = useMemo(() => justEndedClass(snap, today, now), [snap, today, now]);
@@ -145,9 +149,9 @@ export function TodayView({
         <StickyHead bleed={0} className="px-5">
           <div className="flex items-start justify-between">
             <h1 className="text-[26px] font-extrabold tracking-[-.02em]">
-              {md(anchor)}
+              {md(view)}
               {" "}
-              <span className="font-bold text-(--c-ink5)">{WD[weekdayOf(anchor)]}</span>
+              <span className="font-bold text-(--c-ink5)">{WD[weekdayOf(view)]}</span>
             </h1>
             <SearchButton onClick={onSearch} />
           </div>
@@ -156,7 +160,7 @@ export function TodayView({
               ? (
                   <span>
                     第
-                    {week}
+                    {shownWeek}
                     {" "}
                     周
                   </span>
@@ -165,17 +169,17 @@ export function TodayView({
             {inTerm && (
               <>
                 <span className="h-3 w-px bg-(--c-line)" />
-                <span>{week % 2 === 1 ? "单周" : "双周"}</span>
+                <span>{shownWeek % 2 === 1 ? "单周" : "双周"}</span>
               </>
             )}
             <span className="h-3 w-px bg-(--c-line)" />
-            {head.length > 0
+            {shownOcc.length > 0
               ? (
                   <span>
-                    {head.length}
+                    {shownOcc.length}
                     {" "}
                     节课
-                    {anchor === today && (
+                    {view === today && (
                       <span className="text-(--c-ink5)">
                         ，剩
                         {remain}
@@ -364,11 +368,11 @@ export function TodayView({
       </div>
 
       <BottomVeil height={210} />
-      <BackPill show={!cal && view !== today} label="回到今天" bottom="calc(152px + max(24px, env(safe-area-inset-bottom)))" onClick={() => (anchor === today ? pickDay(today) : setAnchor(today))} />
+      <BackPill show={!cal && view !== today} label="回到今天" bottom="calc(152px + max(24px, env(safe-area-inset-bottom)))" onClick={() => pickDay(today)} />
       <AnimatePresence initial={false}>
         {!cal && <DateStrip snap={snap} anchor={view} onPick={pickDay} onCalendar={() => setCal(true)} />}
       </AnimatePresence>
-      {cal && <CalendarSheet snap={snap} mode="day" anchor={anchor} onPick={setAnchor} onClose={() => setCal(false)} />}
+      {cal && <CalendarSheet snap={snap} mode="day" anchor={view} onPick={pickDay} onClose={() => setCal(false)} />}
     </>
   );
 }

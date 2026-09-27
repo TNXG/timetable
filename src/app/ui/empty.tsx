@@ -77,7 +77,7 @@ export function EmptyBlock({ kind, title, desc, actions, className = "px-5", onS
             <button
               key={label}
               onClick={fn}
-              className={`flex h-[34px] items-center gap-1.5 rounded-full text-[13px] font-bold transition-transform duration-150 active:scale-[.96] ${i === 0 ? "bg-(--c-accent) text-white" : `${onSurface ? "bg-(--c-surface2)" : "bg-(--c-surface)"} text-(--c-ink)`} ${icon ? "pl-3 pr-3.5" : "px-3.5"}`}
+              className={`flex h-8.5 items-center gap-1.5 rounded-full text-[13px] font-bold transition-transform duration-150 active:scale-[.96] ${i === 0 ? "bg-(--c-accent) text-white" : `${onSurface ? "bg-(--c-surface2)" : "bg-(--c-surface)"} text-(--c-ink)`} ${icon ? "pl-3 pr-3.5" : "px-3.5"}`}
             >
               {icon}
               {label}

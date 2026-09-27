@@ -1,3 +1,4 @@
+import LeftLine from "~icons/mingcute/left-line";
 import { motion } from "motion/react";
 import React from "react";
 import { useImeShrink } from "../ime";
@@ -73,7 +74,7 @@ export function Card({ children, className = "" }: { children: React.ReactNode; 
 export function BackButton({ onClick }: { onClick: () => void }) {
   return (
     <button onClick={onClick} className="flex h-9 w-9 items-center justify-center rounded-full bg-(--c-surface) transition-transform duration-150 active:scale-[.92]">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style={{ stroke: "var(--c-ink)" }} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M15 19 8 12l7-7" /></svg>
+      <LeftLine width={14} height={14} className="text-(--c-ink)" />
     </button>
   );
 }
