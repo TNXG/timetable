@@ -119,6 +119,31 @@ describe('occurrencesOn', () => {
   })
 })
 
+describe('schedule adjustments', () => {
+  it('uses the explicitly mapped teaching day on the actual date', () => {
+    const s = snap({
+      semester: {
+        ...sem,
+        scheduleAdjustments: [{ id: 'a1', date: '2026-10-10', teachingDate: '2026-10-05', createdAt: 0 }],
+        vacations: [{ name: '国庆', start: '2026-10-01', end: '2026-10-07' }],
+      },
+      courses: [course],
+      rules: [{ ...rule, weeksMask: weeksToMask([6]) }],
+    })
+    const occ = occurrencesOn(s, '2026-10-10')
+    expect(occ).toHaveLength(1)
+    expect(occ[0].date).toBe('2026-10-10')
+    expect(occ[0].weekday).toBe(6)
+    expect(occ[0].week).toBe(6)
+    expect(occurrencesOn(s, '2026-10-05')).toHaveLength(0)
+  })
+
+  it('does not change an unconfigured Saturday', () => {
+    const s = snap({ courses: [course], rules: [{ ...rule, weekday: 6, weeksMask: weeksToMask([6]) }] })
+    expect(occurrencesOn(s, '2026-10-10')).toHaveLength(1)
+  })
+})
+
 describe('identityKey', () => {
   it('stable across whitespace', () => {
     expect(identityKey('高等 数学', '王立群')).toBe(identityKey('高等数学', '王 立群'))

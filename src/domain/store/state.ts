@@ -61,7 +61,12 @@ function hydratePrefs(raw: unknown): Prefs {
 export function hydrate(s: State): State {
   for (const r of s.rules) r.weeksMask = BigInt(r.weeksMask as unknown as string)
   if (!s.archives) s.archives = []
-  for (const a of s.archives) for (const r of a.rules) r.weeksMask = BigInt(r.weeksMask as unknown as string)
+  if (!s.semester) s.semester = null
+  else if (!s.semester.scheduleAdjustments) s.semester.scheduleAdjustments = []
+  for (const a of s.archives) {
+    for (const r of a.rules) r.weeksMask = BigInt(r.weeksMask as unknown as string)
+    if (!a.semester.scheduleAdjustments) a.semester.scheduleAdjustments = []
+  }
   if (!s.savedRules || s.savedRules.length === 0) s.savedRules = [...BUILTIN_RULES]
   if (!s.tasks) s.tasks = []
   for (const t of s.tasks) if (!t.photos) t.photos = []

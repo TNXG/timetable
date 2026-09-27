@@ -15,6 +15,13 @@ export interface DateRange {
   end: LocalDate // 含
 }
 
+export interface ScheduleAdjustment {
+  id: string
+  date: LocalDate
+  teachingDate: LocalDate
+  createdAt: number
+}
+
 export interface Semester {
   id: string
   name: string
@@ -22,6 +29,7 @@ export interface Semester {
   totalWeeks: number
   timeGrid: TimeSlot[]
   vacations: (DateRange & { name: string })[]
+  scheduleAdjustments?: ScheduleAdjustment[]
   /** 全国法定节假日不排课；省略视为开启 */
   holidays?: boolean
   examWeeks: number[] // 周次

@@ -21,36 +21,32 @@ function slotTime(sem: Semester, startPeriod: number, endPeriod: number) {
 /** 展开某一天的全部 Occurrence（含手动条目与例外），按开始时间排序并标冲突。 */
 export function occurrencesOn(snap: Snapshot, date: LocalDate): Occurrence[] {
   const { semester: sem } = snap
-  const week = weekOf(sem, date)
-  const wd = weekdayOf(date)
+  const adjustment = (sem.scheduleAdjustments ?? []).find((a) => a.date === date)
+  const teachingDate = adjustment?.teachingDate ?? date
+  const week = weekOf(sem, teachingDate)
+  const wd = weekdayOf(teachingDate)
+  const actualWd = weekdayOf(date)
   const out: Occurrence[] = []
-  if (week < 1 || week > sem.totalWeeks || inVacation(sem, date)) {
-    // 学期外/假期：常规课不展开，但"调课到这一天"的和 UserEntry 里指定日期的仍显示
-  } else {
+  const mapped = !!adjustment
+  if (week >= 1 && week <= sem.totalWeeks && (mapped || !inVacation(sem, date))) {
     for (const rule of snap.rules) {
       const course = snap.courses.find((c) => c.id === rule.courseId)
       if (!course || course.hidden) continue
       if (rule.weekday !== wd || !maskHasWeek(rule.weeksMask, week)) continue
-      const ov = snap.overrides.find((o) => o.ruleId === rule.id && o.date === date)
-      if (ov?.kind === 'moved' && (ov.newDate ?? date) !== date) continue // 已调走
+      const ov = snap.overrides.find((o) => o.ruleId === rule.id && o.date === teachingDate)
+      if (ov?.kind === 'moved' && (ov.newDate ?? teachingDate) !== teachingDate) continue
       const sp = ov?.kind === 'moved' ? ov.newStartPeriod ?? rule.startPeriod : rule.startPeriod
       const ep = ov?.kind === 'moved' ? ov.newEndPeriod ?? rule.endPeriod : rule.endPeriod
       const t = slotTime(sem, sp, ep)
       out.push({
-        key: `${rule.id}@${date}`,
-        courseId: course.id,
-        ruleId: rule.id,
-        name: course.name,
-        date, week, weekday: wd,
-        startPeriod: sp, endPeriod: ep,
+        key: `${rule.id}@${date}`, courseId: course.id, ruleId: rule.id, name: course.name,
+        date, week, weekday: mapped ? actualWd : wd, startPeriod: sp, endPeriod: ep,
         start: t.start, end: t.end,
         location: (ov?.kind === 'moved' && ov.newLocation) || rule.location,
         teacher: (ov?.kind === 'moved' && ov.newTeacher) || (rule.teacher ?? course.teacher),
         color: course.color,
         status: ov ? (ov.kind === 'moved' ? 'moved' : ov.kind === 'muted' ? 'normal' : ov.kind) : 'normal',
-        muted: ov?.kind === 'muted' || false,
-        conflict: false,
-        source: course.source,
+        muted: ov?.kind === 'muted' || false, conflict: false, source: course.source,
       })
     }
   }
@@ -77,21 +73,29 @@ export function occurrencesOn(snap: Snapshot, date: LocalDate): Occurrence[] {
       source: course.source,
     })
   }
-  // 手动条目
+  // 手动条目始终按实际日期的星期展开。
   for (const en of snap.entries) {
-    const hit = en.date ? en.date === date : en.weekday === wd && week >= 1 && week <= sem.totalWeeks && !inVacation(sem, date)
+    const hit = en.date
+      ? en.date === date
+      : en.weekday === actualWd && week >= 1 && week <= sem.totalWeeks && !inVacation(sem, date)
     if (!hit) continue
     const t = slotTime(sem, en.startPeriod, en.endPeriod)
     out.push({
       key: `${en.id}@${date}`,
       entryId: en.id,
       name: en.name,
-      date, week, weekday: wd,
-      startPeriod: en.startPeriod, endPeriod: en.endPeriod,
-      start: t.start, end: t.end,
+      date,
+      week: weekOf(sem, date),
+      weekday: actualWd,
+      startPeriod: en.startPeriod,
+      endPeriod: en.endPeriod,
+      start: t.start,
+      end: t.end,
       location: en.location,
       color: '#8A8E97',
-      status: 'normal', muted: false, conflict: false,
+      status: 'normal',
+      muted: false,
+      conflict: false,
       source: 'manual',
     })
   }
