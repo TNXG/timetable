@@ -35,12 +35,12 @@ export function DateStrip({ snap, anchor, onPick, onCalendar }: { snap: Snapshot
       animate={{ y: 0, opacity: 1 }}
       exit={{ y: 26, opacity: 0 }}
       transition={{ type: 'spring', bounce: 0.18, duration: 0.45 }}
-      className="absolute inset-x-4 bottom-[calc(80px+max(24px,env(safe-area-inset-bottom)))] z-[9] flex items-stretch rounded-[1.5rem] py-1.5 pr-1"
+      className="absolute inset-x-4 bottom-[calc(80px+max(24px,env(safe-area-inset-bottom)))] z-9 flex items-stretch rounded-3xl py-1.5 pr-1"
       style={dockStyle}
     >
       <div
         ref={box}
-        className="flex flex-1 items-stretch gap-[5px] overflow-x-auto px-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="flex flex-1 items-stretch gap-1.25 overflow-x-auto px-2 scrollbar-none [&::-webkit-scrollbar]:hidden"
         style={{ scrollSnapType: 'x proximity', WebkitOverflowScrolling: 'touch', maskImage: 'linear-gradient(90deg, transparent, #000 10px, #000 calc(100% - 10px), transparent)' }}
       >
         {days.map((d) => {
@@ -49,12 +49,12 @@ export function DateStrip({ snap, anchor, onPick, onCalendar }: { snap: Snapshot
           const n = occurrencesOn(snap, d).length
           const monthStart = d.slice(8) === '01'
           return (
-            <button key={d} data-d={d} onClick={() => onPick(d)} className="relative flex w-[46px] flex-none flex-col items-center py-[5px]" style={{ scrollSnapAlign: 'center' }}>
+            <button key={d} data-d={d} onClick={() => onPick(d)} className="relative flex w-11.5 flex-none flex-col items-center py-1.25" style={{ scrollSnapAlign: 'center' }}>
               {on && (
                 <motion.i
                   layoutId="date-strip-indicator"
                   transition={SPRING}
-                  className="absolute inset-x-[-2px] inset-y-0 rounded-[13px] bg-(--c-accent-soft)"
+                  className="absolute -inset-x-0.5 inset-y-0 rounded-[13px] bg-(--c-accent-soft)"
                 />
               )}
               <span

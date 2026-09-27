@@ -49,7 +49,7 @@ export const timeOfDay = (ms: number) => {
 export function CheckBox({ done, color }: { done: boolean; color: string }) {
   return (
     <span
-      className="flex h-[17px] w-[17px] flex-none items-center justify-center rounded-[6px] border-[1.6px] transition-colors"
+      className="flex h-4.25 w-4.25 flex-none items-center justify-center rounded-md border-[1.6px] transition-colors"
       style={{ borderColor: done ? color : 'var(--c-ink5)', background: done ? color : 'transparent' }}
     >
       {done && (
@@ -67,7 +67,7 @@ export function toggleDone(t: Task) {
 
 export function Check({ done, color, onClick }: { done: boolean; color: string; onClick: () => void }) {
   return (
-    <button onClick={onClick} className="mt-[2px] flex-none">
+    <button onClick={onClick} className="mt-0.5 flex-none">
       <CheckBox done={done} color={color} />
     </button>
   )

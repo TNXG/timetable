@@ -19,8 +19,8 @@ export const rowWeeks = [5, 6, 7, 8, 9]
 export function CalendarSheet({ mode }: { mode: 'day' | 'week' }) {
   return (
     <>
-      <div className="absolute inset-0 z-[19] bg-[#1B1C20]/25" />
-      <div className="absolute inset-x-0 bottom-0 z-[20] rounded-t-[26px] bg-(--c-surface) px-4 pt-6 pb-9">
+      <div className="absolute inset-0 z-19 bg-[#1B1C20]/25" />
+      <div className="absolute inset-x-0 bottom-0 z-20 rounded-t-[26px] bg-(--c-surface) px-4 pt-6 pb-9">
         <div className="flex items-center justify-between px-1">
           <div className="flex items-baseline gap-2.5">
             <span className="text-[19px] font-extrabold tracking-[-.02em] text-(--c-ink)">10月</span>
@@ -33,18 +33,18 @@ export function CalendarSheet({ mode }: { mode: 'day' | 'week' }) {
           </div>
         </div>
 
-        <div className="mt-5 flex gap-[5px]">
+        <div className="mt-5 flex gap-1.25">
           <div className="w-7 flex-none" />
           {['一', '二', '三', '四', '五', '六', '日'].map((w) => (
             <div key={w} className="flex-1 text-center text-[10.5px] font-semibold text-(--c-ink4)">{w}</div>
           ))}
         </div>
 
-        <div className="mt-2 space-y-[3px]">
+        <div className="mt-2 space-y-0.75">
           {monthRows.map((row, ri) => {
             const rowOn = mode === 'week' && rowWeeks[ri] === 7
             return (
-              <div key={ri} className={`flex gap-[5px] rounded-[12px] ${rowOn ? 'bg-(--c-accent-soft)' : ''}`}>
+              <div key={ri} className={`flex gap-1.25 rounded-[12px] ${rowOn ? 'bg-(--c-accent-soft)' : ''}`}>
                 <div className="flex w-7 flex-none items-center justify-center">
                   <span className={`text-[10.5px] font-bold tabular-nums ${rowOn ? 'text-(--c-accent)' : 'text-(--c-ink5)'}`}>{rowWeeks[ri]}</span>
                 </div>
@@ -54,8 +54,8 @@ export function CalendarSheet({ mode }: { mode: 'day' | 'week' }) {
                   const on = mode === 'day' ? d === todayDate : rowOn
                   const cell = mode === 'day' && on
                   return (
-                    <div key={ci} className="relative flex flex-1 flex-col items-center py-[9px]">
-                      {cell && <i className="absolute inset-x-[-1px] inset-y-0 rounded-[13px] bg-(--c-accent-soft)" />}
+                    <div key={ci} className="relative flex flex-1 flex-col items-center py-2.25">
+                      {cell && <i className="absolute -inset-x-px inset-y-0 rounded-[13px] bg-(--c-accent-soft)" />}
                       <span className={`relative z-10 text-[15px] leading-[1.2] font-bold tabular-nums ${on ? 'text-(--c-accent)' : n ? 'text-(--c-ink)' : 'text-(--c-ink5)'}`}>{d}</span>
                       <span className={`relative z-10 mt-1 h-[3px] w-[3px] rounded-full ${n ? (on ? 'bg-(--c-accent)' : 'bg-(--c-ink5b)') : 'bg-transparent'}`} />
                       {n > 0 && <span className={`absolute top-1 right-1.5 z-10 text-[9px] font-bold tabular-nums ${on ? 'text-(--c-accent2)' : 'text-(--c-ink5)'}`}>{n}</span>}

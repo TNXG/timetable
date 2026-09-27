@@ -72,7 +72,7 @@ export function PickerPage({ onBack, onDone, single }: { onBack: () => void; onD
           const el = e.currentTarget
           if (el.scrollTop + el.clientHeight > el.scrollHeight - 400) void loadMore()
         }}
-        className="mt-4 min-h-0 flex-1 overflow-y-auto px-[3px] [scrollbar-width:none]"
+        className="mt-4 min-h-0 flex-1 overflow-y-auto px-0.75 scrollbar-none"
       >
         {items.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center px-8 text-center">
@@ -82,32 +82,32 @@ export function PickerPage({ onBack, onDone, single }: { onBack: () => void; onD
             </div>
             <div className="mt-4 flex gap-2.5">
               {perm === 'blocked' ? (
-                <button onClick={openAppSettings} className="flex h-[34px] items-center rounded-full bg-white px-4 text-[13px] font-bold text-black">去设置</button>
+                <button onClick={openAppSettings} className="flex h-8.5 items-center rounded-full bg-white px-4 text-[13px] font-bold text-black">去设置</button>
               ) : perm !== 'granted' ? (
-                <button onClick={() => void load()} className="flex h-[34px] items-center rounded-full bg-white px-4 text-[13px] font-bold text-black">允许访问</button>
+                <button onClick={() => void load()} className="flex h-8.5 items-center rounded-full bg-white px-4 text-[13px] font-bold text-black">允许访问</button>
               ) : null}
               <button
                 onClick={() => void camera.pick().then((ps) => ps.length > 0 && onDone(ps))}
-                className={`flex h-[34px] items-center rounded-full px-4 text-[13px] font-bold ${perm === 'granted' ? 'bg-white text-black' : 'bg-white/12 text-white'}`}
+                className={`flex h-8.5 items-center rounded-full px-4 text-[13px] font-bold ${perm === 'granted' ? 'bg-white text-black' : 'bg-white/12 text-white'}`}
               >
                 从文件选择
               </button>
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-3 content-start gap-[3px]">
+          <div className="grid grid-cols-3 content-start gap-0.75">
             {items.map((it) => {
               const n = picked.indexOf(it.id)
               return (
                 <button
                   key={it.id}
                   onClick={() => setPicked((cur) => (n >= 0 ? cur.filter((x) => x !== it.id) : single ? [it.id] : [...cur, it.id]))}
-                  className="relative aspect-square overflow-hidden rounded-[6px]"
+                  className="relative aspect-square overflow-hidden rounded-md"
                 >
                   <img src={it.thumb} alt="" loading="lazy" className="h-full w-full object-cover" />
                   {n >= 0 ? (
                     <>
-                      <span className="absolute inset-0 rounded-[6px] ring-[2.5px] ring-inset ring-(--c-accent)" style={{ background: 'color-mix(in srgb, var(--c-accent) 18%, transparent)' }} />
+                      <span className="absolute inset-0 rounded-md ring-[2.5px] ring-inset ring-(--c-accent)" style={{ background: 'color-mix(in srgb, var(--c-accent) 18%, transparent)' }} />
                       <span className="absolute top-1.5 right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-(--c-accent) text-[11px] font-extrabold text-white">
                         {single ? <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round"><path d="m5 12 5 5L20 7" /></svg> : n + 1}
                       </span>

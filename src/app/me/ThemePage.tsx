@@ -12,7 +12,7 @@ export function ThemePage({ onBack }: { onBack: () => void }) {
   const stickers = useStickersOn()
   return (
     <Page>
-      <div className="flex-1 overflow-y-auto px-5 pb-[130px] [scrollbar-width:none]">
+      <div className="flex-1 overflow-y-auto px-5 pb-32.5 scrollbar-none">
         <TopBar title="主题" onBack={onBack} />
         <div className="mt-6 flex gap-3">
           {(['light', 'dark', 'black'] as const).map((r) => {
@@ -25,12 +25,12 @@ export function ThemePage({ onBack }: { onBack: () => void }) {
                 className={`flex-1 overflow-hidden rounded-[16px] bg-(--c-bg) p-2.5 ring-[1.5px] transition-transform duration-150 active:scale-[.97] ${on ? 'ring-(--c-accent)' : 'ring-(--c-line)'}`}
               >
                 <div className="rounded-[10px] bg-(--c-surface) p-2">
-                  <div className="h-[6px] w-2/3 rounded-full bg-(--c-ink)" />
-                  <div className="mt-1.5 h-[5px] w-1/2 rounded-full bg-(--c-ink4)" />
+                  <div className="h-1.5 w-2/3 rounded-full bg-(--c-ink)" />
+                  <div className="mt-1.5 h-1.25 w-1/2 rounded-full bg-(--c-ink4)" />
                 </div>
                 <div className="mt-2 flex gap-1.5">
-                  <div className="h-[14px] flex-1 rounded-[5px] bg-(--c-accent)" />
-                  <div className="h-[14px] flex-1 rounded-[5px] bg-(--c-surface)" />
+                  <div className="h-3.5 flex-1 rounded-[5px] bg-(--c-accent)" />
+                  <div className="h-3.5 flex-1 rounded-[5px] bg-(--c-surface)" />
                 </div>
               </button>
             )

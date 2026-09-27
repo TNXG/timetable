@@ -114,7 +114,7 @@ export default function App() {
   return (
     <div className="flex w-max items-start gap-9 p-10" style={{ zoom }}>
       {batch.map(([k, , render]) => (
-        <div key={k} className="flex w-[375px] flex-none flex-col">{render()}</div>
+        <div key={k} className="flex w-93.75 flex-none flex-col">{render()}</div>
       ))}
     </div>
   )

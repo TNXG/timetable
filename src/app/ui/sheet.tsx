@@ -135,7 +135,7 @@ export function Sheet({
     <>
       <div
         ref={scrim}
-        className="absolute inset-0 z-[60]"
+        className="absolute inset-0 z-60"
         style={{ background: 'var(--c-scrim)', opacity: 0 }}
         onClick={close}
       />
@@ -172,7 +172,7 @@ export function Page({ children, className = '', root, keep }: { children: React
       exit={{ transform: 'translateX(100%)' }}
       transition={SLIDE}
       data-edu-keep={keep === 'opaque' ? 'opaque' : keep ? '' : undefined}
-      className="absolute inset-0 z-[40] will-change-transform"
+      className="absolute inset-0 z-40 will-change-transform"
     >
       <div data-veil-host className={`absolute inset-0 flex flex-col overflow-hidden bg-(--c-bg) ${className}`}>
         {children}

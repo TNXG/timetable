@@ -40,7 +40,7 @@ export function ConflictPage({
       <PageBody>
         <TopBar title="课程冲突" sub={`${md(occ.date)} ${WD[occ.weekday]}，第 ${overlapPeriods} 节重叠`} onBack={onBack} />
 
-        <div className="mt-5 rounded-[16px] bg-(--c-amber-soft) px-4 py-3.5">
+        <div className="mt-5 rounded-2xl bg-(--c-amber-soft) px-4 py-3.5">
           <div className="text-[12.5px] font-bold text-(--c-amber)">{group.length} 门课占用同一时段</div>
           <div className="mt-1 text-[12px] font-medium text-(--c-ink4)">
             重叠 {fmtMinutes(overlapStart)} – {fmtMinutes(overlapEnd)}，共 {fmtDuration(overlapEnd - overlapStart)}
@@ -51,9 +51,9 @@ export function ConflictPage({
           {group.map((o) => {
             const course = state.courses.find((c) => c.id === o.courseId)
             return (
-              <div key={o.key} className="overflow-hidden rounded-[16px] bg-(--c-surface)">
+              <div key={o.key} className="overflow-hidden rounded-2xl bg-(--c-surface)">
                 <div className="flex items-start px-4 pt-4">
-                  <i className="mt-1 mr-3 h-[30px] w-[3px] flex-none rounded-full" style={{ background: o.color }} />
+                  <i className="mt-1 mr-3 h-7.5 w-0.75 flex-none rounded-full" style={{ background: o.color }} />
                   <div className="min-w-0 flex-1">
                     <div className="text-[15px] font-extrabold tracking-[-.01em]">{o.name}</div>
                     <div className="mt-1 text-[12.5px] font-medium text-(--c-ink3)">

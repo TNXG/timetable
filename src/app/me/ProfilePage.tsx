@@ -29,15 +29,15 @@ export function ProfilePage({ onBack, onPick }: { onBack: () => void; onPick: (t
   }
   return (
     <SubPage title="个人资料" onBack={onBack}>
-      <div className="relative h-[172px] overflow-hidden rounded-[18px] bg-[#5d6d55]">
+      <div className="relative h-43 overflow-hidden rounded-[18px] bg-[#5d6d55]">
         <button onClick={() => tap('wall')} className="absolute inset-0 transition-opacity active:opacity-80">
           <img src={wall} alt="" className="h-full w-full object-cover object-[50%_32%]" />
-          <div className="absolute inset-x-0 bottom-0 h-[96px] bg-gradient-to-t from-black/50 to-transparent" />
-          <CameraBadge className="absolute top-3 right-3 h-[28px] w-[28px] bg-black/35 text-white backdrop-blur-md" />
+          <div className="absolute inset-x-0 bottom-0 h-24 bg-linear-to-t from-black/50 to-transparent" />
+          <CameraBadge className="absolute top-3 right-3 h-7 w-7 bg-black/35 text-white backdrop-blur-md" />
         </button>
-        <button onClick={() => tap('avatar')} className="absolute bottom-4 left-4 h-[64px] w-[64px] transition-transform duration-150 active:scale-[.95]">
+        <button onClick={() => tap('avatar')} className="absolute bottom-4 left-4 h-16 w-16 transition-transform duration-150 active:scale-[.95]">
           <img src={avatar} alt="" className="h-full w-full rounded-full border-2 border-white/90 object-cover" />
-          <CameraBadge className="absolute -right-0.5 -bottom-0.5 h-[24px] w-[24px] bg-(--c-ink) text-(--c-bg) ring-2 ring-white" />
+          <CameraBadge className="absolute -right-0.5 -bottom-0.5 h-6 w-6 bg-(--c-ink) text-(--c-bg) ring-2 ring-white" />
         </button>
       </div>
       {menu && (
@@ -50,7 +50,7 @@ export function ProfilePage({ onBack, onPick }: { onBack: () => void; onPick: (t
           onClose={() => setMenu(null)}
         />
       )}
-      <div className="mt-5 overflow-hidden rounded-[16px] bg-(--c-surface)">
+      <div className="mt-5 overflow-hidden rounded-2xl bg-(--c-surface)">
         <Field k="名称">
           <TextInput
             value={state.prefs.name}

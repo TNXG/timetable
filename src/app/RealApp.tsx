@@ -32,7 +32,7 @@ import { Nav, SHEET, SLIDE, closeTopSheet } from './ui'
 
 function Shell({ children, tab, onTab, navHidden }: { children: React.ReactNode; tab: number; onTab: (i: number) => void; navHidden?: boolean }) {
   return (
-    <div data-shell className="relative mx-auto flex h-dvh w-full max-w-[430px] flex-col overflow-hidden bg-(--c-bg) font-sans text-(--c-ink)">
+    <div data-shell className="relative mx-auto flex h-dvh w-full max-w-107.5 flex-col overflow-hidden bg-(--c-bg) font-sans text-(--c-ink)">
       {children}
       <Nav active={tab} onTab={onTab} hidden={navHidden} />
     </div>
@@ -275,7 +275,7 @@ export default function RealApp() {
             animate={{ opacity: 1, transform: 'translateY(0px)' }}
             exit={{ opacity: 0, transform: 'translateY(10px)' }}
             transition={SHEET}
-            className="absolute inset-0 z-[35] flex flex-col bg-(--c-bg) will-change-transform"
+            className="absolute inset-0 z-35 flex flex-col bg-(--c-bg) will-change-transform"
           >
             <SearchPalette
               state={state}
@@ -308,7 +308,7 @@ export default function RealApp() {
   }
 
   return (
-    <div ref={rootRef} className="relative mx-auto h-dvh w-full max-w-[430px] overflow-hidden bg-(--c-bg)">
+    <div ref={rootRef} className="relative mx-auto h-dvh w-full max-w-107.5 overflow-hidden bg-(--c-bg)">
       {renderApp(shellSnap)}
       <AnimatePresence initial={false}>
         {showOnboard && (
@@ -316,7 +316,7 @@ export default function RealApp() {
             key="onboarding"
             exit={onboardUnder ? { opacity: 1 } : { transform: 'translateX(-28%)', opacity: 0 }}
             transition={onboardUnder ? { duration: 0 } : SLIDE}
-            className={`absolute inset-0 ${onboardUnder ? 'z-[35]' : 'z-[90]'}`}
+            className={`absolute inset-0 ${onboardUnder ? 'z-35' : 'z-90'}`}
             style={{ visibility: onboardDone ? 'hidden' : 'visible' }}
           >
             <Onboarding

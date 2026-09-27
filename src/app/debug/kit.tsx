@@ -4,10 +4,10 @@ import React from 'react'
 export function KV({ k, v, sub, tone }: { k: string; v: string; sub?: string; tone?: 'ok' | 'bad' }) {
   return (
     <div className="flex min-w-0 items-start gap-3 py-3.5">
-      <span className="w-[76px] flex-none pt-0.5 text-[12.5px] font-medium text-(--c-ink4)">{k}</span>
+      <span className="w-19 flex-none pt-0.5 text-[12.5px] font-medium text-(--c-ink4)">{k}</span>
       <div className="min-w-0 flex-1">
-        <div className={`text-[13.5px] font-semibold break-words text-left [overflow-wrap:anywhere] ${tone === 'ok' ? 'text-(--c-accent)' : tone === 'bad' ? 'text-(--c-danger)' : 'text-(--c-ink)'}`}>{v}</div>
-        {sub && <div className="mt-0.5 text-[11.5px] font-medium whitespace-pre-line break-words [overflow-wrap:anywhere] text-(--c-ink4)">{sub}</div>}
+        <div className={`text-[13.5px] font-semibold wrap-break-word text-left wrap-anywhere ${tone === 'ok' ? 'text-(--c-accent)' : tone === 'bad' ? 'text-(--c-danger)' : 'text-(--c-ink)'}`}>{v}</div>
+        {sub && <div className="mt-0.5 text-[11.5px] font-medium whitespace-pre-line wrap-break-word wrap-anywhere text-(--c-ink4)">{sub}</div>}
       </div>
     </div>
   )

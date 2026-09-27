@@ -15,7 +15,7 @@ export const C = {
 
 export function Phone({ children, tall }: { children: React.ReactNode; tall?: boolean }) {
   return (
-    <div data-phone className={`relative flex w-[375px] flex-col overflow-hidden rounded-[40px] bg-(--c-bg) ${tall ? 'min-h-[812px] pb-8' : 'h-[812px]'}`}>
+    <div data-phone className={`relative flex w-[375px] flex-col overflow-hidden rounded-[40px] bg-(--c-bg) ${tall ? 'min-h-203 pb-8' : 'h-203'}`}>
       {children}
     </div>
   )
@@ -29,9 +29,9 @@ export function Nav({ active }: { active: number }) {
     [<g key="s"><circle cx="12" cy="12" r="3" /><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.6-2-3.4-2.4 1a7 7 0 0 0-2-1.2L14 3h-4l-.5 2.6a7 7 0 0 0-2 1.2l-2.4-1-2 3.4 2 1.6A7 7 0 0 0 5 12c0 .4 0 .8.1 1.2l-2 1.6 2 3.4 2.4-1a7 7 0 0 0 2 1.2L10 21h4l.5-2.6a7 7 0 0 0 2-1.2l2.4 1 2-3.4-2-1.6c.1-.4.1-.8.1-1.2z" /></g>, '我的'],
   ]
   return (
-    <div className="pointer-events-none absolute inset-x-0 bottom-6 z-[8] flex justify-center px-4">
+    <div className="pointer-events-none absolute inset-x-0 bottom-6 z-8 flex justify-center px-4">
       <div
-        className="flex w-[92%] items-center justify-between rounded-full p-[5px]"
+        className="flex w-[92%] items-center justify-between rounded-full p-1.25"
         style={{
           background: 'var(--c-dock)',
           border: '1px solid var(--c-dock-line)',
@@ -41,9 +41,9 @@ export function Nav({ active }: { active: number }) {
         {items.map(([ic, label], i) => {
           const on = i === active
           return (
-            <div key={label} className="relative flex flex-1 flex-col items-center gap-[2px] px-1 pt-[6px] pb-[5px]">
-              {on && <i className="absolute inset-x-[1px] inset-y-0 rounded-full bg-(--c-accent-soft)" />}
-              <svg viewBox="0 0 24 24" fill="none" stroke={on ? 'var(--c-accent)' : 'var(--c-ink)'} strokeWidth="2.2" className="relative z-10 h-[19px] w-[19px]">{ic}</svg>
+            <div key={label} className="relative flex flex-1 flex-col items-center gap-0.5 px-1 pt-1.5 pb-1.25">
+              {on && <i className="absolute inset-x-px inset-y-0 rounded-full bg-(--c-accent-soft)" />}
+              <svg viewBox="0 0 24 24" fill="none" stroke={on ? 'var(--c-accent)' : 'var(--c-ink)'} strokeWidth="2.2" className="relative z-10 h-4.75 w-4.75">{ic}</svg>
               <span className={`relative z-10 text-[9.5px] font-bold ${on ? 'text-(--c-accent)' : 'text-(--c-ink)'}`}>{label}</span>
             </div>
           )
@@ -120,14 +120,14 @@ export const todayDate = 14
 
 export function DayPicker({ active, lead, trail, className = '', style }: { active: number; lead?: React.ReactNode; trail?: React.ReactNode; className?: string; style?: React.CSSProperties }) {
   return (
-    <div style={style} className={`flex items-stretch gap-[5px] ${className}`}>
+    <div style={style} className={`flex items-stretch gap-1.25 ${className}`}>
       {lead}
       {days.map((d, i) => {
         const on = i === active
         const past = i < todayIndex && !on
         return (
-          <div key={d.d} className="relative flex flex-1 flex-col items-center py-[5px]">
-            {on && <i className="absolute inset-x-[-1px] inset-y-0 rounded-[13px] bg-(--c-accent-soft)" />}
+          <div key={d.d} className="relative flex flex-1 flex-col items-center py-1.25">
+            {on && <i className="absolute -inset-x-px inset-y-0 rounded-[13px] bg-(--c-accent-soft)" />}
             <span className={`relative z-10 text-[17px] leading-[1.2] font-bold tabular-nums ${on ? 'text-(--c-accent)' : past ? 'text-(--c-ink5b)' : 'text-(--c-ink)'}`}>{d.d}</span>
             <span className={`relative z-10 mt-0.5 text-[10.5px] font-semibold ${on ? 'text-(--c-accent)' : past ? 'text-(--c-ink5b)' : 'text-(--c-ink4)'}`}>{i === todayIndex ? '今天' : d.w}</span>
             {d.n > 0 && <span className={`absolute top-1 right-1.5 z-10 text-[9px] font-bold tabular-nums ${on ? 'text-(--c-accent2)' : past ? 'text-(--c-ink5b)' : 'text-(--c-ink5)'}`}>{d.n}</span>}
@@ -150,7 +150,7 @@ export function DateStrip({ active }: { active: number }) {
     <DayPicker
       active={active}
       style={dockStyle}
-      className="absolute inset-x-4 bottom-[104px] z-[9] rounded-[1.5rem] px-2 py-1.5"
+      className="absolute inset-x-4 bottom-26 z-9 rounded-3xl px-2 py-1.5"
       trail={
         <div className="flex w-10 flex-none items-center justify-center">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink2)" strokeWidth="1.9"><rect x="3" y="4" width="18" height="17" rx="4" /><path d="M3 9h18M8 2v4M16 2v4" /></svg>
@@ -179,16 +179,16 @@ export function CourseRow({ c, last }: { c: Course; last?: boolean }) {
           {now && (
             <>
               <i className="absolute inset-x-0 top-0 h-[55%] bg-(--c-accent)" />
-              <i className="absolute top-[55%] left-1/2 h-[9px] w-[9px] -translate-x-1/2 -translate-y-1/2 rounded-full border-[2.5px] border-(--c-accent) bg-(--c-surface)" />
+              <i className="absolute top-[55%] left-1/2 h-2.25 w-2.25 -translate-x-1/2 -translate-y-1/2 rounded-full border-[2.5px] border-(--c-accent) bg-(--c-surface)" />
             </>
           )}
         </div>
       </div>
       <div className={`min-w-0 flex-1 pl-4 ${last ? 'pb-7' : ''} ${past ? 'opacity-50' : ''}`}>
-        <div className="relative rounded-[16px] bg-(--c-surface) px-4 py-3.5">
+        <div className="relative rounded-2xl bg-(--c-surface) px-4 py-3.5">
           <div className="flex items-start gap-2">
             <div className="min-w-0 flex-1">
-              <div className="text-[16px] leading-[1.25] font-bold tracking-[-.01em] text-(--c-ink)">{c.name}</div>
+              <div className="text-[16px] leading-tight font-bold tracking-[-.01em] text-(--c-ink)">{c.name}</div>
               <div className="mt-1 flex items-center gap-2 text-[12.5px] font-medium text-(--c-ink3)">
                 <span className="min-w-0 truncate">{c.loc}，{c.teacher}</span>
               </div>
@@ -236,7 +236,7 @@ export function TopBar({ title, sub }: { title: string; sub?: string }) {
         </div>
       </div>
       <h1 className="mt-4 text-[26px] font-extrabold tracking-[-.02em] text-(--c-ink)">{title}</h1>
-      {sub && <div className="mt-1.5 text-[13px] leading-[1.5] font-medium text-(--c-ink4)">{sub}</div>}
+      {sub && <div className="mt-1.5 text-[13px] leading-normal font-medium text-(--c-ink4)">{sub}</div>}
     </>
   )
 }
@@ -254,14 +254,14 @@ export function Board({ className = '', zoom = 1, tilt, top = 0 }: { className?:
     <div className={`relative overflow-hidden ${className}`} style={{ background: 'linear-gradient(160deg,#33524A 0%,#243E36 55%,#1E352E 100%)' }}>
       <div className="absolute inset-0 opacity-50" style={{ background: 'radial-gradient(60% 45% at 30% 40%, rgba(255,255,255,.10), transparent 70%), radial-gradient(40% 40% at 80% 90%, rgba(255,255,255,.08), transparent 70%)' }} />
       <div
-        className="absolute left-0 top-0 h-[300px] w-[420px] origin-top-left px-9 py-7 text-white/85"
+        className="absolute left-0 top-0 h-75 w-105 origin-top-left px-9 py-7 text-white/85"
         style={{ zoom, top, transform: tilt ? 'perspective(600px) rotateY(-4deg) rotateX(2deg) scale(1.04)' : undefined }}
       >
         <div className="text-[13px] font-medium tracking-[.06em] text-white/50">§8.3 第二型曲面积分</div>
         <div className="mt-5 inline-block border-b-2 border-white/70 pb-0.5 text-[24px] font-bold tracking-[.12em]">作业</div>
-        <div className="mt-4 -rotate-[.6deg] text-[22px] font-semibold tracking-[.03em]">习题册 P41 – P45</div>
+        <div className="mt-4 rotate-[-0.6deg] text-[22px] font-semibold tracking-[.03em]">习题册 P41 – P45</div>
         <div className="mt-2 rotate-[.4deg] text-[20px] font-medium tracking-[.03em]">第 3、5、7 题</div>
-        <div className="mt-5 -rotate-[.5deg] text-[18px] font-medium tracking-[.04em] text-white/70">下周一 课前交 ！</div>
+        <div className="mt-5 rotate-[-0.5deg] text-[18px] font-medium tracking-[.04em] text-white/70">下周一 课前交 ！</div>
       </div>
     </div>
   )
@@ -275,7 +275,7 @@ export function SubHead({ title, sub }: { title: string; sub?: string }) {
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink)" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M15 19 8 12l7-7" /></svg>
       </div>
       <h1 className="mt-4 text-[26px] font-extrabold tracking-[-.02em] text-(--c-ink)">{title}</h1>
-      {sub && <div className="mt-1.5 text-[13px] leading-[1.5] font-medium text-(--c-ink4)">{sub}</div>}
+      {sub && <div className="mt-1.5 text-[13px] leading-normal font-medium text-(--c-ink4)">{sub}</div>}
     </div>
   )
 }

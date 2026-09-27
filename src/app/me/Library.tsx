@@ -11,12 +11,12 @@ export function CoursesPage({ onBack, onDetail, onManual }: { onBack: () => void
       {courses.length === 0 ? (
         <EmptyBlock kind="none" title="无课程" actions={[['手动添加', onManual]]} />
       ) : (
-        <div className="overflow-hidden rounded-[16px] bg-(--c-surface)">
+        <div className="overflow-hidden rounded-2xl bg-(--c-surface)">
           {courses.map((c, i) => {
             const slots = state.rules.filter((r) => r.courseId === c.id)
             return (
               <button key={c.id} onClick={() => onDetail(c)} className={`flex w-full items-center px-4 py-3.5 text-left transition-colors active:bg-(--c-bg) ${i > 0 ? 'border-t border-(--c-surface2)' : ''}`}>
-                <i className="mr-3 h-[26px] w-[3px] flex-none rounded-full" style={{ background: c.color }} />
+                <i className="mr-3 h-6.5 w-0.75 flex-none rounded-full" style={{ background: c.color }} />
                 <div className="min-w-0 flex-1">
                   <div className={`truncate text-[14px] font-bold ${c.hidden ? 'text-(--c-ink5) line-through' : ''}`}>{c.name}</div>
                   <div className="mt-0.5 truncate text-[12px] font-medium text-(--c-ink4)">

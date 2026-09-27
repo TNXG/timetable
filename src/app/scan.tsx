@@ -139,31 +139,31 @@ export function ScanPage({ onBack, onResult }: { onBack: () => void; onResult: (
         </div>
 
         <div className="relative min-h-0 flex-1 overflow-hidden">
-          <div ref={frame} className="absolute inset-y-0 inset-x-2 touch-none rounded-[24px]">
-            <div ref={video} className="absolute inset-0 overflow-hidden rounded-[24px] bg-black [&>video]:h-full [&>video]:w-full [&>video]:object-cover" />
+          <div ref={frame} className="absolute inset-y-0 inset-x-2 touch-none rounded-3xl">
+            <div ref={video} className="absolute inset-0 overflow-hidden rounded-3xl bg-black [&>video]:h-full [&>video]:w-full [&>video]:object-cover" />
             {frozen && (
               <img
                 src={frozen}
                 alt=""
                 onLoad={() => { frozenLoaded.current?.(); frozenLoaded.current = null }}
-                className="pointer-events-none absolute inset-0 h-full w-full rounded-[24px] object-cover"
+                className="pointer-events-none absolute inset-0 h-full w-full rounded-3xl object-cover"
               />
             )}
-            <div aria-hidden className="pointer-events-none absolute inset-0 rounded-[24px]" style={{ boxShadow: '0 0 0 200vmax #000' }} />
-            <div className="pointer-events-none absolute inset-0 rounded-[24px]" style={{ background: 'linear-gradient(180deg, rgba(0,0,0,.25), transparent 30%, transparent 75%, rgba(0,0,0,.35))' }} />
-            {['left-5 top-5 border-l-2 border-t-2 rounded-tl-[8px]', 'right-5 top-5 border-r-2 border-t-2 rounded-tr-[8px]', 'left-5 bottom-5 border-l-2 border-b-2 rounded-bl-[8px]', 'right-5 bottom-5 border-r-2 border-b-2 rounded-br-[8px]'].map((c) => (
+            <div aria-hidden className="pointer-events-none absolute inset-0 rounded-3xl" style={{ boxShadow: '0 0 0 200vmax #000' }} />
+            <div className="pointer-events-none absolute inset-0 rounded-3xl" style={{ background: 'linear-gradient(180deg, rgba(0,0,0,.25), transparent 30%, transparent 75%, rgba(0,0,0,.35))' }} />
+            {['left-5 top-5 border-l-2 border-t-2 rounded-tl-lg', 'right-5 top-5 border-r-2 border-t-2 rounded-tr-lg', 'left-5 bottom-5 border-l-2 border-b-2 rounded-bl-lg', 'right-5 bottom-5 border-r-2 border-b-2 rounded-br-lg'].map((c) => (
               <span key={c} className={`pointer-events-none absolute h-6 w-6 border-white/80 ${c}`} />
             ))}
             {denied && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center rounded-[24px] bg-black px-8 text-center">
+              <div className="absolute inset-0 flex flex-col items-center justify-center rounded-3xl bg-black px-8 text-center">
                 <div className="text-[15px] font-bold text-white">相机未开启</div>
                 <div className="mt-2 text-[12.5px] font-medium text-white/60">在系统设置里允许相机，即可扫码导入</div>
                 {denied === 'blocked' ? (
-                  <button onClick={openAppSettings} className="mt-4 flex h-[34px] items-center rounded-full bg-white px-4 text-[13px] font-bold text-black">去设置</button>
+                  <button onClick={openAppSettings} className="mt-4 flex h-8.5 items-center rounded-full bg-white px-4 text-[13px] font-bold text-black">去设置</button>
                 ) : (
                   <button
                     onClick={() => void camera.request('camera').then((s) => { if (s === 'granted') { setDenied(null); setGranted(true) } })}
-                    className="mt-4 flex h-[34px] items-center rounded-full bg-white px-4 text-[13px] font-bold text-black"
+                    className="mt-4 flex h-8.5 items-center rounded-full bg-white px-4 text-[13px] font-bold text-black"
                   >
                     重试
                   </button>
@@ -177,7 +177,7 @@ export function ScanPage({ onBack, onResult }: { onBack: () => void; onResult: (
         </div>
 
         <div className="flex flex-none flex-col items-center bg-black px-9 pt-6 pb-12">
-          <div className="h-[20px] text-[13px] font-semibold text-white">{busy ? '读取中' : hint}</div>
+          <div className="h-5 text-[13px] font-semibold text-white">{busy ? '读取中' : hint}</div>
           <div className="mt-1 text-[12.5px] font-medium text-white/55">对准课表二维码（链接、JSON 或 .ics）</div>
         </div>
       </div>

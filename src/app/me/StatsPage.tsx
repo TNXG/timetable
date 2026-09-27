@@ -75,7 +75,7 @@ export function StatsPage({ onBack, onCourse, onTodo }: { onBack: () => void; on
             <span className="text-[22px] font-extrabold tracking-[-.02em] text-(--c-ink)">第 {week} 周</span>
             <span className="text-[12.5px] font-medium tabular-nums text-(--c-ink4)">共 {sem.totalWeeks} 周</span>
           </div>
-          <div className="mt-3 h-[5px] overflow-hidden rounded-full bg-(--c-surface2)">
+          <div className="mt-3 h-1.25 overflow-hidden rounded-full bg-(--c-surface2)">
             <div className="h-full rounded-full bg-(--c-ink)" style={{ width: `${sem.totalWeeks > 0 ? Math.min(100, (week / sem.totalWeeks) * 100) : 0}%` }} />
           </div>
           {facts.length > 0 && (
@@ -99,7 +99,7 @@ export function StatsPage({ onBack, onCourse, onTodo }: { onBack: () => void; on
                     {total > 0 && <span className="ml-3 flex-none text-[12.5px] font-semibold tabular-nums text-(--c-ink3)">{done} / {total} 节</span>}
                   </div>
                   {total > 0 && (
-                    <div className="mt-2 h-[4px] overflow-hidden rounded-full bg-(--c-surface2)">
+                    <div className="mt-2 h-1 overflow-hidden rounded-full bg-(--c-surface2)">
                       <div className="h-full rounded-full" style={{ width: `${Math.min(100, (done / total) * 100)}%`, background: c.color }} />
                     </div>
                   )}

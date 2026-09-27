@@ -24,7 +24,7 @@ export function ErasePage({ onBack, onDone }: { onBack: () => void; onDone: () =
   }
   return (
     <Page>
-      <div className="flex-1 overflow-y-auto px-5 [scrollbar-width:none]">
+      <div className="flex-1 overflow-y-auto px-5 scrollbar-none">
         <TopBar title="清除数据" sub="卸载应用不会移除系统日历中的内容。" onBack={onBack} />
         <div className="mt-6 rounded-[18px] bg-(--c-surface) px-4">
           {['课表、课程和调整', '作业和照片', '教务账号与登录凭据', '系统日历中由本应用创建的日历'].map((t, i) => (

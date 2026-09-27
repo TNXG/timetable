@@ -54,9 +54,9 @@ export function TodoScreen() {
               <div className="mt-2.5 space-y-2">
                 {list.map((t) => (
                   <div key={t.title} className={`flex overflow-hidden rounded-[14px] bg-(--c-surface) px-3.5 py-3 ${t.done ? 'opacity-45' : ''}`}>
-                    <div className="mt-[3px] mr-3 flex-none">
+                    <div className="mt-0.75 mr-3 flex-none">
                       <span
-                        className="flex h-[17px] w-[17px] items-center justify-center rounded-[6px] border-[1.8px]"
+                        className="flex h-4.25 w-4.25 items-center justify-center rounded-md border-[1.8px]"
                         style={{ borderColor: t.done ? t.color : 'var(--c-radio-border)', background: t.done ? t.color : 'transparent' }}
                       >
                         {t.done && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.6"><path d="m6 12.5 4 4 8-9" /></svg>}
@@ -65,10 +65,10 @@ export function TodoScreen() {
                     <div className="flex-1">
                       <div className="flex items-start justify-between">
                         <span className={`text-[14px] leading-[1.3] font-bold tracking-[-.01em] text-(--c-ink) ${t.done ? 'line-through' : ''}`}>{t.title}</span>
-                        {t.kind === 'exam' && <span className="ml-2 flex-none rounded-[6px] bg-(--c-rose-soft) px-1.5 py-[2px] text-[10px] font-bold text-(--c-rose)">考试</span>}
+                        {t.kind === 'exam' && <span className="ml-2 flex-none rounded-md bg-(--c-rose-soft) px-1.5 py-0.5 text-[10px] font-bold text-(--c-rose)">考试</span>}
                       </div>
                       <div className="mt-1.5 flex items-center gap-2">
-                        <i className="h-[7px] w-[7px] flex-none rounded-full" style={{ background: t.color }} />
+                        <i className="h-1.75 w-1.75 flex-none rounded-full" style={{ background: t.color }} />
                         <span className="text-[11.5px] font-semibold text-(--c-ink3)">{t.course}</span>
                         <span className="text-[11.5px] font-medium tabular-nums text-(--c-ink4)">{t.meta}</span>
                       </div>
@@ -84,7 +84,7 @@ export function TodoScreen() {
         </div>
       </div>
       <div
-        className="pointer-events-none absolute inset-x-0 bottom-0 z-[7] h-[150px]"
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-7 h-37.5"
         style={{ background: 'var(--c-fade)' }}
       />
       <Nav active={2} />

@@ -59,11 +59,11 @@ export function AboutPage({ onBack, onDebug }: { onBack: () => void; onDebug: ()
       ]
   return (
     <Page>
-      <div className="flex-1 overflow-y-auto px-5 pb-6 [scrollbar-width:none]">
+      <div className="flex-1 overflow-y-auto px-5 pb-6 scrollbar-none">
         <TopBar title="关于" onBack={onBack} />
         <div className="mt-10 flex flex-col items-center">
           <button type="button" onClick={tapIcon} className="flex-none outline-none">
-            <img src="/icon.png" alt="Koma" className="h-[84px] w-[84px]" />
+            <img src="/icon.png" alt="Koma" className="h-21 w-21" />
           </button>
           <div className="mt-4 text-[22px] font-extrabold tracking-[-.02em] text-(--c-ink)">Koma</div>
           {version && <div className="mt-1 text-[12.5px] font-medium tabular-nums text-(--c-ink4)">{version}</div>}

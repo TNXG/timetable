@@ -11,11 +11,11 @@ export function PreviewGrid({ courses, periods }: { courses: NormalizedCourse[];
   const cols = Array.from({ length: days }, (_, i) => i + 1)
   const marks = [0.25, 0.5, 0.75].map((f) => Math.round(GRID_H * f))
   return (
-    <div className="rounded-[16px] bg-(--c-surface) px-3 pt-2.5 pb-3">
-      <div className="flex gap-[4px]">
+    <div className="rounded-2xl bg-(--c-surface) px-3 pt-2.5 pb-3">
+      <div className="flex gap-1">
         {cols.map((d) => <div key={d} className="flex-1 text-center text-[9.5px] font-semibold text-(--c-ink4)">{'一二三四五六日'[d - 1]}</div>)}
       </div>
-      <div className="relative mt-1.5 flex gap-[4px]" style={{ height: GRID_H }}>
+      <div className="relative mt-1.5 flex gap-1" style={{ height: GRID_H }}>
         {marks.map((t) => <div key={t} className="absolute inset-x-0 h-px bg-(--c-line2)" style={{ top: t }} />)}
         {cols.map((d) => (
           <div key={d} className="relative flex-1">
@@ -23,7 +23,7 @@ export function PreviewGrid({ courses, periods }: { courses: NormalizedCourse[];
               c.rules.filter((r) => r.weekday === d).map((r, i) => (
                 <div
                   key={`${c.course.identityKey}-${i}`}
-                  className="absolute inset-x-0 overflow-hidden rounded-[5px] px-1 py-[3px] text-[7.5px] leading-[1.25] font-bold"
+                  className="absolute inset-x-0 overflow-hidden rounded-[5px] px-1 py-0.75 text-[7.5px] leading-tight font-bold"
                   style={{
                     top: ((r.startPeriod - 1) / n) * GRID_H,
                     height: Math.max(6, ((r.endPeriod - r.startPeriod + 1) / n) * GRID_H - 1),

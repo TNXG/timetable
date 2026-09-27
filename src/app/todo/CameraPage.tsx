@@ -175,7 +175,7 @@ export function CameraPage({
             onClick={() => go(() => setPickingCourse(true))}
             className="flex items-center gap-1.5 rounded-full bg-white/12 px-3 py-1.5 text-[12.5px] font-bold text-white transition-transform duration-150 active:scale-[.96]"
           >
-            {course && <span className="h-[7px] w-[7px] rounded-full" style={{ background: course.color }} />}
+            {course && <span className="h-1.75 w-1.75 rounded-full" style={{ background: course.color }} />}
             {course ? clipText(course.name) : '课程'}
             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.6)" strokeWidth="3"><path d="m6 9 6 6 6-6" /></svg>
           </button>
@@ -187,33 +187,33 @@ export function CameraPage({
         <div className="relative min-h-0 flex-1 overflow-hidden">
           <div
             ref={frame}
-            className="absolute inset-y-0 inset-x-2 touch-none rounded-[24px]"
+            className="absolute inset-y-0 inset-x-2 touch-none rounded-3xl"
             onTouchStart={onTouchStart}
             onTouchMove={onTouchMove}
             onTouchEnd={onTouchEnd}
             onTouchCancel={onTouchEnd}
           >
-            <div ref={video} className="absolute inset-0 overflow-hidden rounded-[24px] bg-black [&>video]:h-full [&>video]:w-full [&>video]:object-cover" />
+            <div ref={video} className="absolute inset-0 overflow-hidden rounded-3xl bg-black [&>video]:h-full [&>video]:w-full [&>video]:object-cover" />
             {frozen && (
               <img
                 src={frozen}
                 alt=""
                 onLoad={() => { frozenLoaded.current?.(); frozenLoaded.current = null }}
-                className="pointer-events-none absolute inset-0 h-full w-full rounded-[24px] object-cover"
+                className="pointer-events-none absolute inset-0 h-full w-full rounded-3xl object-cover"
               />
             )}
-            <div aria-hidden className="pointer-events-none absolute inset-0 rounded-[24px]" style={{ boxShadow: '0 0 0 200vmax #000' }} />
-            <div className="pointer-events-none absolute inset-0 rounded-[24px]" style={{ background: 'linear-gradient(180deg, rgba(0,0,0,.25), transparent 30%, transparent 75%, rgba(0,0,0,.35))' }} />
-            {['left-5 top-5 border-l-2 border-t-2 rounded-tl-[8px]', 'right-5 top-5 border-r-2 border-t-2 rounded-tr-[8px]', 'left-5 bottom-5 border-l-2 border-b-2 rounded-bl-[8px]', 'right-5 bottom-5 border-r-2 border-b-2 rounded-br-[8px]'].map((c) => (
+            <div aria-hidden className="pointer-events-none absolute inset-0 rounded-3xl" style={{ boxShadow: '0 0 0 200vmax #000' }} />
+            <div className="pointer-events-none absolute inset-0 rounded-3xl" style={{ background: 'linear-gradient(180deg, rgba(0,0,0,.25), transparent 30%, transparent 75%, rgba(0,0,0,.35))' }} />
+            {['left-5 top-5 border-l-2 border-t-2 rounded-tl-lg', 'right-5 top-5 border-r-2 border-t-2 rounded-tr-lg', 'left-5 bottom-5 border-l-2 border-b-2 rounded-bl-lg', 'right-5 bottom-5 border-r-2 border-b-2 rounded-br-lg'].map((c) => (
               <span key={c} className={`pointer-events-none absolute h-6 w-6 border-white/80 ${c}`} />
             ))}
             {denied && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center rounded-[24px] bg-black px-8 text-center">
+              <div className="absolute inset-0 flex flex-col items-center justify-center rounded-3xl bg-black px-8 text-center">
                 <div className="text-[15px] font-bold text-white">相机未开启</div>
                 <div className="mt-2 text-[12.5px] font-medium text-white/60">在系统设置里允许相机，即可拍下板书</div>
                 <button
                   onClick={() => void camera.request('camera').then((s) => { if (s === 'granted') { setDenied(false); setGranted(true) } })}
-                  className="mt-4 flex h-[34px] items-center rounded-full bg-white px-4 text-[13px] font-bold text-black"
+                  className="mt-4 flex h-8.5 items-center rounded-full bg-white px-4 text-[13px] font-bold text-black"
                 >
                   重试
                 </button>
@@ -223,7 +223,7 @@ export function CameraPage({
         </div>
 
         <div className="flex flex-none items-center justify-between bg-black px-9 pt-6 pb-10">
-          <button onClick={() => go(onPicker)} className="h-[46px] w-[46px] overflow-hidden rounded-[12px] ring-2 ring-white/25 transition-transform duration-150 active:scale-[.94]">
+          <button onClick={() => go(onPicker)} className="h-11.5 w-11.5 overflow-hidden rounded-xl ring-2 ring-white/25 transition-transform duration-150 active:scale-[.94]">
             {thumb ? (
               <img src={thumb.thumb} alt="" className="h-full w-full object-cover" />
             ) : (
@@ -234,9 +234,9 @@ export function CameraPage({
           </button>
           <button
             onClick={() => void shoot()}
-            className="flex h-[76px] w-[76px] items-center justify-center rounded-full border-[3.5px] border-white transition-transform duration-150 active:scale-[.94]"
+            className="flex h-19 w-19 items-center justify-center rounded-full border-[3.5px] border-white transition-transform duration-150 active:scale-[.94]"
           >
-            <span className="h-[62px] w-[62px] rounded-full bg-white" />
+            <span className="h-15.5 w-15.5 rounded-full bg-white" />
           </button>
           <CircleBtn size={46} onClick={() => void camera.switchCamera()}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 12a8 8 0 0 1-14.3 4.9M4 12a8 8 0 0 1 14.3-4.9" /><path d="M4 20v-5h5M20 4v5h-5" /></svg>

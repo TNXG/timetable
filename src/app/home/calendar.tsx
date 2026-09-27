@@ -34,12 +34,12 @@ const MonthGrid = memo(function MonthGrid({ month, sem, counts, anchor, today, m
   }
   const anchorWeek = weekOf(sem, anchor)
   return (
-    <div className="space-y-[3px]">
+    <div className="space-y-0.75">
       {rows.map((row, ri) => {
         const wk = rowWeek(row)
         const rowOn = mode === 'week' && wk === anchorWeek
         return (
-          <div key={ri} className={`flex gap-[5px] rounded-[12px] ${rowOn ? 'bg-(--c-accent-soft)' : ''}`}>
+          <div key={ri} className={`flex gap-1.25 rounded-[12px] ${rowOn ? 'bg-(--c-accent-soft)' : ''}`}>
             <div className="flex w-7 flex-none items-center justify-center">
               <span className={`text-[10.5px] font-bold tabular-nums ${rowOn ? 'text-(--c-accent)' : 'text-(--c-ink5)'}`}>{wk >= 1 && wk <= sem.totalWeeks ? wk : ''}</span>
             </div>
@@ -49,8 +49,8 @@ const MonthGrid = memo(function MonthGrid({ month, sem, counts, anchor, today, m
               const isToday = d === today
               const sel = d === anchor
               return (
-                <button key={d} onClick={() => onPick(d)} className="relative flex flex-1 flex-col items-center py-[9px]">
-                  {sel && <i className="absolute inset-x-[-4px] inset-y-0 rounded-[13px] bg-(--c-accent-soft)" />}
+                <button key={d} onClick={() => onPick(d)} className="relative flex flex-1 flex-col items-center py-2.25">
+                  {sel && <i className="absolute -inset-x-1 inset-y-0 rounded-[13px] bg-(--c-accent-soft)" />}
                   <span
                     className={`relative z-10 flex h-[22px] w-[22px] items-center justify-center text-[15px] leading-none font-bold tabular-nums ${
                       isToday || sel ? 'text-(--c-accent)' : n ? 'text-(--c-ink)' : 'text-(--c-ink5)'
@@ -155,7 +155,7 @@ export function CalendarSheet({ snap, mode, anchor, onPick, onClose }: { snap: S
       dismissRef={dismiss}
       className="px-4"
       header={
-        <div className="flex gap-[5px] px-4 pt-1 pb-2">
+        <div className="flex gap-1.25 px-4 pt-1 pb-2">
           <div className="w-7 flex-none" />
           {[1, 2, 3, 4, 5, 6, 7].map((w) => (
             <div key={w} className="flex-1 text-center text-[10.5px] font-semibold text-(--c-ink4)">{WD_SHORT[w]}</div>

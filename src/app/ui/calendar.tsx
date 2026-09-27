@@ -92,7 +92,7 @@ export function Calendar({ value, onChange, today = todayYmd() }: { value: strin
           </button>
           <button onClick={() => goMonth(1)} className="flex h-10 w-10 items-center justify-center transition-opacity active:opacity-50"><CalArrow dir={1} /></button>
         </div>
-        <div className="grid h-[26px] grid-cols-7 items-center">
+        <div className="grid h-6.5 grid-cols-7 items-center">
           {WD_SHORT.slice(1).map((w) => <span key={w} className="text-center text-[12px] font-semibold text-(--c-ink4)">{w}</span>)}
         </div>
         <div className="relative" style={{ height: CAL_ROW * 6 }}>
@@ -116,7 +116,7 @@ export function Calendar({ value, onChange, today = todayYmd() }: { value: strin
                   initial={false}
                   animate={{ left: `${((selIdx % 7) + 0.5) * (100 / 7)}%`, top: (Math.floor(selIdx / 7) + 0.5) * CAL_ROW }}
                   transition={SHEET}
-                  className="pointer-events-none absolute -mt-[17px] -ml-[17px] h-[34px] w-[34px] rounded-full bg-(--c-accent)"
+                  className="pointer-events-none absolute -mt-4.25 -ml-4.25 h-8.5 w-8.5 rounded-full bg-(--c-accent)"
                 />
               )}
               {cells.map((c) => {

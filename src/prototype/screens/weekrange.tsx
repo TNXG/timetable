@@ -36,10 +36,10 @@ export function WeekShell({
 
         <div className="mt-3.5 px-2">
           <div className="rounded-[22px] bg-(--c-surface) p-2.5 pb-4">
-            <div className="flex items-stretch gap-[5px]">
-              <div className="-mr-[5px] flex w-8 flex-none items-center justify-center text-[10.5px] font-semibold text-(--c-ink5)">{month}</div>
+            <div className="flex items-stretch gap-1.25">
+              <div className="-mr-1.25 flex w-8 flex-none items-center justify-center text-[10.5px] font-semibold text-(--c-ink5)">{month}</div>
               {strip.map(([d, w]) => (
-                <div key={d + w} className="relative flex flex-1 flex-col items-center py-[5px]">
+                <div key={d + w} className="relative flex flex-1 flex-col items-center py-1.25">
                   <span className="text-[17px] leading-[1.2] font-bold tabular-nums text-(--c-ink5b)">{d}</span>
                   <span className="mt-0.5 text-[10.5px] font-semibold text-(--c-ink5b)">{w}</span>
                 </div>
@@ -54,10 +54,10 @@ export function WeekShell({
               <div className="flex pt-1.5">
                 <div className="w-8 flex-none">
                   {['8:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00'].map((t) => (
-                    <div key={t} className="h-[84px] pr-1.5 text-right text-[9.5px] font-semibold tabular-nums text-(--c-ink5b)">{t}</div>
+                    <div key={t} className="h-21 pr-1.5 text-right text-[9.5px] font-semibold tabular-nums text-(--c-ink5b)">{t}</div>
                   ))}
                 </div>
-                <div className="relative h-[536px] flex-1">{children}</div>
+                <div className="relative h-134 flex-1">{children}</div>
               </div>
             </div>
           </div>
@@ -72,8 +72,8 @@ export function WeekShell({
 export function WeekBand({ tone, title, meta }: { tone: 'gray' | 'amber'; title: string; meta: string }) {
   const c = tone === 'amber' ? '#C29155' : '#8A8E97'
   return (
-    <div className="flex items-center gap-2 rounded-[8px] px-2.5 py-[6px]" style={{ background: tint(c, 12) }}>
-      <i className="h-[14px] w-[3px] flex-none rounded-full" style={{ background: c }} />
+    <div className="flex items-center gap-2 rounded-lg px-2.5 py-1.5" style={{ background: tint(c, 12) }}>
+      <i className="h-3.5 w-0.75 flex-none rounded-full" style={{ background: c }} />
       <span className="text-[11.5px] font-bold" style={{ color: `color-mix(in srgb, ${c} 85%, var(--c-ink-mix))` }}>{title}</span>
       <span className="ml-auto text-[10.5px] font-semibold" style={{ color: c }}>{meta}</span>
     </div>
@@ -94,7 +94,7 @@ export function GhostEvent({ name, color, top, h }: { name: string; color: strin
 
 export function FloatPills({ actions }: { actions: string[] }) {
   return (
-    <div className="absolute inset-x-0 bottom-[100px] z-[9] flex justify-center gap-2">
+    <div className="absolute inset-x-0 bottom-25 z-9 flex justify-center gap-2">
       {actions.map((a, i) => (
         <span
           key={a}
@@ -134,7 +134,7 @@ export function VacationScreen() {
       band={<WeekBand tone="amber" title="国庆假期" meta="10月1日–10月7日，停课 2 节" />}
       footer={<FloatPills actions={['前往 10月8日']} />}
     >
-      <div className="flex h-full gap-[5px]">
+      <div className="flex h-full gap-1.25">
         {[0, 1, 2, 3, 4, 5].map((i) => (
           <div key={i} className="relative flex-1">
             {i === 1 && <GhostEvent name="高等数学（下）" color={C.math} top={0} h={70} />}
@@ -171,22 +171,22 @@ export function ExamWeekScreen() {
             {exams.map(([name, day, time, loc, seat, cd], i) => {
               const color = examColors[i]
               return (
-                <div key={name} className="rounded-[16px] bg-(--c-surface) px-4 py-3.5">
+                <div key={name} className="rounded-2xl bg-(--c-surface) px-4 py-3.5">
                   <div className="flex items-start justify-between">
                     <div className="flex min-w-0 items-center">
-                      <i className="mr-3 h-[16px] w-[3px] flex-none rounded-full" style={{ background: color }} />
+                      <i className="mr-3 h-4 w-0.75 flex-none rounded-full" style={{ background: color }} />
                       <span className="truncate text-[15px] font-bold tracking-[-.01em] text-(--c-ink)">{name}</span>
                     </div>
                     {cd ? (
-                      <span className="ml-2 flex-none rounded-[7px] bg-(--c-accent-soft) px-2 py-[3px] text-[10.5px] font-bold text-(--c-accent)">{cd}</span>
+                      <span className="ml-2 flex-none rounded-[7px] bg-(--c-accent-soft) px-2 py-0.75 text-[10.5px] font-bold text-(--c-accent)">{cd}</span>
                     ) : (
                       <span className="ml-2 flex-none text-[11.5px] font-semibold tabular-nums text-(--c-ink4b)">{day.slice(0, 4)}</span>
                     )}
                   </div>
-                  <div className="mt-2 flex items-baseline gap-2 pl-[15px]">
+                  <div className="mt-2 flex items-baseline gap-2 pl-3.75">
                     <span className="text-[13px] font-bold tabular-nums text-(--c-ink)">{day} {time}</span>
                   </div>
-                  <div className="mt-1 flex items-baseline gap-2 pl-[15px] text-[12px] font-medium text-(--c-ink3)">
+                  <div className="mt-1 flex items-baseline gap-2 pl-3.75 text-[12px] font-medium text-(--c-ink3)">
                     <span>{loc}</span>
                     <span className="h-3 w-px bg-(--c-line)" />
                     <span className="tabular-nums">{seat}</span>
@@ -196,9 +196,9 @@ export function ExamWeekScreen() {
             })}
           </div>
 
-          <div className="mt-4 rounded-[16px] bg-(--c-surface) px-4 py-3.5">
+          <div className="mt-4 rounded-2xl bg-(--c-surface) px-4 py-3.5">
             <div className="text-[13px] font-bold text-(--c-ink)">还有 2 门没有考试安排</div>
-            <div className="mt-1 text-[12px] leading-[1.5] font-medium text-(--c-ink3)">大学英语（三）、形势与政策。</div>
+            <div className="mt-1 text-[12px] leading-normal font-medium text-(--c-ink3)">大学英语（三）、形势与政策。</div>
             <div className="mt-3 flex items-center justify-between">
               <span className="text-[12.5px] font-medium text-(--c-ink4)">考试安排为手动添加</span>
               <span className="text-[13px] font-bold text-(--c-accent)">添加考试</span>

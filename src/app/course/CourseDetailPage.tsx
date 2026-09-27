@@ -88,7 +88,7 @@ export function CourseDetailPage({
   const todayWd = weekdayOf(today)
   return (
     <Page>
-      <div className="flex-1 overflow-y-auto px-4 pb-10 [scrollbar-width:none]">
+      <div className="flex-1 overflow-y-auto px-4 pb-10 scrollbar-none">
         <TopBar
           title={cur.name}
           onBack={onBack}
@@ -105,7 +105,7 @@ export function CourseDetailPage({
         <div className="mt-3 space-y-3">
         <Card className="relative">
           {sticker && stickersOn && (
-            <span {...holdProps} className="absolute -top-[18px] -right-1.5 select-none touch-manipulation" style={{ WebkitTouchCallout: 'none' }}>
+            <span {...holdProps} className="absolute -top-4.5 -right-1.5 select-none touch-manipulation" style={{ WebkitTouchCallout: 'none' }}>
               <Sticker id={sticker} size={74} tilt={stickerTilt(cur.name)} />
             </span>
           )}
@@ -113,7 +113,7 @@ export function CourseDetailPage({
             <div className="text-[12.5px] font-medium text-(--c-ink3)">
               {[cur.source === 'import' ? '规则导入' : '手动添加', weeksSpan].filter(Boolean).join('，')}
             </div>
-            {!(sticker && stickersOn) && <i {...holdProps} className="mt-1 ml-3 h-[10px] w-[10px] flex-none rounded-full" style={{ background: cur.color }} />}
+            {!(sticker && stickersOn) && <i {...holdProps} className="mt-1 ml-3 h-2.5 w-2.5 flex-none rounded-full" style={{ background: cur.color }} />}
           </div>
           <div className="mt-5">
             {([
@@ -130,7 +130,7 @@ export function CourseDetailPage({
               )] as [string, React.ReactNode]] : []),
             ] as [string, React.ReactNode][]).map(([k, v], i) => (
               <div key={k} className={`flex items-baseline ${i > 0 ? 'mt-4' : ''}`}>
-                <span className="w-[72px] flex-none text-[13px] font-medium text-(--c-ink4)">{k}</span>
+                <span className="w-18 flex-none text-[13px] font-medium text-(--c-ink4)">{k}</span>
                 <span className="text-[14px] text-(--c-ink)">{v}</span>
               </div>
             ))}
@@ -170,14 +170,14 @@ export function CourseDetailPage({
 
         <Card>
           <div className="flex items-baseline">
-            <span className="w-[72px] flex-none text-[13px] font-medium text-(--c-ink4)">学期进度</span>
+            <span className="w-18 flex-none text-[13px] font-medium text-(--c-ink4)">学期进度</span>
             <span className="text-[14px] font-semibold tabular-nums text-(--c-ink)">{passed.length} / {sessions.length} 次</span>
           </div>
           <div className="mt-3 h-1 overflow-hidden rounded-full bg-(--c-surface2)">
             <i className="block h-full rounded-full bg-(--c-accent)" style={{ width: `${sessions.length ? (passed.length / sessions.length) * 100 : 0}%` }} />
           </div>
           <div className="mt-4 flex items-baseline">
-            <span className="w-[72px] flex-none text-[13px] font-medium text-(--c-ink4)">出勤</span>
+            <span className="w-18 flex-none text-[13px] font-medium text-(--c-ink4)">出勤</span>
             <span className="text-[14px] font-semibold tabular-nums text-(--c-ink)">
               {passed.length === 0 ? '—' : `${attended.length} / ${passed.length}，出勤率 ${rate}%`}
             </span>
@@ -249,7 +249,7 @@ function StickerPicker({ course, onPick, onClose }: { course: Course; onPick: (i
             aria-label="自动"
             className={`flex aspect-square items-center justify-center rounded-[16px] bg-(--c-bg) transition-transform duration-150 active:scale-[.94] ${course.sticker === undefined ? 'ring-2 ring-inset ring-(--c-accent)' : ''}`}
           >
-            {auto ? <Sticker id={auto} size={38} /> : <span className="h-[38px] w-[38px] rounded-full border-[1.8px] border-dashed border-(--c-ink5)" />}
+            {auto ? <Sticker id={auto} size={38} /> : <span className="h-9.5 w-9.5 rounded-full border-[1.8px] border-dashed border-(--c-ink5)" />}
           </button>
         )}
         {ids.map((id) => {

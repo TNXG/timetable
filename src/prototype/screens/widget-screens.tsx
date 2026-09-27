@@ -22,13 +22,13 @@ export function WHead({ d, w, sub }: { d: string; w: string; sub?: string }) {
 export function WRow({ name, time, loc, color, big = true, badge }: { name: string; time?: string; loc?: string; color: string; big?: boolean; badge?: string }) {
   return (
     <div className="flex items-center gap-2 rounded-[10px] py-1.5 pr-2.5 pl-0" style={{ background: tint(color, 8) }}>
-      <i className="my-[3px] ml-1.5 w-[3px] flex-none self-stretch rounded-full" style={{ background: color }} />
+      <i className="my-0.75 ml-1.5 w-0.75 flex-none self-stretch rounded-full" style={{ background: color }} />
       <div className="min-w-0 flex-1">
         <div className={`truncate ${big ? 'text-[13px]' : 'text-[12px]'} leading-[1.3] font-bold tracking-[-.01em] text-(--c-ink)`}>{name}</div>
-        {loc && <div className="mt-[1px] truncate text-[11px] leading-[1.25] font-medium text-(--c-ink3)">{loc}</div>}
+        {loc && <div className="mt-px truncate text-[11px] leading-tight font-medium text-(--c-ink3)">{loc}</div>}
       </div>
       {badge && (
-        <span className="flex-none rounded-full bg-(--c-accent) px-1.5 py-[2px] text-[9.5px] font-bold text-white">{badge}</span>
+        <span className="flex-none rounded-full bg-(--c-accent) px-1.5 py-0.5 text-[9.5px] font-bold text-white">{badge}</span>
       )}
       {time && <div className="flex-none text-right text-[11.5px] leading-[1.3] font-semibold tabular-nums text-(--c-ink3)">{time}</div>}
     </div>
@@ -42,14 +42,14 @@ export function WidgetScreen() {
       <div className="absolute inset-0 bg-[#0E1116]/25" />
       <div className="relative flex-1 px-4 pt-10">
         <div className="flex gap-3.5">
-          <WCard className="h-[162px] w-[162px]">
+          <WCard className="h-40.5 w-40.5">
             <WHead d="14" w="周二" />
             <div className="mt-2.5 space-y-1.5">
               <WRow name="高等数学" loc="教三 302" time="10:00" color={C.math} big={false} />
               <WRow name="数据结构" loc="教一 201" time="14:00" color={C.ds} big={false} />
             </div>
           </WCard>
-          <WCard className="flex h-[162px] w-[162px] flex-col">
+          <WCard className="flex h-40.5 w-40.5 flex-col">
             <div className="text-[11.5px] font-bold text-(--c-ink3)">下一节</div>
             <div className="mt-1 flex items-baseline gap-1">
               <span className="text-[38px] leading-none font-semibold tracking-[-.035em] tabular-nums text-(--c-ink)">15</span>
@@ -61,7 +61,7 @@ export function WidgetScreen() {
           </WCard>
         </div>
 
-        <WCard className="mt-3.5 flex h-[162px] gap-3.5">
+        <WCard className="mt-3.5 flex h-40.5 gap-3.5">
           <div className="flex-1">
             <WHead d="14" w="周二" />
             <div className="mt-2.5 space-y-1.5">
@@ -102,17 +102,17 @@ export function WidgetScreen() {
                 {col.map(([color, name, time, loc, now]) => (
                   <div
                     key={name + time}
-                    className="h-[64px] rounded-[10px] px-1.5 py-2"
+                    className="h-16 rounded-[10px] px-1.5 py-2"
                     style={{
                       background: tint(color, now ? 16 : 8),
                       boxShadow: now ? `inset 0 0 0 1.5px ${color}` : undefined,
                     }}
                   >
                     <div className="flex items-center gap-1">
-                      <span className="truncate text-[11px] leading-[1.25] font-bold" style={{ color: `color-mix(in srgb, ${color} 88%, #000)` }}>{name}</span>
+                      <span className="truncate text-[11px] leading-tight font-bold" style={{ color: `color-mix(in srgb, ${color} 88%, #000)` }}>{name}</span>
                     </div>
                     <div className="mt-1.5 text-[10px] leading-[1.3] font-semibold tabular-nums text-(--c-ink3)">{time}</div>
-                    <div className="mt-[1px] truncate text-[10px] leading-[1.3] font-medium text-(--c-ink4)">{loc}</div>
+                    <div className="mt-px truncate text-[10px] leading-[1.3] font-medium text-(--c-ink4)">{loc}</div>
                   </div>
                 ))}
               </div>
@@ -132,7 +132,7 @@ export function WidgetScreen2() {
       <div className="absolute inset-0 bg-[#0E1116]/25" />
       <div className="relative flex-1 px-4 pt-10">
         <div className="flex gap-3.5">
-          <WCard className="flex h-[196px] w-[162px] flex-col">
+          <WCard className="flex h-49 w-40.5 flex-col">
             <div className="flex items-baseline gap-1.5">
               <span className="text-[24px] leading-none font-semibold tracking-[-.03em] tabular-nums text-(--c-ink)">14</span>
               <span className="text-[12px] font-semibold text-(--c-accent)">周二</span>
@@ -140,27 +140,27 @@ export function WidgetScreen2() {
             </div>
             <div className="relative mt-3 flex-1">
               <i className="absolute top-1 bottom-2 left-[3.5px] w-[1.5px] rounded-full bg-(--c-surface2)" />
-              <div className="space-y-[13px]">
+              <div className="space-y-3.25">
                 {([
                   ['10:00', '高等数学', '教三 302', C.math, 'now'],
                   ['14:00', '数据结构', '教一 201', C.ds, 'next'],
                   ['16:00', '体育', '东区体育馆', C.phy, 'next'],
                 ] as [string, string, string, string, string][]).map(([t, name, loc, color, st]) => (
-                  <div key={t} className="relative flex gap-2.5 pl-[18px]" style={{ opacity: st === 'past' ? 0.4 : 1 }}>
+                  <div key={t} className="relative flex gap-2.5 pl-4.5" style={{ opacity: st === 'past' ? 0.4 : 1 }}>
                     <i
-                      className="absolute top-[4px] left-0 h-[8px] w-[8px] rounded-full"
+                      className="absolute top-1 left-0 h-2 w-2 rounded-full"
                       style={{ background: st === 'now' ? color : 'var(--c-surface)', boxShadow: `inset 0 0 0 1.5px ${st === 'now' ? color : 'var(--c-dot-border)'}` }}
                     />
                     <div className="min-w-0 flex-1">
-                      <div className="truncate text-[12px] leading-[1.25] font-bold tracking-[-.01em] text-(--c-ink)">{name}</div>
-                      <div className="mt-[1px] truncate text-[10.5px] leading-[1.25] font-medium tabular-nums text-(--c-ink3)">{t}　{loc}</div>
+                      <div className="truncate text-[12px] leading-tight font-bold tracking-[-.01em] text-(--c-ink)">{name}</div>
+                      <div className="mt-px truncate text-[10.5px] leading-tight font-medium tabular-nums text-(--c-ink3)">{t}　{loc}</div>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
           </WCard>
-          <WCard className="flex h-[196px] w-[162px] flex-col">
+          <WCard className="flex h-49 w-40.5 flex-col">
             <div className="flex items-baseline">
               <span className="text-[11.5px] font-bold text-(--c-ink3)">这周要交</span>
               <span className="ml-auto text-[11px] font-semibold text-(--c-ink4)">3 项未完成</span>

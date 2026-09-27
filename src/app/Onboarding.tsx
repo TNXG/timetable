@@ -11,7 +11,7 @@ const WEEKS = 20
 /** 开学日期，落到所在周的周一 */
 export function StartDateField({ value, onChange }: { value: string; onChange: (d: string) => void }) {
   return (
-    <div className="divide-y divide-(--c-surface2) overflow-hidden rounded-[16px] bg-(--c-surface)">
+    <div className="divide-y divide-(--c-surface2) overflow-hidden rounded-2xl bg-(--c-surface)">
       <Field k="开学" sub={value ? `第 1 周 ${md(mondayOf(value))} 周一` : undefined}>
         <DateInput value={value} onChange={onChange} />
       </Field>
@@ -26,7 +26,7 @@ export function currentWeek(startDate: string): number {
 function Step({ title, sub, onBack, footer, children }: { title: string; sub?: string; onBack?: () => void; footer: React.ReactNode; children: React.ReactNode }) {
   return (
     <Page onBack={onBack} root={!onBack}>
-      <div className="flex-1 overflow-y-auto px-5 [scrollbar-width:none]">
+      <div className="flex-1 overflow-y-auto px-5 scrollbar-none">
         <TopBar title={title} sub={sub} onBack={onBack} />
         <div className="mt-6">{children}</div>
       </div>
@@ -47,10 +47,10 @@ export default function Onboarding({ onDone, initialStep = 0, backRef }: { onDon
   }
 
   return (
-    <div className="relative mx-auto h-dvh w-full max-w-[430px] overflow-hidden bg-(--c-bg) font-sans text-(--c-ink)">
+    <div className="relative mx-auto h-dvh w-full max-w-107.5 overflow-hidden bg-(--c-bg) font-sans text-(--c-ink)">
       <Page root className="intro-hero">
         <div className="flex flex-1 flex-col px-7 pt-[max(64px,calc(env(safe-area-inset-top)+34px))]">
-          <img src="/mascot.png" alt="" className="h-[200px] w-[200px] self-center object-contain" />
+          <img src="/mascot.png" alt="" className="h-50 w-50 self-center object-contain" />
           <div className="mt-auto pb-14">
             <div className="text-[17px] font-bold tracking-[.02em] text-(--c-ink3)">Koma</div>
             <h1 className="mt-3 text-[44px] leading-[1.15] font-extrabold tracking-[-.04em]">
@@ -78,7 +78,7 @@ export default function Onboarding({ onDone, initialStep = 0, backRef }: { onDon
               </div>
             }
           >
-            <div className="divide-y divide-(--c-surface2) overflow-hidden rounded-[16px] bg-(--c-surface)">
+            <div className="divide-y divide-(--c-surface2) overflow-hidden rounded-2xl bg-(--c-surface)">
               <Row title={DEFAULT_PLUGIN.name} badge="默认" onClick={() => onDone('edu')} />
             </div>
           </Step>

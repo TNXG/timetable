@@ -29,7 +29,7 @@ export function DebugHub({ onBack, onPage }: { onBack: () => void; onPage: (p: D
   ]
   return (
     <Page>
-      <div className="flex-1 overflow-y-auto px-5 pb-10 [scrollbar-width:none]">
+      <div className="flex-1 overflow-y-auto px-5 pb-10 scrollbar-none">
         <TopBar title="调试" onBack={onBack} />
         {groups.map(([g, rows]) => (
           <div key={g} className="mt-6">

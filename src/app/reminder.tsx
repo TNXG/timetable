@@ -117,7 +117,7 @@ export function NotifPrefPage({ onBack, onPick }: { onBack: () => void; onPick: 
   }
   return (
     <Page>
-      <div className="flex-1 overflow-y-auto px-5 pb-[130px] [scrollbar-width:none]">
+      <div className="flex-1 overflow-y-auto px-5 pb-32.5 scrollbar-none">
         <TopBar title="提醒" onBack={onBack} />
         <CalendarCard onOpen={() => void open()} />
         <div className="mt-5">
@@ -146,7 +146,7 @@ export function PrefPickPage({ pref, onBack }: { pref: PrefKey; onBack: () => vo
   const { title, sub, multi, options } = OPTIONS[pref]
   return (
     <Page>
-      <div className="flex-1 overflow-y-auto px-5 pb-[130px] [scrollbar-width:none]">
+      <div className="flex-1 overflow-y-auto px-5 pb-32.5 scrollbar-none">
         <TopBar title={title} sub={sub} onBack={onBack} />
         <div className="mt-6 rounded-[18px] bg-(--c-surface) px-4">
           {options.map((o, i) => {
@@ -206,18 +206,18 @@ export function CalendarIntroPage({ onDone }: { onDone: () => void }) {
 
   return (
     <Page>
-      <div className="flex-1 overflow-y-auto px-5 pb-6 [scrollbar-width:none]">
+      <div className="flex-1 overflow-y-auto px-5 pb-6 scrollbar-none">
         <TopBar title="同步至系统日历" />
         <div className="mt-6 rounded-[18px] bg-(--c-surface) px-4">
           {KINDS.map((k, i) => (
             <div key={k.label} className={`flex items-center py-3.5 ${i ? 'border-t border-(--c-surface2)' : ''}`}>
-              <i className="mr-3 h-[9px] w-[9px] flex-none rounded-full" style={{ background: k.color }} />
+              <i className="mr-3 h-2.25 w-2.25 flex-none rounded-full" style={{ background: k.color }} />
               <span className="flex-1 text-[14px] font-semibold text-(--c-ink)">{k.label}</span>
               <span className="text-[12.5px] font-medium tabular-nums text-(--c-ink4)">{k.lead(state.prefs)}</span>
             </div>
           ))}
         </div>
-        {denied && <div className="mt-3 px-1 text-[12px] leading-[1.5] font-medium text-(--c-rose)">日历权限已关闭。</div>}
+        {denied && <div className="mt-3 px-1 text-[12px] leading-normal font-medium text-(--c-rose)">日历权限已关闭。</div>}
       </div>
       <div className="flex-none px-5 pt-2 pb-[max(22px,env(safe-area-inset-bottom))]">
         <PrimaryButton busy={busy} onClick={() => void go()}>{denied ? '去系统设置允许' : '开启同步'}</PrimaryButton>

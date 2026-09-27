@@ -17,7 +17,7 @@ export function EduPage({ onBack }: { onBack: () => void }) {
   const plugin: EduPlugin | undefined = sync ? EDU_PLUGINS.find((p) => p.url === sync.school.url || p.name === sync.school.name) : undefined
   return (
     <Page>
-      <div className="flex-1 overflow-y-auto px-5 pb-10 [scrollbar-width:none]">
+      <div className="flex-1 overflow-y-auto px-5 pb-10 scrollbar-none">
         <TopBar title="教务" sub="绑定、会话与自动更新" onBack={onBack} />
         <Group title="插件">
           <KV k="默认学校" v={DEFAULT_PLUGIN.name} sub={DEFAULT_PLUGIN.url} />

@@ -51,10 +51,10 @@ export function AiImportPage({ onBack, onNext, attach }: { onBack: () => void; o
   const lines = AI_IMPORT_PROMPT.trimEnd().split('\n')
   return (
     <Page>
-      <div className="flex-1 overflow-y-auto px-5 pb-6 [scrollbar-width:none]">
+      <div className="flex-1 overflow-y-auto px-5 pb-6 scrollbar-none">
         <TopBar title="让 AI 转换课表" sub={attach ? '复制这段 Prompt（已附上课表页面文字）交给任意 AI，输出后粘贴即可' : '复制这段 Prompt 连同课表交给任意 AI，输出后粘贴即可'} onBack={onBack} />
 
-        <div className="relative mt-6 rounded-[16px] bg-(--c-surface) px-4 py-4">
+        <div className="relative mt-6 rounded-2xl bg-(--c-surface) px-4 py-4">
           <button onClick={copy} className="absolute top-1.5 right-1.5 flex h-10 w-10 items-center justify-center rounded-full transition-opacity active:opacity-60">
             {copied ? (
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{ stroke: 'var(--c-accent)' }} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="m5 12 5 5L20 7" /></svg>
@@ -62,7 +62,7 @@ export function AiImportPage({ onBack, onNext, attach }: { onBack: () => void; o
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{ stroke: 'var(--c-ink2)' }} strokeWidth="1.9"><rect x="9" y="9" width="11" height="11" rx="2.5" /><path d="M15 5.5A2.5 2.5 0 0 0 12.5 3h-6A3.5 3.5 0 0 0 3 6.5v6A2.5 2.5 0 0 0 5.5 15" /></svg>
             )}
           </button>
-          <div className="relative h-[168px] overflow-hidden">
+          <div className="relative h-42 overflow-hidden">
             {lines.map((line, i) => (
               <div key={i} className="pr-10 font-mono text-[11.5px] leading-[1.95]">
                 {line === '' ? '\u00a0' : promptTokens(line).map(([t, c], j) => (
@@ -84,7 +84,7 @@ export function AiImportPage({ onBack, onNext, attach }: { onBack: () => void; o
           </div>
         </div>
 
-        <div className="mt-4 rounded-[16px] bg-(--c-surface) px-4 py-3.5">
+        <div className="mt-4 rounded-2xl bg-(--c-surface) px-4 py-3.5">
           <div className="flex items-center justify-between">
             <span className="text-[11.5px] font-semibold text-(--c-ink4)">AI 输出的课表</span>
             <TextAction onClick={paste}>粘贴</TextAction>
@@ -94,7 +94,7 @@ export function AiImportPage({ onBack, onNext, attach }: { onBack: () => void; o
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder="在这里粘贴 AI 输出的 JSON"
-            className="mt-2 h-40 w-full resize-none bg-transparent font-mono text-[12.5px] leading-[1.5] outline-none placeholder:text-(--c-ink5)"
+            className="mt-2 h-40 w-full resize-none bg-transparent font-mono text-[12.5px] leading-normal outline-none placeholder:text-(--c-ink5)"
           />
         </div>
       </div>

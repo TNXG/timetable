@@ -24,7 +24,7 @@ export function Chips({ items, active }: { items: string[]; active: number }) {
 export function Field({ k, v, sub, muted }: { k: string; v: string; sub?: string; muted?: boolean }) {
   return (
     <div className="flex items-baseline px-4 py-3">
-      <span className="w-[62px] flex-none text-[12.5px] font-medium text-(--c-ink4)">{k}</span>
+      <span className="w-15.5 flex-none text-[12.5px] font-medium text-(--c-ink4)">{k}</span>
       <div className="min-w-0 flex-1">
         <div className={`text-[14px] font-semibold ${muted ? 'text-(--c-ink4b)' : 'text-(--c-ink)'}`}>{v}</div>
         {sub && <div className="mt-1 text-[11.5px] font-medium text-(--c-ink4)">{sub}</div>}
@@ -46,7 +46,7 @@ export function EditSessionScreen() {
         </div>
 
         <div className="mt-4 text-[12.5px] font-semibold text-(--c-ink3)">详情</div>
-        <div className="mt-2.5 divide-y divide-(--c-surface2) overflow-hidden rounded-[16px] bg-(--c-surface)">
+        <div className="mt-2.5 divide-y divide-(--c-surface2) overflow-hidden rounded-2xl bg-(--c-surface)">
           <Field k="状态" v="正常上课" sub="可改为请假、停课或调课" />
           <Field k="时间" v="14:00 – 15:40" sub="5–6 节" />
           <Field k="地点" v="教学三楼 110" />
@@ -55,7 +55,7 @@ export function EditSessionScreen() {
         </div>
 
         <div className="mt-4 text-[12.5px] font-semibold text-(--c-ink3)">快捷操作</div>
-        <div className="mt-2.5 divide-y divide-(--c-surface2) overflow-hidden rounded-[16px] bg-(--c-surface)">
+        <div className="mt-2.5 divide-y divide-(--c-surface2) overflow-hidden rounded-2xl bg-(--c-surface)">
           {([
             ['请假一次', '出勤记一次缺勤'],
             ['这节停课', '仅移除这一次，不影响其他周'],
@@ -64,7 +64,7 @@ export function EditSessionScreen() {
             <div key={t} className="flex items-center px-4 py-3">
               <div className="min-w-0 flex-1">
                 <div className="text-[13.5px] font-bold text-(--c-ink)">{t}</div>
-                <div className="mt-[3px] text-[11.5px] font-medium text-(--c-ink4)">{d}</div>
+                <div className="mt-0.75 text-[11.5px] font-medium text-(--c-ink4)">{d}</div>
               </div>
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink5)" strokeWidth="2.4" className="ml-2 flex-none"><path d="m9 5 7 7-7 7" /></svg>
             </div>
@@ -94,7 +94,7 @@ export function ManualAddScreen() {
           <Chips items={['课程', '自习', '考试', '其他']} active={1} />
         </div>
 
-        <div className="mt-4 divide-y divide-(--c-surface2) overflow-hidden rounded-[16px] bg-(--c-surface)">
+        <div className="mt-4 divide-y divide-(--c-surface2) overflow-hidden rounded-2xl bg-(--c-surface)">
           <Field k="名称" v="数据结构复习" />
           <Field k="时间" v="周三 19:00 – 21:00" sub="不占节次，按钟点安排" />
           <Field k="地点" v="图书馆 3 层 自习区" />
@@ -102,31 +102,31 @@ export function ManualAddScreen() {
           <Field k="提醒" v="开始前 15 分钟" />
         </div>
 
-        <div className="mt-4 flex items-center justify-between rounded-[16px] bg-(--c-surface) px-4 py-3.5">
+        <div className="mt-4 flex items-center justify-between rounded-2xl bg-(--c-surface) px-4 py-3.5">
           <span className="text-[12.5px] font-medium text-(--c-ink4)">颜色</span>
           <div className="flex items-center gap-2.5">
             {[C.la, C.ds, C.eng, C.phy, C.pol, '#8A8E97'].map((c, i) => (
               <span
                 key={c}
-                className="flex h-[19px] w-[19px] items-center justify-center rounded-full"
+                className="flex h-4.75 w-4.75 items-center justify-center rounded-full"
                 style={{ background: tint(c, 22), boxShadow: i === 0 ? `inset 0 0 0 1.6px ${c}` : undefined }}
               >
-                <i className="h-[7px] w-[7px] rounded-full" style={{ background: c }} />
+                <i className="h-1.75 w-1.75 rounded-full" style={{ background: c }} />
               </span>
             ))}
           </div>
         </div>
 
-        <div className="mt-4 rounded-[16px] bg-(--c-surface) px-4 py-3.5">
+        <div className="mt-4 rounded-2xl bg-(--c-surface) px-4 py-3.5">
           <div className="text-[12.5px] font-semibold text-(--c-ink3)">预览</div>
-          <div className="mt-2.5 flex items-center rounded-[12px] px-3.5 py-3" style={{ background: tint(C.la, 8) }}>
-            <i className="mr-3 h-[34px] w-[3px] flex-none rounded-full" style={{ background: C.la }} />
+          <div className="mt-2.5 flex items-center rounded-xl px-3.5 py-3" style={{ background: tint(C.la, 8) }}>
+            <i className="mr-3 h-8.5 w-0.75 flex-none rounded-full" style={{ background: C.la }} />
             <div className="min-w-0 flex-1">
               <div className="text-[13.5px] font-bold text-(--c-ink)">数据结构复习</div>
-              <div className="mt-[3px] text-[11.5px] font-medium text-(--c-ink3)">周三 19:00–21:00　图书馆 3 层</div>
+              <div className="mt-0.75 text-[11.5px] font-medium text-(--c-ink3)">周三 19:00–21:00　图书馆 3 层</div>
             </div>
           </div>
-          <div className="mt-2.5 text-[11.5px] leading-[1.5] font-medium text-(--c-ink4b)">和周三的课不冲突。</div>
+          <div className="mt-2.5 text-[11.5px] leading-normal font-medium text-(--c-ink4b)">和周三的课不冲突。</div>
         </div>
 
         <div className="mt-4 flex items-center justify-end gap-5 px-1">
@@ -160,7 +160,7 @@ export function SearchScreen() {
         <div className="flex items-center rounded-full bg-(--c-surface) px-4 py-2.5">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink4)" strokeWidth="2.2" className="mr-2.5 flex-none"><circle cx="11" cy="11" r="7" /><path d="m16.5 16.5 4 4" /></svg>
           <span className="text-[14px] font-medium text-(--c-ink)">线</span>
-          <i className="ml-[1px] h-[15px] w-[1.5px] bg-(--c-accent)" />
+          <i className="ml-px h-3.75 w-[1.5px] bg-(--c-accent)" />
           <span className="ml-auto flex-none text-[12.5px] font-medium text-(--c-ink3)">取消</span>
         </div>
 
@@ -171,7 +171,7 @@ export function SearchScreen() {
               <div className="mt-1.5 overflow-hidden rounded-[14px] bg-(--c-surface) p-1">
                 {rows.map(([name, meta, right], i) => (
                   <div key={name} className={`flex items-center rounded-[10px] px-2.5 py-2.5 ${g === '课程' && i === 0 ? 'bg-(--c-line2)' : ''}`}>
-                    <i className="mr-3 h-[26px] w-[3px] flex-none rounded-full" style={{ background: rows[i][3] }} />
+                    <i className="mr-3 h-6.5 w-0.75 flex-none rounded-full" style={{ background: rows[i][3] }} />
                     <div className="min-w-0 flex-1">
                       <div className="truncate text-[13.5px] font-semibold text-(--c-ink)">
                         {name.split('线').map((part, k) => (
@@ -181,7 +181,7 @@ export function SearchScreen() {
                           </React.Fragment>
                         ))}
                       </div>
-                      <div className="mt-[2px] truncate text-[11.5px] font-medium text-(--c-ink4)">{meta}</div>
+                      <div className="mt-0.5 truncate text-[11.5px] font-medium text-(--c-ink4)">{meta}</div>
                     </div>
                     {right && <span className="ml-2 flex-none text-[11.5px] font-medium text-(--c-ink4b)">{right}</span>}
                   </div>
@@ -202,16 +202,16 @@ export function SearchEmptyScreen() {
         <div className="flex items-center rounded-full bg-(--c-surface) px-4 py-2.5">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink4)" strokeWidth="2.2" className="mr-2.5 flex-none"><circle cx="11" cy="11" r="7" /><path d="m16.5 16.5 4 4" /></svg>
           <span className="text-[14px] font-medium text-(--c-ink)">线代考试</span>
-          <i className="ml-[1px] h-[15px] w-[1.5px] bg-(--c-accent)" />
+          <i className="ml-px h-3.75 w-[1.5px] bg-(--c-accent)" />
           <span className="ml-auto flex-none text-[12.5px] font-medium text-(--c-ink3)">取消</span>
         </div>
         <div className="mt-8 text-center text-[12.5px] font-medium text-(--c-ink4)">未找到“线代考试”</div>
         <div className="mt-4 overflow-hidden rounded-[14px] bg-(--c-surface) p-1">
           <div className="flex items-center rounded-[10px] px-2.5 py-2.5">
-            <i className="mr-3 h-[26px] w-[3px] flex-none rounded-full bg-(--c-accent)" />
+            <i className="mr-3 h-6.5 w-0.75 flex-none rounded-full bg-(--c-accent)" />
             <div className="min-w-0 flex-1">
               <div className="truncate text-[13.5px] font-semibold text-(--c-ink)">新建待办“线代考试”</div>
-              <div className="mt-[2px] text-[11.5px] font-medium text-(--c-ink4)">线性代数，考试</div>
+              <div className="mt-0.5 text-[11.5px] font-medium text-(--c-ink4)">线性代数，考试</div>
             </div>
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink5)" strokeWidth="2.4" className="ml-2 flex-none"><path d="m9 5 7 7-7 7" /></svg>
           </div>
@@ -253,7 +253,7 @@ export function LongPressScreen() {
           <div className="rounded-[22px] bg-(--c-surface) p-2.5 pb-4">
             <DayPicker
               active={todayIndex}
-              lead={<div className="-mr-[5px] flex w-8 flex-none items-center justify-center text-[10.5px] font-semibold text-(--c-ink4)">10月</div>}
+              lead={<div className="-mr-1.25 flex w-8 flex-none items-center justify-center text-[10.5px] font-semibold text-(--c-ink4)">10月</div>}
             />
             <div className="relative mt-2">
               {[0, 84, 168, 252, 336, 420, 504].map((t) => (
@@ -262,10 +262,10 @@ export function LongPressScreen() {
               <div className="flex pt-1.5">
                 <div className="w-8 flex-none">
                   {['8:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00'].map((t) => (
-                    <div key={t} className="h-[84px] pr-1.5 text-right text-[9.5px] font-semibold tabular-nums text-(--c-ink4b)">{t}</div>
+                    <div key={t} className="h-21 pr-1.5 text-right text-[9.5px] font-semibold tabular-nums text-(--c-ink4b)">{t}</div>
                   ))}
                 </div>
-                <div className="relative flex h-[536px] flex-1 gap-[5px]">
+                <div className="relative flex h-134 flex-1 gap-1.25">
                   {weekCols.map((c, i) => (
                     <div key={i} className="relative flex-1">
                       {c.map((ev) => {
@@ -302,18 +302,18 @@ export function LongPressScreen() {
 
       <div className="absolute inset-0 z-30 bg-(--c-bg)/72" />
 
-      <div className="absolute top-[318px] right-4 z-40 w-[226px] overflow-hidden rounded-[17px] border border-(--c-line) bg-(--c-surface) py-2" style={{ boxShadow: 'var(--c-menu-shadow)' }}>
+      <div className="absolute top-79.5 right-4 z-40 w-56.5 overflow-hidden rounded-[17px] border border-(--c-line) bg-(--c-surface) py-2" style={{ boxShadow: 'var(--c-menu-shadow)' }}>
         <div className="px-3.5 pt-1 pb-2.5">
           <div className="truncate text-[12.5px] font-medium text-(--c-ink4)">高等数学（下）　10:00</div>
         </div>
         {pressMenu.map(([ic, t], i) => (
-          <div key={t} className={`mx-2 flex items-center rounded-[11px] px-2.5 py-[9px] ${i === 0 ? 'bg-(--c-line2)' : ''}`}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="var(--c-ink2)" strokeWidth="1.7" strokeLinecap="round" className="mr-3 h-[17px] w-[17px] flex-none">{ic}</svg>
+          <div key={t} className={`mx-2 flex items-center rounded-[11px] px-2.5 py-2.25 ${i === 0 ? 'bg-(--c-line2)' : ''}`}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--c-ink2)" strokeWidth="1.7" strokeLinecap="round" className="mr-3 h-4.25 w-4.25 flex-none">{ic}</svg>
             <span className="truncate text-[14px] font-medium text-(--c-ink)">{t}</span>
           </div>
         ))}
-        <div className="mx-2 mt-0.5 flex items-center rounded-[11px] px-2.5 py-[9px]">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#C25B5B" strokeWidth="1.7" strokeLinecap="round" className="mr-3 h-[17px] w-[17px] flex-none"><circle cx="12" cy="12" r="8.5" /><path d="m9 9 6 6M15 9l-6 6" /></svg>
+        <div className="mx-2 mt-0.5 flex items-center rounded-[11px] px-2.5 py-2.25">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#C25B5B" strokeWidth="1.7" strokeLinecap="round" className="mr-3 h-4.25 w-4.25 flex-none"><circle cx="12" cy="12" r="8.5" /><path d="m9 9 6 6M15 9l-6 6" /></svg>
           <span className="text-[14px] font-medium text-(--c-danger)">本节停课</span>
         </div>
       </div>

@@ -12,7 +12,7 @@ export const eduTerms = ['2025-2026 学年 第 1 学期', '2024-2025 学年 第 
 
 export function EduTermSheet() {
   return (
-    <div className="absolute inset-0 z-[20]" style={{ background: 'var(--c-scrim)' }}>
+    <div className="absolute inset-0 z-20" style={{ background: 'var(--c-scrim)' }}>
       <div className="absolute inset-x-0 bottom-0 rounded-t-[26px] bg-(--c-surface) px-5 pt-5 pb-9 shadow-(--c-lift-shadow)">
         <div className="text-[17px] font-extrabold tracking-[-.02em] text-(--c-ink)">导入哪个学期？</div>
         <div className="mt-4 space-y-2">
@@ -21,10 +21,10 @@ export function EduTermSheet() {
             return (
               <div
                 key={t}
-                className="flex items-center rounded-[12px] px-3.5 py-3"
+                className="flex items-center rounded-xl px-3.5 py-3"
                 style={{ background: on ? 'var(--c-accent-soft)' : 'var(--c-row-muted)', boxShadow: on ? 'inset 0 0 0 1.5px var(--c-accent)' : undefined }}
               >
-                <span className="mr-3 flex h-[17px] w-[17px] flex-none items-center justify-center rounded-full border-[1.8px]" style={{ borderColor: on ? 'var(--c-accent)' : 'var(--c-radio-border)', background: on ? 'var(--c-accent)' : 'transparent' }}>
+                <span className="mr-3 flex h-4.25 w-4.25 flex-none items-center justify-center rounded-full border-[1.8px]" style={{ borderColor: on ? 'var(--c-accent)' : 'var(--c-radio-border)', background: on ? 'var(--c-accent)' : 'transparent' }}>
                   {on && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.6"><path d="m6 12.5 4 4 8-9" /></svg>}
                 </span>
                 <span className={`text-[13.5px] font-bold text-(--c-ink) ${on ? '' : 'opacity-55'}`}>{t}</span>
@@ -32,7 +32,7 @@ export function EduTermSheet() {
             )
           })}
         </div>
-        <div className="mt-5 rounded-[16px] bg-(--c-accent) py-[15px] text-center text-[15px] font-bold text-white">继续</div>
+        <div className="mt-5 rounded-2xl bg-(--c-accent) py-3.75 text-center text-[15px] font-bold text-white">继续</div>
       </div>
     </div>
   )
@@ -72,14 +72,14 @@ export function EduBrowserScreen({ ready = true, overlay }: { ready?: boolean; o
             <div className="mt-8 space-y-3">
               <div>
                 <div className="text-[11.5px] font-medium text-[#6B6B6B]">学号</div>
-                <div className="mt-1.5 h-[44px] rounded-[10px] bg-[#F4F4F5] px-3.5 text-[13px] leading-[44px] text-[#B0B0B0]">2023 ···</div>
+                <div className="mt-1.5 h-11 rounded-[10px] bg-[#F4F4F5] px-3.5 text-[13px] leading-11 text-[#B0B0B0]">2023 ···</div>
               </div>
               <div>
                 <div className="flex items-baseline justify-between text-[11.5px] font-medium text-[#6B6B6B]"><span>密码</span><span className="text-[#9A9A9A]">忘记密码</span></div>
-                <div className="mt-1.5 h-[44px] rounded-[10px] bg-[#F4F4F5] px-3.5 text-[13px] leading-[44px] text-[#B0B0B0]">••••••••</div>
+                <div className="mt-1.5 h-11 rounded-[10px] bg-[#F4F4F5] px-3.5 text-[13px] leading-11 text-[#B0B0B0]">••••••••</div>
               </div>
             </div>
-            <div className="mt-6 h-[46px] rounded-[10px] bg-[#111] text-center text-[13.5px] leading-[46px] font-semibold text-white">登录</div>
+            <div className="mt-6 h-11.5 rounded-[10px] bg-[#111] text-center text-[13.5px] leading-11.5 font-semibold text-white">登录</div>
             <div className="mt-4 text-center text-[11.5px] text-[#9A9A9A]">登录即同意《教务系统使用条款》</div>
             <div className="mt-auto pb-3 text-center text-[10.5px] text-[#B8B8B8]">新疆理工职业大学　© 2026</div>
           </div>
@@ -87,7 +87,7 @@ export function EduBrowserScreen({ ready = true, overlay }: { ready?: boolean; o
         <div className="mt-4 flex flex-1 flex-col overflow-hidden bg-white text-[#111]">
           <div className="flex items-center px-5 pt-4 pb-3">
             <span className="text-[16px] font-semibold tracking-[-.01em]">我的课表</span>
-            <span className="ml-auto flex h-[26px] items-center gap-1.5 rounded-full bg-[#F4F4F5] px-3 text-[11px] font-medium text-[#444]">2025 秋季学期<svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="3" strokeLinecap="round"><path d="m6 9 6 6 6-6" /></svg></span>
+            <span className="ml-auto flex h-6.5 items-center gap-1.5 rounded-full bg-[#F4F4F5] px-3 text-[11px] font-medium text-[#444]">2025 秋季学期<svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="3" strokeLinecap="round"><path d="m6 9 6 6 6-6" /></svg></span>
           </div>
           <div className="grid grid-cols-[34px_repeat(5,1fr)] px-3 text-[9px]">
             <div />
@@ -99,7 +99,7 @@ export function EduBrowserScreen({ ready = true, overlay }: { ready?: boolean; o
             ))}
             {Array.from({ length: 6 }).map((_, r) => (
               <React.Fragment key={r}>
-                <div className="flex h-[74px] flex-col items-center pt-1 text-[8.5px] leading-[1.3] text-[#9A9A9A]">
+                <div className="flex h-18.5 flex-col items-center pt-1 text-[8.5px] leading-[1.3] text-[#9A9A9A]">
                   <span className="font-semibold text-[#444]">{r * 2 + 1}</span>
                   <span>{['8:00', '10:05', '14:00', '15:55', '19:00', '20:45'][r]}</span>
                 </div>
@@ -110,11 +110,11 @@ export function EduBrowserScreen({ ready = true, overlay }: { ready?: boolean; o
                   const fg = ['#3E4A9E', '#2E7A4D', '#A45A1E', '#6A3EA6', '#1F6C8C', '#A8395A'][k]
                   const room = ['教三 302', '外语楼 105', '教一 201', '理科楼 B204', '教三 410', '主楼 117'][k]
                   return (
-                    <div key={c} className="h-[74px] p-[2px]">
+                    <div key={c} className="h-18.5 p-0.5">
                       {on && (
                         <div className="h-full overflow-hidden rounded-[7px] px-1.5 py-1.5 text-[8px] leading-[1.3]" style={{ background: bg, color: fg }}>
                           <div className="font-semibold">{cells[k]}</div>
-                          <div className="mt-[3px] opacity-70">{room}</div>
+                          <div className="mt-0.75 opacity-70">{room}</div>
                         </div>
                       )}
                     </div>
@@ -126,7 +126,7 @@ export function EduBrowserScreen({ ready = true, overlay }: { ready?: boolean; o
         </div>
         )}
 
-        <div className="pointer-events-none absolute inset-x-0 bottom-9 z-[9] flex justify-center">
+        <div className="pointer-events-none absolute inset-x-0 bottom-9 z-9 flex justify-center">
           <span className={`flex h-[36px] items-center gap-1.5 rounded-full px-4 text-[13px] font-bold ${ready ? 'text-(--c-accent)' : 'text-(--c-ink3)'}`} style={dockStyle}>
             {ready ? '导入 32 门课' : '登录后打开课表页'}
           </span>
@@ -143,13 +143,13 @@ export function EduPreviewScreen() {
       <div className="flex flex-1 flex-col overflow-hidden px-5 pt-12">
         <TopBar title="32 门课" />
 
-        <div className="mt-6 rounded-[16px] bg-(--c-surface) px-3 pt-2.5 pb-3">
-          <div className="flex gap-[4px]">
+        <div className="mt-6 rounded-2xl bg-(--c-surface) px-3 pt-2.5 pb-3">
+          <div className="flex gap-1">
             {['一', '二', '三', '四', '五', '六'].map((w) => (
               <div key={w} className="flex-1 text-center text-[9.5px] font-semibold text-(--c-ink4)">{w}</div>
             ))}
           </div>
-          <div className="relative mt-1.5 flex h-[152px] gap-[4px]">
+          <div className="relative mt-1.5 flex h-38 gap-1">
             {[0, 50, 100].map((t) => (
               <div key={t} className="absolute inset-x-0 h-px bg-(--c-line2)" style={{ top: t + 48 }} />
             ))}
@@ -158,7 +158,7 @@ export function EduPreviewScreen() {
                 {col.map((ev) => (
                   <div
                     key={ev.name + ev.top}
-                    className="absolute inset-x-0 overflow-hidden rounded-[5px] px-1 py-[3px] text-[7.5px] leading-[1.25] font-bold"
+                    className="absolute inset-x-0 overflow-hidden rounded-[5px] px-1 py-0.75 text-[7.5px] leading-tight font-bold"
                     style={{ top: ev.top * 0.28, height: ev.h * 0.28, background: tint(ev.color, 14), color: `color-mix(in srgb, ${ev.color} 88%, var(--c-ink-mix))` }}
                   >
                     {ev.name}
@@ -175,14 +175,14 @@ export function EduPreviewScreen() {
         </div>
         <div className="mt-2.5 space-y-2">
           {parsed.slice(0, 3).map((p) => (
-            <div key={p.name} className="flex items-center overflow-hidden rounded-[12px] pr-3.5" style={{ background: tint(p.color, 7) }}>
-              <i className="mr-3 h-[42px] w-[3px] flex-none rounded-full" style={{ background: p.color }} />
+            <div key={p.name} className="flex items-center overflow-hidden rounded-xl pr-3.5" style={{ background: tint(p.color, 7) }}>
+              <i className="mr-3 h-10.5 w-0.75 flex-none rounded-full" style={{ background: p.color }} />
               <div className="flex-1 py-2.5">
                 <div className="flex items-baseline justify-between">
                   <span className="text-[13.5px] font-bold tracking-[-.01em] text-(--c-ink)">{p.name}</span>
                   <span className="ml-2 flex-none text-[11px] font-semibold tabular-nums text-(--c-ink3)">{p.weeks}</span>
                 </div>
-                <div className="mt-[3px] text-[11.5px] font-medium tabular-nums text-(--c-ink3)">{p.when}　{p.loc}　{p.teacher}</div>
+                <div className="mt-0.75 text-[11.5px] font-medium tabular-nums text-(--c-ink3)">{p.when}　{p.loc}　{p.teacher}</div>
               </div>
             </div>
           ))}
@@ -190,7 +190,7 @@ export function EduPreviewScreen() {
 
         <div className="flex-1" />
         <div className="pb-8">
-          <div className="rounded-[16px] bg-(--c-accent) py-[15px] text-center text-[15px] font-bold text-white">导入</div>
+          <div className="rounded-2xl bg-(--c-accent) py-3.75 text-center text-[15px] font-bold text-white">导入</div>
         </div>
       </div>
     </Phone>
@@ -204,12 +204,12 @@ export function EduFailScreen() {
       <div className="flex flex-1 flex-col overflow-hidden px-5 pt-12">
         <TopBar title="没有识别到课表" />
 
-        <div className="mt-6 rounded-[16px] bg-(--c-surface) px-4 py-3.5">
+        <div className="mt-6 rounded-2xl bg-(--c-surface) px-4 py-3.5">
           <div className="text-[11.5px] font-semibold text-(--c-ink4)">页面</div>
           <div className="mt-1.5 truncate font-mono text-[12.5px] text-(--c-ink)">jw.xjvut.edu.cn/xsxk/kbcx_list.jsp</div>
         </div>
 
-        <div className="mt-6 overflow-hidden rounded-[16px] bg-(--c-surface)">
+        <div className="mt-6 overflow-hidden rounded-2xl bg-(--c-surface)">
           {options.map((t, i) => (
             <div key={t} className={`flex items-center px-4 py-3.5 ${i > 0 ? 'border-t border-(--c-surface2)' : ''}`}>
               <span className="flex-1 text-[14px] font-bold text-(--c-ink)">{t}</span>
@@ -220,7 +220,7 @@ export function EduFailScreen() {
 
         <div className="flex-1" />
         <div className="pb-8">
-          <div className="rounded-[16px] bg-(--c-surface) py-[15px] text-center text-[15px] font-bold text-(--c-ink)">返回</div>
+          <div className="rounded-2xl bg-(--c-surface) py-3.75 text-center text-[15px] font-bold text-(--c-ink)">返回</div>
         </div>
       </div>
     </Phone>

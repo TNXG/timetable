@@ -34,7 +34,7 @@ function ParsedRow({ nc, sem }: { nc: NormalizedCourse; sem: Semester }) {
   const time = r ? `${fmtMinutes(sem.timeGrid[r.startPeriod - 1]?.start ?? 0)}–${fmtMinutes(sem.timeGrid[r.endPeriod - 1]?.end ?? 0)}` : ''
   return (
     <div className="flex items-center px-4 py-3">
-      <i className="mr-3 h-[26px] w-[3px] flex-none rounded-full" style={{ background: nc.course.color }} />
+      <i className="mr-3 h-6.5 w-0.75 flex-none rounded-full" style={{ background: nc.course.color }} />
       <div className="min-w-0 flex-1">
         <div className="truncate text-[14px] font-bold">{nc.course.name}</div>
         <div className="mt-0.5 truncate text-[12px] font-medium text-(--c-ink4)">
@@ -169,7 +169,7 @@ export function ImportRunPage({ rule, initialText, initialOut, autoRun, overBrow
 
   return (
     <Page keep={overBrowser ? 'opaque' : undefined}>
-      <div className="flex-1 overflow-y-auto px-5 pb-6 [scrollbar-width:none]">
+      <div className="flex-1 overflow-y-auto px-5 pb-6 scrollbar-none">
         <TopBar
           title={stage === 'input' ? rule.name : `${pending?.courses.length ?? 0} 门课`}
           sub={stage === 'input' ? KIND_LABEL[rule.input] : undefined}
@@ -181,7 +181,7 @@ export function ImportRunPage({ rule, initialText, initialOut, autoRun, overBrow
             {stage === 'input' && (
               <div className="mt-6">
                 {rule.input === 'xlsx' ? (
-                  <label className="flex w-full cursor-pointer items-center justify-center rounded-[16px] bg-(--c-surface) py-10 text-[13.5px] font-semibold text-(--c-ink2)">
+                  <label className="flex w-full cursor-pointer items-center justify-center rounded-2xl bg-(--c-surface) py-10 text-[13.5px] font-semibold text-(--c-ink2)">
                     {fileName || '选择 .xlsx 文件'}
                     <input
                       type="file"
@@ -198,7 +198,7 @@ export function ImportRunPage({ rule, initialText, initialOut, autoRun, overBrow
                 ) : (
                   <>
                     {rule.input === 'ics' && (
-                      <label className="mb-2.5 flex w-full cursor-pointer items-center justify-center rounded-[16px] bg-(--c-surface) py-10 text-[13.5px] font-semibold text-(--c-ink2)">
+                      <label className="mb-2.5 flex w-full cursor-pointer items-center justify-center rounded-2xl bg-(--c-surface) py-10 text-[13.5px] font-semibold text-(--c-ink2)">
                         {fileName || '选择 .ics 文件'}
                         <input
                           type="file"
@@ -215,7 +215,7 @@ export function ImportRunPage({ rule, initialText, initialOut, autoRun, overBrow
                         />
                       </label>
                     )}
-                    <div className="flex items-center gap-3 rounded-[16px] bg-(--c-surface) px-4 py-2.5">
+                    <div className="flex items-center gap-3 rounded-2xl bg-(--c-surface) px-4 py-2.5">
                       <TextInput value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https:// 链接" className="min-w-0 flex-1 text-[13px]" />
                       <TextAction disabled={!url.trim() || busy !== ''} busy={busy === 'fetch'} onClick={grab}>抓取</TextAction>
                     </div>
@@ -223,7 +223,7 @@ export function ImportRunPage({ rule, initialText, initialOut, autoRun, overBrow
                       value={text}
                       onChange={(e) => setText(e.target.value)}
                       placeholder={KIND_HINT[rule.input]}
-                      className="mt-2.5 h-64 w-full rounded-[16px] bg-(--c-surface) p-3.5 font-mono text-[12px] leading-relaxed outline-none placeholder:text-(--c-ink5) focus:ring-1 focus:ring-(--c-accent-line)"
+                      className="mt-2.5 h-64 w-full rounded-2xl bg-(--c-surface) p-3.5 font-mono text-[12px] leading-relaxed outline-none placeholder:text-(--c-ink5) focus:ring-1 focus:ring-(--c-accent-line)"
                     />
                   </>
                 )}
@@ -244,7 +244,7 @@ export function ImportRunPage({ rule, initialText, initialOut, autoRun, overBrow
                   <div className="mt-1.5 px-1 text-[12.5px] font-semibold tabular-nums text-(--c-ink4)">{`${target.name}，${md(target.startDate)} 开学，共 ${target.totalWeeks} 周`}</div>
                 )}
                 {rollover && (
-                  <div className="mt-2.5 rounded-[16px] bg-(--c-surface) px-4 py-3 text-[12.5px] font-medium text-(--c-ink3)">
+                  <div className="mt-2.5 rounded-2xl bg-(--c-surface) px-4 py-3 text-[12.5px] font-medium text-(--c-ink3)">
                     <span className="font-bold text-(--c-ink)">开始新学期</span>　{sem.name}已结束，将移入往期学期
                   </div>
                 )}
@@ -256,7 +256,7 @@ export function ImportRunPage({ rule, initialText, initialOut, autoRun, overBrow
                 )}
 
                 {fileGrid && (
-                  <div className="mt-2.5 flex items-center rounded-[16px] bg-(--c-surface) px-4 py-3">
+                  <div className="mt-2.5 flex items-center rounded-2xl bg-(--c-surface) px-4 py-3">
                     <div className="min-w-0 flex-1">
                       <div className="text-[14px] font-bold">采用文件里的作息时间</div>
                       <div className="mt-0.5 truncate text-[12px] font-medium tabular-nums text-(--c-ink4)">
@@ -268,13 +268,13 @@ export function ImportRunPage({ rule, initialText, initialOut, autoRun, overBrow
                 )}
 
                 {syncSource && canKeep && (
-                  <div className="mt-2.5 flex items-center rounded-[16px] bg-(--c-surface) px-4 py-3">
+                  <div className="mt-2.5 flex items-center rounded-2xl bg-(--c-surface) px-4 py-3">
                     <div className="min-w-0 flex-1 text-[14px] font-bold">自动更新课表</div>
                     <Switch on={keepLogin} onChange={setKeepLogin} />
                   </div>
                 )}
 
-                <div className="mt-2.5 divide-y divide-(--c-surface2) overflow-hidden rounded-[16px] bg-(--c-surface)">
+                <div className="mt-2.5 divide-y divide-(--c-surface2) overflow-hidden rounded-2xl bg-(--c-surface)">
                   {pending.courses.map((nc) => (
                     <ParsedRow key={nc.course.identityKey} nc={nc} sem={target} />
                   ))}
@@ -284,7 +284,7 @@ export function ImportRunPage({ rule, initialText, initialOut, autoRun, overBrow
                 </div>
 
                 {preview.removed.length > 0 && (
-                  <div className="mt-4 rounded-[16px] bg-(--c-surface) px-4 py-3.5 text-[12.5px] font-medium text-(--c-ink3)">
+                  <div className="mt-4 rounded-2xl bg-(--c-surface) px-4 py-3.5 text-[12.5px] font-medium text-(--c-ink3)">
                     <span className="font-bold text-(--c-danger)">进回收站</span>　{preview.removed.map((c) => c.name).join('、')}
                   </div>
                 )}
@@ -294,7 +294,7 @@ export function ImportRunPage({ rule, initialText, initialOut, autoRun, overBrow
                     <div className="mt-5 text-[12.5px] font-semibold text-(--c-ink3)">{errors.length} 条无法解析</div>
                     <div className="mt-2 space-y-2">
                       {errors.map((d, i) => (
-                        <div key={i} className="rounded-[12px] bg-(--c-surface) px-3.5 py-2.5">
+                        <div key={i} className="rounded-xl bg-(--c-surface) px-3.5 py-2.5">
                           <div className="text-[12.5px] font-bold text-(--c-danger)">{d.message}</div>
                           {d.at?.snippet && <div className="mt-1 truncate font-mono text-[11px] text-(--c-ink4)">{d.at.snippet}</div>}
                         </div>

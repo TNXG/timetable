@@ -17,8 +17,8 @@ const breakName = (start: number) => (start < 15 * 60 ? '午休' : start < 20 * 
 type Pick = { i: number; which: 'start' | 'end' }
 
 /** 节次行：序号 26 | 开始胶囊 | 箭头 | 下课胶囊 | 时长，两个胶囊平分余宽 */
-const COL_IDX = 'w-[26px] flex-none'
-const COL_DUR = 'ml-3 w-[46px] flex-none text-right'
+const COL_IDX = 'w-6.5 flex-none'
+const COL_DUR = 'ml-3 w-11.5 flex-none text-right'
 
 function ArrowIcon() {
   return (
@@ -37,7 +37,7 @@ export function SchedulePage({ sem, onBack }: { sem: Semester; onBack: () => voi
 
   return (
     <Page>
-      <div className="flex-1 overflow-y-auto px-5 pb-[130px] [scrollbar-width:none]">
+      <div className="flex-1 overflow-y-auto px-5 pb-32.5 scrollbar-none">
         <TopBar title="作息时间" onBack={onBack} />
 
         <div className="mt-6 rounded-[18px] bg-(--c-surface) px-4">
@@ -58,7 +58,7 @@ export function SchedulePage({ sem, onBack }: { sem: Semester; onBack: () => voi
           <div className="flex items-center pt-3 pb-1 text-[11px] font-semibold text-(--c-ink5)">
             <span className={COL_IDX} />
             <span className="flex-1 text-center">开始</span>
-            <span className="mx-2 w-[16px] flex-none" />
+            <span className="mx-2 w-4 flex-none" />
             <span className="flex-1 text-center">下课</span>
             <span className={COL_DUR}>时长</span>
           </div>
@@ -71,7 +71,7 @@ export function SchedulePage({ sem, onBack }: { sem: Semester; onBack: () => voi
             return (
               <React.Fragment key={i}>
                 {i > 0 && (
-                  <div className={`flex items-center ${big ? 'h-[30px]' : 'h-[18px]'}`}>
+                  <div className={`flex items-center ${big ? 'h-7.5' : 'h-4.5'}`}>
                     <span className={COL_IDX} />
                     <span className={`flex-1 border-t border-dashed ${big ? 'border-(--c-line)' : 'border-(--c-line2)'}`} />
                     <span className={`px-2 text-[11px] font-semibold tabular-nums ${gap < 0 ? 'text-(--c-danger)' : big ? 'text-(--c-ink4)' : 'text-(--c-ink5)'}`}>

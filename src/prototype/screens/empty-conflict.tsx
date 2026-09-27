@@ -55,7 +55,7 @@ export function ConflictScreen({ mode = 'view' }: { mode?: 'view' | 'pick' }) {
           <div className="rounded-[22px] bg-(--c-surface) p-2.5 pb-4">
             <DayPicker
               active={todayIndex}
-              lead={<div className="-mr-[5px] flex w-8 flex-none items-center justify-center text-[10.5px] font-semibold text-(--c-ink4)">10月</div>}
+              lead={<div className="-mr-1.25 flex w-8 flex-none items-center justify-center text-[10.5px] font-semibold text-(--c-ink4)">10月</div>}
             />
             <div className="relative mt-2">
               {[0, 84, 168, 252, 336, 420, 504].map((t) => (
@@ -64,10 +64,10 @@ export function ConflictScreen({ mode = 'view' }: { mode?: 'view' | 'pick' }) {
               <div className="flex pt-1.5">
                 <div className="relative w-8 flex-none">
                   {['8:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00'].map((t) => (
-                    <div key={t} className="h-[84px] pr-1.5 text-right text-[9.5px] font-semibold tabular-nums text-(--c-ink4b)">{t}</div>
+                    <div key={t} className="h-21 pr-1.5 text-right text-[9.5px] font-semibold tabular-nums text-(--c-ink4b)">{t}</div>
                   ))}
                 </div>
-                <div className="relative flex h-[536px] flex-1 gap-[5px]">
+                <div className="relative flex h-134 flex-1 gap-1.25">
                   {conflictCols.map((col, i) => (
                     <div key={i} className="relative flex-1">
                       {col.map((ev) => {
@@ -99,7 +99,7 @@ export function ConflictScreen({ mode = 'view' }: { mode?: 'view' | 'pick' }) {
                               {!stacked && <div className="mt-0.5 text-[8.5px] leading-[1.3] font-semibold opacity-60">{ev.loc}</div>}
                             </div>
                             {stacked && lane === 0 && (
-                              <span className="absolute top-[-5px] right-[-7px] z-10 flex h-[14px] w-[14px] items-center justify-center rounded-full bg-[#E0AC6C] text-[8.5px] leading-none font-bold text-white ring-[2px] ring-white">2</span>
+                              <span className="absolute -top-1.25 -right-1.75 z-10 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-[#E0AC6C] text-[8.5px] leading-none font-bold text-white ring-2 ring-white">2</span>
                             )}
                           </div>
                         )
@@ -113,8 +113,8 @@ export function ConflictScreen({ mode = 'view' }: { mode?: 'view' | 'pick' }) {
         </div>
       </div>
 
-      <div className="absolute inset-x-0 bottom-0 z-[7]">
-        <div className="rounded-t-[26px] bg-(--c-surface) px-5 pt-5 pb-[104px] shadow-(--c-lift-shadow)">
+      <div className="absolute inset-x-0 bottom-0 z-7">
+        <div className="rounded-t-[26px] bg-(--c-surface) px-5 pt-5 pb-26 shadow-(--c-lift-shadow)">
           <div className="text-[17px] font-extrabold tracking-[-.02em] text-(--c-ink)">{pick ? '留哪一门？' : '周二 10:00 有两门课'}</div>
           {pick && <div className="mt-1.5 text-[12.5px] font-medium text-(--c-ink4)">没选的那门从课表里隐藏，不删除</div>}
           <div className={`${pick ? 'mt-4' : 'mt-3.5'} space-y-2`}>
@@ -123,7 +123,7 @@ export function ConflictScreen({ mode = 'view' }: { mode?: 'view' | 'pick' }) {
               return (
                 <div
                   key={name}
-                  className="flex items-center rounded-[12px] px-3.5 py-3"
+                  className="flex items-center rounded-xl px-3.5 py-3"
                   style={{
                     background: pick && !on ? 'var(--c-row-muted)' : tint(color, 7),
                     boxShadow: pick && on ? `inset 0 0 0 1.5px ${color}` : undefined,
@@ -131,20 +131,20 @@ export function ConflictScreen({ mode = 'view' }: { mode?: 'view' | 'pick' }) {
                 >
                   {pick ? (
                     <span
-                      className="mr-3 flex h-[17px] w-[17px] flex-none items-center justify-center rounded-full border-[1.8px]"
+                      className="mr-3 flex h-4.25 w-4.25 flex-none items-center justify-center rounded-full border-[1.8px]"
                       style={{ borderColor: on ? color : 'var(--c-radio-border)', background: on ? color : 'transparent' }}
                     >
                       {on && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.6"><path d="m6 12.5 4 4 8-9" /></svg>}
                     </span>
                   ) : (
-                    <i className="mr-3 h-[38px] w-[3px] flex-none rounded-full" style={{ background: color }} />
+                    <i className="mr-3 h-9.5 w-0.75 flex-none rounded-full" style={{ background: color }} />
                   )}
                   <div className={`min-w-0 flex-1 ${pick && !on ? 'opacity-55' : ''}`}>
                     <div className="flex items-baseline justify-between">
                       <span className="text-[13.5px] font-bold text-(--c-ink)">{name}</span>
                       <span className="ml-2 flex-none text-[11.5px] font-semibold tabular-nums text-(--c-ink3)">{time}</span>
                     </div>
-                    <div className="mt-[3px] truncate text-[11.5px] font-medium text-(--c-ink3)">{loc}　{from}</div>
+                    <div className="mt-0.75 truncate text-[11.5px] font-medium text-(--c-ink3)">{loc}　{from}</div>
                   </div>
                 </div>
               )
@@ -187,7 +187,7 @@ export function ChangeScreen() {
       <div className="flex-1 overflow-hidden px-5 pt-12">
         <TopBar title="线性代数调课了" sub="11:02 用「正方教务 通用规则」重新导入时发现的变化" />
 
-        <div className="mt-5 overflow-hidden rounded-[16px] bg-(--c-surface)">
+        <div className="mt-5 overflow-hidden rounded-2xl bg-(--c-surface)">
           {diffRows.map(([k, from, to], i) => {
             const same = from === to
             return (
@@ -209,33 +209,33 @@ export function ChangeScreen() {
 
         <div className="mt-4 text-[12.5px] font-semibold text-(--c-ink3)">受影响的安排</div>
         <div className="mt-2.5 space-y-2">
-          <div className="flex items-center rounded-[12px] px-3.5 py-3" style={{ background: tint(C.la, 7) }}>
-            <i className="mr-3 h-[38px] w-[3px] flex-none rounded-full" style={{ background: C.la }} />
+          <div className="flex items-center rounded-xl px-3.5 py-3" style={{ background: tint(C.la, 7) }}>
+            <i className="mr-3 h-9.5 w-0.75 flex-none rounded-full" style={{ background: C.la }} />
             <div className="min-w-0 flex-1">
               <div className="text-[13.5px] font-bold text-(--c-ink)">期中考试 覆盖 1–5 章</div>
-              <div className="mt-[3px] text-[11.5px] font-medium text-(--c-ink3)">原本跟着这节课，时间要不要一起改</div>
+              <div className="mt-0.75 text-[11.5px] font-medium text-(--c-ink3)">原本跟着这节课，时间要不要一起改</div>
             </div>
           </div>
-          <div className="flex items-center rounded-[12px] px-3.5 py-3" style={{ background: 'rgba(223,169,104,.09)' }}>
-            <i className="mr-3 h-[38px] w-[3px] flex-none rounded-full" style={{ background: '#DFA968' }} />
+          <div className="flex items-center rounded-xl px-3.5 py-3" style={{ background: 'rgba(223,169,104,.09)' }}>
+            <i className="mr-3 h-9.5 w-0.75 flex-none rounded-full" style={{ background: '#DFA968' }} />
             <div className="min-w-0 flex-1">
               <div className="text-[13.5px] font-bold text-(--c-ink)">新时间和大学物理重叠</div>
-              <div className="mt-[3px] text-[11.5px] font-medium text-(--c-ink3)">周五 10:00 已有大学物理，理科楼 A203</div>
+              <div className="mt-0.75 text-[11.5px] font-medium text-(--c-ink3)">周五 10:00 已有大学物理，理科楼 A203</div>
             </div>
           </div>
         </div>
 
         <div className="mt-4 text-[12.5px] font-semibold text-(--c-ink3)">这门课以前的变更</div>
-        <div className="mt-2.5 overflow-hidden rounded-[16px] bg-(--c-surface)">
+        <div className="mt-2.5 overflow-hidden rounded-2xl bg-(--c-surface)">
           {([
             ['9月30日', '停课一次', '国庆假期，已从课表移除'],
             ['9月18日', '换教室', '教学三楼 214 → 110，当时已保留'],
           ] as [string, string, string][]).map(([d, what, why], i) => (
             <div key={d} className={`flex items-baseline px-4 py-2.5 ${i > 0 ? 'border-t border-(--c-surface2)' : ''}`}>
-              <span className="w-[58px] flex-none text-[11.5px] font-semibold tabular-nums text-(--c-ink4b)">{d}</span>
+              <span className="w-14.5 flex-none text-[11.5px] font-semibold tabular-nums text-(--c-ink4b)">{d}</span>
               <div className="min-w-0 flex-1">
                 <div className="text-[13px] font-bold text-(--c-ink)">{what}</div>
-                <div className="mt-[3px] text-[11.5px] font-medium text-(--c-ink4)">{why}</div>
+                <div className="mt-0.75 text-[11.5px] font-medium text-(--c-ink4)">{why}</div>
               </div>
             </div>
           ))}

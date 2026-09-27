@@ -60,7 +60,7 @@ export function ReviewPage({
           <button onClick={onRetake} className="flex h-9 items-center rounded-full bg-(--c-surface) px-4 text-[13px] font-bold text-(--c-ink) transition-transform duration-150 active:scale-[.96]">重拍</button>
         </div>
 
-        <div className="mt-4 flex flex-none gap-2.5 overflow-x-auto [scrollbar-width:none]">
+        <div className="mt-4 flex flex-none gap-2.5 overflow-x-auto scrollbar-none">
           {photos.map((p, i) => (
             <TaskPhotoImg
               key={p.path}

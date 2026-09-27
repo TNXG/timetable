@@ -34,7 +34,7 @@ export function TodayScreen({ overlay }: { overlay?: React.ReactNode }) {
 
   return (
     <Phone>
-      <div ref={scrollRef} onScroll={onScroll} className="flex-1 overflow-y-auto pt-12 pb-[200px] [scrollbar-width:none]">
+      <div ref={scrollRef} onScroll={onScroll} className="flex-1 overflow-y-auto pt-12 pb-50 scrollbar-none">
         <div className="px-5">
           <h1 className="text-[26px] font-extrabold tracking-[-.02em] text-(--c-ink)">10月14日 <span className="font-bold text-(--c-ink4)">周二</span></h1>
           <div className="mt-2 flex items-center gap-2.5 text-[12.5px] font-semibold text-(--c-ink3)">
@@ -64,7 +64,7 @@ export function TodayScreen({ overlay }: { overlay?: React.ReactNode }) {
       </div>
 
       <div
-        className="pointer-events-none absolute inset-x-0 bottom-0 z-[7] h-[200px]"
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-7 h-50"
         style={{ background: 'var(--c-fade)' }}
       />
       {!overlay && <DateStrip active={active} />}
@@ -144,14 +144,14 @@ export function WeekScreen({ overlay }: { overlay?: React.ReactNode }) {
           <div className="rounded-[22px] bg-(--c-surface) p-2.5 pb-4">
             <DayPicker
               active={todayIndex}
-              lead={<div className="-mr-[5px] flex w-8 flex-none items-center justify-center text-[10.5px] font-semibold text-(--c-ink4)">10月</div>}
+              lead={<div className="-mr-1.25 flex w-8 flex-none items-center justify-center text-[10.5px] font-semibold text-(--c-ink4)">10月</div>}
             />
 
             <div className="relative mt-2">
               <WeekLines axis={weekAxis} />
               <div className="flex pt-1.5">
                 <WeekAxis axis={weekAxis} nowTop={weekAxis.y(nowMin)} nowLabel={nowLabel} />
-                <div className="relative flex flex-1 gap-[5px]" style={{ height: weekAxis.height }}>
+                <div className="relative flex flex-1 gap-1.25" style={{ height: weekAxis.height }}>
                   {weekCols.map((col, i) => {
                     const pastCol = i < todayIndex
                     const nowY = weekAxis.y(nowMin)
@@ -180,7 +180,7 @@ export function WeekScreen({ overlay }: { overlay?: React.ReactNode }) {
                           )
                         })}
                         {i === todayIndex && (
-                          <div className="pointer-events-none absolute right-[-2px] left-[-2px] z-20" style={{ top: nowY }}>
+                          <div className="pointer-events-none absolute -right-0.5 -left-0.5 z-20" style={{ top: nowY }}>
                             <i className="block h-[1.5px] w-full rounded-full bg-(--c-accent)" />
                           </div>
                         )}

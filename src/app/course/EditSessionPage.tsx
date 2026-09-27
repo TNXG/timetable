@@ -97,7 +97,7 @@ export function EditSessionPage({
         )}
 
         <div className="mt-4 text-[12.5px] font-semibold text-(--c-ink3)">时间与地点</div>
-        <div className="mt-2.5 divide-y divide-(--c-surface2) overflow-hidden rounded-[16px] bg-(--c-surface)">
+        <div className="mt-2.5 divide-y divide-(--c-surface2) overflow-hidden rounded-2xl bg-(--c-surface)">
           {scope === 0 ? (
             <Field k="日期"><DateInput value={date} onChange={setDate} /></Field>
           ) : (
@@ -119,7 +119,7 @@ export function EditSessionPage({
         </div>
 
         {ov && (
-          <div className="mt-5 overflow-hidden rounded-[16px] bg-(--c-surface)">
+          <div className="mt-5 overflow-hidden rounded-2xl bg-(--c-surface)">
             <button
               onClick={() => { store.removeOverride(occ.ruleId!, occ.date); onBack() }}
               className="w-full px-4 py-3.5 text-left text-[13.5px] font-bold text-(--c-rose) transition-colors active:bg-(--c-bg)"

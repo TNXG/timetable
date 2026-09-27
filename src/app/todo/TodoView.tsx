@@ -36,11 +36,11 @@ export function TaskRow({
               {t.title || '板书'}
             </span>
             {t.kind === 'exam' && (
-              <span className="flex-none rounded-[5px] bg-(--c-rose-soft) px-1.5 py-[2px] text-[10px] font-extrabold text-(--c-rose)">考试</span>
+              <span className="flex-none rounded-[5px] bg-(--c-rose-soft) px-1.5 py-0.5 text-[10px] font-extrabold text-(--c-rose)">考试</span>
             )}
           </div>
-          <div className="mt-[5px] flex items-baseline gap-1.5 text-[12px] leading-[16px] font-medium text-(--c-ink4)">
-            <span className="h-[7px] w-[7px] flex-none self-center rounded-full" style={{ background: color }} />
+          <div className="mt-1.25 flex items-baseline gap-1.5 text-[12px] leading-4 font-medium text-(--c-ink4)">
+            <span className="h-1.75 w-1.75 flex-none self-center rounded-full" style={{ background: color }} />
             <span className="truncate">{course?.name ?? KIND_LABEL[t.kind]}</span>
             <span className="flex-none tabular-nums text-(--c-ink3)">{right}</span>
           </div>
@@ -49,7 +49,7 @@ export function TaskRow({
           )}
           {t.note && !left && <div className="mt-1 truncate text-[12px] font-medium text-(--c-ink3)">{t.note}</div>}
         </div>
-        {photo && <TaskPhotoImg path={photo.path} className="ml-3 h-[56px] w-[56px] flex-none rounded-[10px]" />}
+        {photo && <TaskPhotoImg path={photo.path} className="ml-3 h-14 w-14 flex-none rounded-[10px]" />}
       </button>
     </div>
   )
@@ -74,20 +74,20 @@ function InboxRow({
         <button onClick={onOpen} className="flex w-full items-start text-left">
           <div className="min-w-0 flex-1">
             <div className="truncate text-[14px] font-bold tracking-[-.01em] text-(--c-ink3)">{t.title || '板书'}</div>
-            <div className="mt-[5px] flex items-baseline gap-1.5 text-[12px] leading-[16px] font-medium text-(--c-ink4)">
-              <span className="h-[7px] w-[7px] flex-none self-center rounded-full" style={{ background: course?.color ?? 'var(--c-ink5)' }} />
+            <div className="mt-1.25 flex items-baseline gap-1.5 text-[12px] leading-4 font-medium text-(--c-ink4)">
+              <span className="h-1.75 w-1.75 flex-none self-center rounded-full" style={{ background: course?.color ?? 'var(--c-ink5)' }} />
               <span className="truncate">{course?.name ?? KIND_LABEL[t.kind]}</span>
               <span className="flex-none tabular-nums text-(--c-ink3)">
                 {t.capturedAt ? `${timeOfDay(t.capturedAt)} 拍下` : dueText(t.due, t.dueMinutes, today)}
               </span>
             </div>
           </div>
-          {photo && <TaskPhotoImg path={photo.path} className="ml-3 h-[56px] w-[56px] flex-none rounded-[10px]" />}
+          {photo && <TaskPhotoImg path={photo.path} className="ml-3 h-14 w-14 flex-none rounded-[10px]" />}
         </button>
         {suggest && suggest.beforeClass && (
           <button
             onClick={() => store.editTask(t.id, { due: suggest.due, dueMinutes: suggest.dueMinutes, inbox: false })}
-            className="mt-2 inline-flex items-center gap-1 rounded-full bg-(--c-accent-soft) px-2.5 py-[5px] text-[11.5px] font-bold text-(--c-accent) transition-transform duration-150 active:scale-[.96]"
+            className="mt-2 inline-flex items-center gap-1 rounded-full bg-(--c-accent-soft) px-2.5 py-1.25 text-[11.5px] font-bold text-(--c-accent) transition-transform duration-150 active:scale-[.96]"
           >
             下次课前，{WD[weekdayOf(suggest.due)]} {fmtMinutes(suggest.dueMinutes)}
             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="m9 5 7 7-7 7" /></svg>
@@ -132,7 +132,7 @@ export function TodoView({
 
   return (
     <>
-      <div className="flex-1 overflow-y-auto pb-[170px] [scrollbar-width:none]">
+      <div className="flex-1 overflow-y-auto pb-42.5 scrollbar-none">
         <StickyHead className="px-5">
           <h1 className="text-[26px] font-extrabold tracking-[-.02em] text-(--c-ink)">待办</h1>
           {state.tasks.length > 0 && (

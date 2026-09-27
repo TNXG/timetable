@@ -54,7 +54,7 @@ export function SearchPalette({ state, onClose, onPickCourse, onPickTask }: { st
   }, [q, state])
 
   return (
-    <div className="flex-1 overflow-y-auto [scrollbar-width:none]">
+    <div className="flex-1 overflow-y-auto scrollbar-none">
       <div className="px-4 pt-[max(52px,calc(env(safe-area-inset-top)+22px))] pb-10">
         <div className="flex items-center rounded-full bg-(--c-surface) px-4 py-2.5">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" style={{ stroke: 'var(--c-ink4)' }} strokeWidth="2.2" strokeLinecap="round" className="mr-2.5 flex-none"><circle cx="11" cy="11" r="7" /><path d="m16.5 16.5 4 4" /></svg>
@@ -78,10 +78,10 @@ export function SearchPalette({ state, onClose, onPickCourse, onPickTask }: { st
                   const slots = state.rules.filter((r) => r.courseId === c.id)
                   return (
                     <button key={c.id} onClick={() => onPickCourse(c)} className="flex w-full items-center rounded-[10px] px-2.5 py-2.5 text-left transition-colors active:bg-(--c-surface2)">
-                      <i className="mr-3 h-[26px] w-[3px] flex-none rounded-full" style={{ background: c.color }} />
+                      <i className="mr-3 h-6.5 w-0.75 flex-none rounded-full" style={{ background: c.color }} />
                       <div className="min-w-0 flex-1">
                         <div className="truncate text-[13.5px] font-semibold"><Hit text={c.name} q={q} /></div>
-                        <div className="mt-[2px] truncate text-[11.5px] font-medium text-(--c-ink4)">
+                        <div className="mt-0.5 truncate text-[11.5px] font-medium text-(--c-ink4)">
                           {slots.length > 0 ? `${WD[slots[0].weekday]} ${slots[0].startPeriod}–${slots[0].endPeriod} 节` : '—'}{locs[0] ? `，${locs[0]}` : ''}
                         </div>
                       </div>
@@ -100,14 +100,14 @@ export function SearchPalette({ state, onClose, onPickCourse, onPickTask }: { st
                   const course = state.courses.find((c) => c.id === t.courseId)
                   return (
                     <button key={t.id} onClick={() => onPickTask(t)} className={`flex w-full items-center rounded-[10px] px-2.5 py-2.5 text-left transition-colors active:bg-(--c-surface2) ${t.done ? 'opacity-45' : ''}`}>
-                      <i className="mr-3 h-[26px] w-[3px] flex-none rounded-full" style={{ background: course?.color ?? 'var(--c-ink5)' }} />
+                      <i className="mr-3 h-6.5 w-0.75 flex-none rounded-full" style={{ background: course?.color ?? 'var(--c-ink5)' }} />
                       <div className="min-w-0 flex-1">
                         <div className={`truncate text-[13.5px] font-semibold ${t.done ? 'line-through' : ''}`}><Hit text={t.title || '板书'} q={q} /></div>
-                        <div className="mt-[2px] truncate text-[11.5px] font-medium text-(--c-ink4)">
+                        <div className="mt-0.5 truncate text-[11.5px] font-medium text-(--c-ink4)">
                           {course?.name ?? TASK_KIND_LABEL[t.kind]}，{dueText(t.due, t.dueMinutes, today)}
                         </div>
                       </div>
-                      {t.kind === 'exam' && <span className="ml-2 flex-none rounded-[5px] bg-(--c-rose-soft) px-1.5 py-[2px] text-[10px] font-extrabold text-(--c-rose)">考试</span>}
+                      {t.kind === 'exam' && <span className="ml-2 flex-none rounded-[5px] bg-(--c-rose-soft) px-1.5 py-0.5 text-[10px] font-extrabold text-(--c-rose)">考试</span>}
                     </button>
                   )
                 })}

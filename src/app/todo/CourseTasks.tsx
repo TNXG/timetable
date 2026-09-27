@@ -35,7 +35,7 @@ export function CourseTasks({
           <motion.div
             layoutId={composeLayoutId(course.id)}
             transition={SHEET}
-            className="flex items-center gap-2 bg-(--c-surface2) p-[6px] pr-3.5"
+            className="flex items-center gap-2 bg-(--c-surface2) p-1.5 pr-3.5"
             style={{ borderRadius: COMPOSE_RADIUS }}
           >
             <button

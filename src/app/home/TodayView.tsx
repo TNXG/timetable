@@ -117,7 +117,7 @@ export function TodayView({
       <div
         ref={(el) => { scrollRef.current = el }}
         onScroll={onScroll}
-        className="flex-1 overflow-y-auto pb-[210px] [scrollbar-width:none]"
+        className="flex-1 overflow-y-auto pb-52.5 scrollbar-none"
       >
         <StickyHead bleed={0} className="px-5">
           <div className="flex items-start justify-between">
@@ -142,7 +142,7 @@ export function TodayView({
             )}
           </div>
         </StickyHead>
-        {vac && <div className="mx-5 mt-1 rounded-[16px] bg-(--c-surface) px-4 py-3 text-[13px] font-semibold text-[#9A7B3F]">{vac}</div>}
+        {vac && <div className="mx-5 mt-1 rounded-2xl bg-(--c-surface) px-4 py-3 text-[13px] font-semibold text-[#9A7B3F]">{vac}</div>}
 
         {nothingAtAll ? (
           <div className="mt-16">
@@ -190,7 +190,7 @@ export function TodayView({
               return (
               <div key={day.date} data-day={day.date}>
                 {day.occ.length > 0 && (
-                  <div className="flex items-baseline justify-between pb-[22px]">
+                  <div className="flex items-baseline justify-between pb-5.5">
                     <div className="flex items-baseline gap-2.5">
                       <span className="text-[17px] leading-none font-extrabold tracking-[-.02em]">{day.rel}</span>
                       <span className="text-[12.5px] font-semibold text-(--c-ink4)">{md(day.date)}{day.rel !== WD[weekdayOf(day.date)] ? ` ${WD[weekdayOf(day.date)]}` : ''}</span>
@@ -226,24 +226,24 @@ export function TodayView({
                           {nowOn && (
                             <>
                               <i className="absolute inset-x-0 top-0 bg-(--c-accent)" style={{ height: `${pct}%` }} />
-                              <i className="absolute left-1/2 h-[9px] w-[9px] -translate-x-1/2 -translate-y-1/2 rounded-full border-[2.5px] border-(--c-accent) bg-(--c-surface)" style={{ top: `${pct}%` }} />
+                              <i className="absolute left-1/2 h-2.25 w-2.25 -translate-x-1/2 -translate-y-1/2 rounded-full border-[2.5px] border-(--c-accent) bg-(--c-surface)" style={{ top: `${pct}%` }} />
                             </>
                           )}
                         </div>
                       </div>
                       <div className={`min-w-0 flex-1 pl-4 ${isLast ? 'pb-7' : ''} ${past || o.status === 'cancelled' ? 'opacity-50' : ''}`}>
                       {/* 每节课一张卡；右侧竖列放学科贴纸和状态标签，右边缘对齐，贴纸随卡片一起抬起 */}
-                      <div data-lift className="relative rounded-[16px] bg-(--c-surface) px-4 py-3.5">
+                      <div data-lift className="relative rounded-2xl bg-(--c-surface) px-4 py-3.5">
                         <div className="flex items-start gap-2">
                           <div className="min-w-0 flex-1">
                             <div className={`text-[16px] leading-[1.25] font-bold tracking-[-.01em] ${o.status === 'cancelled' ? 'line-through' : ''}`}>{o.name}</div>
                             <div className="mt-1 flex items-center gap-2 text-[12.5px] font-medium text-(--c-ink3)">
                               <span className="min-w-0 truncate">{[o.location, o.teacher].filter(Boolean).join('，') || '—'}</span>
-                              {o.conflict && <span className="flex-none rounded-[7px] bg-(--c-amber-soft) px-2 py-[3px] text-[10.5px] font-bold text-(--c-amber)">冲突</span>}
-                              {o.status === 'moved' && <span className="flex-none rounded-[7px] bg-(--c-accent-soft) px-2 py-[3px] text-[10.5px] font-bold text-(--c-accent)">已调课</span>}
-                              {o.status === 'cancelled' && <span className="flex-none rounded-[7px] bg-(--c-surface2) px-2 py-[3px] text-[10.5px] font-bold text-(--c-ink3)">停课</span>}
-                              {o.status === 'leave' && <span className="flex-none rounded-[7px] bg-(--c-rose-soft) px-2 py-[3px] text-[10.5px] font-bold text-(--c-rose)">请假</span>}
-                              {o.muted && o.status === 'normal' && !past && <span className="flex-none rounded-[7px] bg-(--c-surface2) px-2 py-[3px] text-[10.5px] font-bold text-(--c-ink3)">静音</span>}
+                              {o.conflict && <span className="flex-none rounded-[7px] bg-(--c-amber-soft) px-2 py-0.75 text-[10.5px] font-bold text-(--c-amber)">冲突</span>}
+                              {o.status === 'moved' && <span className="flex-none rounded-[7px] bg-(--c-accent-soft) px-2 py-0.75 text-[10.5px] font-bold text-(--c-accent)">已调课</span>}
+                              {o.status === 'cancelled' && <span className="flex-none rounded-[7px] bg-(--c-surface2) px-2 py-0.75 text-[10.5px] font-bold text-(--c-ink3)">停课</span>}
+                              {o.status === 'leave' && <span className="flex-none rounded-[7px] bg-(--c-rose-soft) px-2 py-0.75 text-[10.5px] font-bold text-(--c-rose)">请假</span>}
+                              {o.muted && o.status === 'normal' && !past && <span className="flex-none rounded-[7px] bg-(--c-surface2) px-2 py-0.75 text-[10.5px] font-bold text-(--c-ink3)">静音</span>}
                             </div>
                           </div>
                           {sticker && <Sticker id={sticker} size={24} tilt={-4} className="flex-none" />}

@@ -20,7 +20,7 @@ export function DetailScreen({ tall }: { tall?: boolean }) {
         </div>
 
         <Card className="relative">
-          <Sticker id="math-calc" size={74} tilt={stickerTilt('高等数学（下）')} className="absolute -top-[18px] -right-1.5" />
+          <Sticker id="math-calc" size={74} tilt={stickerTilt('高等数学（下）')} className="absolute -top-4.5 -right-1.5" />
           <div className="pr-16 text-[22px] font-extrabold tracking-[-.01em] text-(--c-ink)">高等数学（下）</div>
           <div className="mt-1.5 text-[12.5px] font-medium text-(--c-ink3)">必修课，5 学分，9月2日 – 12月18日</div>
           <div className="mt-5">
@@ -33,7 +33,7 @@ export function DetailScreen({ tall }: { tall?: boolean }) {
               ['提醒', '上课前 20 分钟'],
             ] as [string, React.ReactNode][]).map(([k, v], i) => (
               <div key={k} className={`flex items-baseline ${i > 0 ? 'mt-4' : ''}`}>
-                <span className="w-[72px] flex-none text-[13px] font-medium text-(--c-ink4)">{k}</span>
+                <span className="w-18 flex-none text-[13px] font-medium text-(--c-ink4)">{k}</span>
                 <span className="text-[14px] font-semibold text-(--c-ink)">{v}</span>
               </div>
             ))}
@@ -65,14 +65,14 @@ export function DetailScreen({ tall }: { tall?: boolean }) {
 
         <Card>
           <div className="flex items-baseline">
-            <span className="w-[72px] flex-none text-[13px] font-medium text-(--c-ink4)">学期进度</span>
+            <span className="w-18 flex-none text-[13px] font-medium text-(--c-ink4)">学期进度</span>
             <span className="text-[14px] font-semibold tabular-nums text-(--c-ink)">13 / 64 课时</span>
           </div>
           <div className="mt-3 h-1 overflow-hidden rounded-full bg-(--c-surface2)">
             <i className="block h-full w-[20.3%] rounded-full bg-(--c-accent)" />
           </div>
           <div className="mt-4 flex items-baseline">
-            <span className="w-[72px] flex-none text-[13px] font-medium text-(--c-ink4)">出勤</span>
+            <span className="w-18 flex-none text-[13px] font-medium text-(--c-ink4)">出勤</span>
             <span className="text-[14px] font-semibold tabular-nums text-(--c-ink)">6 / 7，出勤率 86%</span>
           </div>
           <div className="mt-3 flex gap-1.5">
@@ -89,29 +89,29 @@ export function DetailScreen({ tall }: { tall?: boolean }) {
           </div>
           <div className="mt-3 space-y-2">
             <div className="flex items-center rounded-[14px] bg-(--c-bg) p-2.5">
-              <div className="mr-3 h-[44px] w-[58px] flex-none overflow-hidden rounded-[9px]"><Board className="h-full w-full" zoom={0.28} /></div>
+              <div className="mr-3 h-11 w-14.5 flex-none overflow-hidden rounded-[9px]"><Board className="h-full w-full" zoom={0.28} /></div>
               <div className="min-w-0 flex-1">
                 <div className="text-[13.5px] font-semibold text-(--c-ink)">板书</div>
-                <div className="mt-[3px] text-[11.5px] font-medium text-(--c-ink4)">今天 09:38 拍下</div>
+                <div className="mt-0.75 text-[11.5px] font-medium text-(--c-ink4)">今天 09:38 拍下</div>
               </div>
-              <span className="ml-2 flex h-[26px] flex-none items-center rounded-full bg-(--c-accent-soft) px-2.5 text-[11px] font-bold text-(--c-accent)">周四 课前</span>
+              <span className="ml-2 flex h-6.5 flex-none items-center rounded-full bg-(--c-accent-soft) px-2.5 text-[11px] font-bold text-(--c-accent)">周四 课前</span>
             </div>
             <div className="flex items-center rounded-[14px] bg-(--c-bg) px-3 py-2.5">
               <div className="min-w-0 flex-1">
                 <div className="truncate text-[13.5px] font-semibold text-(--c-ink)">习题册 P41–P45 第 3、5、7 题</div>
-                <div className="mt-[3px] text-[11.5px] font-medium text-(--c-ink4)">作业，纸质提交</div>
+                <div className="mt-0.75 text-[11.5px] font-medium text-(--c-ink4)">作业，纸质提交</div>
               </div>
-              <span className="ml-2 flex h-[26px] flex-none items-center rounded-full bg-(--c-accent-soft) px-2.5 text-[11px] font-bold text-(--c-accent)">今晚 23:00</span>
+              <span className="ml-2 flex h-6.5 flex-none items-center rounded-full bg-(--c-accent-soft) px-2.5 text-[11px] font-bold text-(--c-accent)">今晚 23:00</span>
             </div>
             <div className="flex items-center rounded-[14px] bg-(--c-bg) px-3 py-2.5">
               <div className="min-w-0 flex-1">
                 <div className="truncate text-[13.5px] font-semibold text-(--c-ink)">期中考试 1–5 章</div>
-                <div className="mt-[3px] text-[11.5px] font-medium text-(--c-ink4)">考试，可带计算器</div>
+                <div className="mt-0.75 text-[11.5px] font-medium text-(--c-ink4)">考试，可带计算器</div>
               </div>
               <span className="ml-2 flex-none text-[11.5px] font-semibold text-(--c-ink4)">第 9 周</span>
             </div>
           </div>
-          <div className="mt-3 flex items-center gap-2 rounded-full bg-(--c-bg) p-[5px] pr-3">
+          <div className="mt-3 flex items-center gap-2 rounded-full bg-(--c-bg) p-1.25 pr-3">
             <span className="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-(--c-surface)">
               <CameraIcon size={16} />
             </span>
@@ -158,25 +158,25 @@ export function AddScreen() {
         <div className="mt-1.5 text-[13px] font-medium text-(--c-ink4)">选一条规则，选中就开始解析导入</div>
 
         <div className="mt-6 text-[12.5px] font-semibold text-(--c-ink3)">我的规则</div>
-        <div className="mt-2.5 overflow-hidden rounded-[16px] bg-(--c-surface)">
+        <div className="mt-2.5 overflow-hidden rounded-2xl bg-(--c-surface)">
           {myRules.map((r, i) => (
             <div key={r.name} className={`px-4 py-3.5 ${i > 0 ? 'border-t border-(--c-surface2)' : ''}`}>
               <div className="flex items-center">
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
                     <span className={`text-[14.5px] font-bold ${r.running ? 'text-(--c-accent)' : 'text-(--c-ink)'}`}>{r.name}</span>
-                    {r.tag && !r.running && <span className="rounded-[6px] bg-(--c-surface2) px-1.5 py-[2px] text-[10px] font-bold text-(--c-ink3)">{r.tag}</span>}
+                    {r.tag && !r.running && <span className="rounded-md bg-(--c-surface2) px-1.5 py-0.5 text-[10px] font-bold text-(--c-ink3)">{r.tag}</span>}
                   </div>
                   <div className="mt-1 text-[12px] font-medium text-(--c-ink4)">{r.running ? r.progress : r.meta}</div>
                 </div>
                 {r.running ? (
-                  <svg className="ml-3 h-[15px] w-[15px] flex-none animate-spin" viewBox="0 0 24 24" fill="none" stroke="#4F5BD5" strokeWidth="2.6" strokeLinecap="round"><path d="M12 3a9 9 0 1 0 9 9" /></svg>
+                  <svg className="ml-3 h-3.75 w-3.75 flex-none animate-spin" viewBox="0 0 24 24" fill="none" stroke="#4F5BD5" strokeWidth="2.6" strokeLinecap="round"><path d="M12 3a9 9 0 1 0 9 9" /></svg>
                 ) : (
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink5)" strokeWidth="2.4" className="ml-3 flex-none"><path d="m9 5 7 7-7 7" /></svg>
                 )}
               </div>
               {r.running && (
-                <div className="mt-3 h-[3px] overflow-hidden rounded-full bg-(--c-accent-soft)">
+                <div className="mt-3 h-0.75 overflow-hidden rounded-full bg-(--c-accent-soft)">
                   <i className="block h-full rounded-full bg-(--c-accent)" style={{ width: `${r.pct}%` }} />
                 </div>
               )}
@@ -185,7 +185,7 @@ export function AddScreen() {
         </div>
 
         <div className="mt-6 text-[12.5px] font-semibold text-(--c-ink3)">添加新规则</div>
-        <div className="mt-2.5 overflow-hidden rounded-[16px] bg-(--c-surface)">
+        <div className="mt-2.5 overflow-hidden rounded-2xl bg-(--c-surface)">
           {ruleSources.map(([t, d], i) => (
             <div key={t} className={`flex items-center px-4 py-3.5 ${i > 0 ? 'border-t border-(--c-surface2)' : ''}`}>
               <div className="flex-1">
@@ -197,7 +197,7 @@ export function AddScreen() {
           ))}
         </div>
 
-        <div className="mt-5 px-1 text-[11.5px] leading-[1.5] font-medium text-(--c-ink4b)">
+        <div className="mt-5 px-1 text-[11.5px] leading-normal font-medium text-(--c-ink4b)">
           上次导入 21 门课，9月1日，用时 6 秒。
         </div>
       </div>
@@ -223,34 +223,34 @@ export function LinkScreen() {
       <div className="flex-1 overflow-hidden px-5 pt-12">
         <TopBar title="从链接添加" sub="粘贴规则链接或分享码" />
 
-        <div className="mt-6 rounded-[16px] bg-(--c-surface) px-4 py-3.5">
+        <div className="mt-6 rounded-2xl bg-(--c-surface) px-4 py-3.5">
           <div className="flex items-center justify-between">
             <span className="text-[11.5px] font-semibold text-(--c-ink4)">规则链接</span>
             <span className="text-[13px] font-bold text-(--c-accent)">粘贴</span>
           </div>
-          <div className="mt-2 font-mono text-[12.5px] leading-[1.5] break-all text-(--c-ink)">
-            lexicon://rule/zfjw-generic?v=2.3<i className="ml-[1px] inline-block h-[15px] w-[1.5px] translate-y-[2px] bg-(--c-accent)" />
+          <div className="mt-2 font-mono text-[12.5px] leading-normal break-all text-(--c-ink)">
+            lexicon://rule/zfjw-generic?v=2.3<i className="ml-px inline-block h-3.75 w-[1.5px] translate-y-0.5 bg-(--c-accent)" />
           </div>
         </div>
 
         <div className="mt-5 text-[12.5px] font-semibold text-(--c-ink3)">解析出 18 门课</div>
 
         {/* 文件自带节次表且与当前不同：默认采用（当前仍是出厂作息时），用户改过的作息不自动覆盖 */}
-        <div className="mt-2.5 flex items-center rounded-[16px] bg-(--c-surface) px-4 py-3">
+        <div className="mt-2.5 flex items-center rounded-2xl bg-(--c-surface) px-4 py-3">
           <div className="min-w-0 flex-1">
             <div className="text-[14px] font-bold text-(--c-ink)">采用文件里的作息时间</div>
             <div className="mt-0.5 truncate text-[12px] font-medium tabular-nums text-(--c-ink4)">12 节 08:00–22:10，当前 10 节</div>
           </div>
-          <span className="relative h-[26px] w-[44px] flex-none rounded-full bg-(--c-accent)"><i className="absolute top-[3px] right-[3px] h-[20px] w-[20px] rounded-full bg-white" /></span>
+          <span className="relative h-6.5 w-11 flex-none rounded-full bg-(--c-accent)"><i className="absolute top-0.75 right-0.75 h-5 w-5 rounded-full bg-white" /></span>
         </div>
 
-        <div className="mt-2.5 rounded-[16px] bg-(--c-surface) px-3 pt-2.5 pb-3">
-          <div className="flex gap-[4px]">
+        <div className="mt-2.5 rounded-2xl bg-(--c-surface) px-3 pt-2.5 pb-3">
+          <div className="flex gap-1">
             {['一', '二', '三', '四', '五', '六'].map((w) => (
               <div key={w} className="flex-1 text-center text-[9.5px] font-semibold text-(--c-ink4)">{w}</div>
             ))}
           </div>
-          <div className="relative mt-1.5 flex h-[152px] gap-[4px]">
+          <div className="relative mt-1.5 flex h-38 gap-1">
             {[0, 50, 100].map((t) => (
               <div key={t} className="absolute inset-x-0 h-px bg-(--c-line2)" style={{ top: t + 48 }} />
             ))}
@@ -259,7 +259,7 @@ export function LinkScreen() {
                 {col.map((ev) => (
                   <div
                     key={ev.name + ev.top}
-                    className="absolute inset-x-0 overflow-hidden rounded-[5px] px-1 py-[3px] text-[7.5px] leading-[1.25] font-bold"
+                    className="absolute inset-x-0 overflow-hidden rounded-[5px] px-1 py-0.75 text-[7.5px] leading-tight font-bold"
                     style={{ top: ev.top * 0.28, height: ev.h * 0.28, background: tint(ev.color, 14), color: `color-mix(in srgb, ${ev.color} 88%, var(--c-ink-mix))` }}
                   >
                     {ev.name}
@@ -272,14 +272,14 @@ export function LinkScreen() {
 
         <div className="mt-3 space-y-2">
           {parsed.slice(0, 2).map((p) => (
-            <div key={p.name} className="flex items-center overflow-hidden rounded-[12px] pr-3.5" style={{ background: tint(p.color, 7) }}>
-              <i className="mr-3 h-[42px] w-[3px] flex-none rounded-full" style={{ background: p.color }} />
+            <div key={p.name} className="flex items-center overflow-hidden rounded-xl pr-3.5" style={{ background: tint(p.color, 7) }}>
+              <i className="mr-3 h-10.5 w-0.75 flex-none rounded-full" style={{ background: p.color }} />
               <div className="flex-1 py-2.5">
                 <div className="flex items-baseline justify-between">
                   <span className="text-[13.5px] font-bold tracking-[-.01em] text-(--c-ink)">{p.name}</span>
                   <span className="ml-2 flex-none text-[11px] font-semibold tabular-nums text-(--c-ink3)">{p.weeks}</span>
                 </div>
-                <div className="mt-[3px] text-[11.5px] font-medium tabular-nums text-(--c-ink3)">{p.when}　{p.loc}　{p.teacher}</div>
+                <div className="mt-0.75 text-[11.5px] font-medium tabular-nums text-(--c-ink3)">{p.when}　{p.loc}　{p.teacher}</div>
               </div>
             </div>
           ))}
@@ -313,7 +313,7 @@ export function AiRuleScreen() {
       <div className="flex-1 overflow-hidden px-5 pt-12">
         <TopBar title="让 AI 生成规则" sub="复制这段 Prompt 交给任意 AI，写好后粘贴即可" />
 
-        <div className="relative mt-6 rounded-[16px] bg-(--c-surface) px-4 py-4">
+        <div className="relative mt-6 rounded-2xl bg-(--c-surface) px-4 py-4">
           <div className="absolute top-3.5 right-4">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink2)" strokeWidth="1.9"><rect x="9" y="9" width="11" height="11" rx="2.5" /><path d="M15 5.5A2.5 2.5 0 0 0 12.5 3h-6A3.5 3.5 0 0 0 3 6.5v6A2.5 2.5 0 0 0 5.5 15" /></svg>
           </div>
@@ -326,15 +326,15 @@ export function AiRuleScreen() {
           ))}
         </div>
 
-        <div className="mt-4 rounded-[16px] bg-(--c-surface) px-4 py-3.5">
+        <div className="mt-4 rounded-2xl bg-(--c-surface) px-4 py-3.5">
           <div className="flex items-center justify-between">
             <span className="text-[11.5px] font-semibold text-(--c-ink4)">AI 输出的规则</span>
             <span className="text-[13px] font-bold text-(--c-accent)">粘贴</span>
           </div>
-          <div className="mt-2 font-mono text-[12.5px] leading-[1.5] text-(--c-ink5)">在这里粘贴，或拖入 .rule 文件</div>
+          <div className="mt-2 font-mono text-[12.5px] leading-normal text-(--c-ink5)">在这里粘贴，或拖入 .rule 文件</div>
         </div>
 
-        <div className="mt-4 rounded-[16px] bg-(--c-surface) px-4 py-3.5 text-center">
+        <div className="mt-4 rounded-2xl bg-(--c-surface) px-4 py-3.5 text-center">
           <span className="text-[13px] font-bold text-(--c-ink5)">解析并预览</span>
         </div>
       </div>

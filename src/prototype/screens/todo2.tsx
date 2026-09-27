@@ -40,14 +40,14 @@ export const todo2Groups: [string, Todo2[]][] = [
 export function Todo2Row({ t }: { t: Todo2 }) {
   return (
     <div className="flex items-start rounded-[14px] bg-(--c-surface) px-3.5 py-3">
-      <span className="mt-[2px] h-[17px] w-[17px] flex-none rounded-[6px] border-[1.6px] border-(--c-ink5)" />
+      <span className="mt-0.5 h-4.25 w-4.25 flex-none rounded-md border-[1.6px] border-(--c-ink5)" />
       <div className="ml-3 min-w-0 flex-1">
         <div className="flex items-center gap-1.5">
           <span className={`truncate text-[14px] font-bold tracking-[-.01em] ${t.suggest ? 'text-(--c-ink3)' : 'text-(--c-ink)'}`}>{t.title}</span>
-          {t.exam && <span className="flex-none rounded-[5px] bg-(--c-rose-soft) px-1.5 py-[2px] text-[10px] font-extrabold text-(--c-rose)">考试</span>}
+          {t.exam && <span className="flex-none rounded-[5px] bg-(--c-rose-soft) px-1.5 py-0.5 text-[10px] font-extrabold text-(--c-rose)">考试</span>}
         </div>
-        <div className="mt-[5px] flex items-center gap-1.5 text-[12px] font-medium text-(--c-ink4)">
-          <span className="h-[7px] w-[7px] flex-none rounded-full" style={{ background: t.color }} />
+        <div className="mt-1.25 flex items-center gap-1.5 text-[12px] font-medium text-(--c-ink4)">
+          <span className="h-1.75 w-1.75 flex-none rounded-full" style={{ background: t.color }} />
           <span className="truncate">{t.course}</span>
           <span className="flex-none tabular-nums text-(--c-ink3)">· {t.due}</span>
         </div>
@@ -55,13 +55,13 @@ export function Todo2Row({ t }: { t: Todo2 }) {
           <div className={`mt-1 text-[12px] font-semibold tabular-nums ${t.leftTone === 'rose' ? 'text-(--c-rose)' : 'text-(--c-ink3)'}`}>{t.left}</div>
         )}
         {t.suggest && (
-          <div className="mt-2 inline-flex items-center gap-1 rounded-full bg-(--c-accent-soft) px-2.5 py-[5px] text-[11.5px] font-bold text-(--c-accent)">
+          <div className="mt-2 inline-flex items-center gap-1 rounded-full bg-(--c-accent-soft) px-2.5 py-1.25 text-[11.5px] font-bold text-(--c-accent)">
             {t.suggest}
             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="m9 5 7 7-7 7" /></svg>
           </div>
         )}
       </div>
-      {t.photo && <Board className="ml-3 h-[56px] w-[56px] flex-none rounded-[10px]" zoom={0.2} />}
+      {t.photo && <Board className="ml-3 h-14 w-14 flex-none rounded-[10px]" zoom={0.2} />}
     </div>
   )
 }
@@ -101,8 +101,8 @@ export function Todo2List() {
 /* 底部胶囊：相机 + 一句话，压在 Nav 上面 */
 export function Composer() {
   return (
-    <div className="absolute inset-x-4 bottom-[92px] z-[9]">
-      <div className="flex items-center gap-2 rounded-full p-[6px] pr-3.5" style={dockStyle}>
+    <div className="absolute inset-x-4 bottom-23 z-9">
+      <div className="flex items-center gap-2 rounded-full p-1.5 pr-3.5" style={dockStyle}>
         <span className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-(--c-surface2)"><CameraIcon /></span>
         <span className="flex-1 pl-1 text-[15px] font-medium text-(--c-ink4)">新待办</span>
       </div>
@@ -114,7 +114,7 @@ export function Todo2Screen() {
   return (
     <Phone>
       <Todo2List />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[7] h-[190px]" style={{ background: 'var(--c-fade)' }} />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-7 h-47.5" style={{ background: 'var(--c-fade)' }} />
       <Composer />
       <Nav active={2} />
     </Phone>
@@ -125,33 +125,33 @@ export function Todo2Screen() {
 export function Keyboard() {
   const Key = ({ w = 32, dark, children }: { w?: number; dark?: boolean; children?: React.ReactNode }) => (
     <span
-      className={`flex h-[42px] items-center justify-center rounded-[6px] text-[16px] font-medium text-(--c-ink) ${dark ? 'bg-[#ACB1BA]' : 'bg-white'}`}
+      className={`flex h-[42px] items-center justify-center rounded-md text-[16px] font-medium text-(--c-ink) ${dark ? 'bg-[#ACB1BA]' : 'bg-white'}`}
       style={{ width: w, boxShadow: '0 1px 0 rgba(0,0,0,.25)' }}
     >{children}</span>
   )
   return (
-    <div className="absolute inset-x-0 bottom-0 z-[8] bg-[#D1D4DA] px-[3px] pt-2 pb-[38px]">
-      <div className="flex justify-center gap-[6px]">{'qwertyuiop'.split('').map((k) => <Key key={k}>{k}</Key>)}</div>
-      <div className="mt-[11px] flex justify-center gap-[6px]">{'asdfghjkl'.split('').map((k) => <Key key={k}>{k}</Key>)}</div>
-      <div className="mt-[11px] flex justify-center gap-[6px]">
+    <div className="absolute inset-x-0 bottom-0 z-8 bg-[#D1D4DA] px-0.75 pt-2 pb-9.5">
+      <div className="flex justify-center gap-1.5">{'qwertyuiop'.split('').map((k) => <Key key={k}>{k}</Key>)}</div>
+      <div className="mt-2.75 flex justify-center gap-1.5">{'asdfghjkl'.split('').map((k) => <Key key={k}>{k}</Key>)}</div>
+      <div className="mt-2.75 flex justify-center gap-1.5">
         <Key w={42} dark>⇧</Key>
         {'zxcvbnm'.split('').map((k) => <Key key={k}>{k}</Key>)}
         <Key w={42} dark>⌫</Key>
       </div>
-      <div className="mt-[11px] flex justify-center gap-[6px]">
+      <div className="mt-2.75 flex justify-center gap-1.5">
         <Key w={90} dark><span className="text-[14px]">123</span></Key>
         <Key w={182}><span className="text-[14px]">空格</span></Key>
         <Key w={90} dark><span className="text-[14px]">换行</span></Key>
       </div>
-      <div className="mx-auto mt-4 h-[5px] w-[134px] rounded-full bg-(--c-ink)/85" />
+      <div className="mx-auto mt-4 h-1.25 w-33.5 rounded-full bg-(--c-ink)/85" />
     </div>
   )
 }
 
 export function Chip2({ color, children, tone = 'plain' }: { color?: string; children: React.ReactNode; tone?: 'plain' | 'accent' }) {
   return (
-    <span className={`inline-flex h-[30px] items-center gap-1.5 rounded-full px-3 text-[12.5px] font-bold ${tone === 'accent' ? 'bg-(--c-accent-soft) text-(--c-accent)' : 'bg-(--c-surface2) text-(--c-ink2)'}`}>
-      {color && <span className="h-[7px] w-[7px] rounded-full" style={{ background: color }} />}
+    <span className={`inline-flex h-7.5 items-center gap-1.5 rounded-full px-3 text-[12.5px] font-bold ${tone === 'accent' ? 'bg-(--c-accent-soft) text-(--c-accent)' : 'bg-(--c-surface2) text-(--c-ink2)'}`}>
+      {color && <span className="h-1.75 w-1.75 rounded-full" style={{ background: color }} />}
       {children}
     </span>
   )
@@ -162,19 +162,19 @@ export function Todo2ComposeScreen() {
   return (
     <Phone>
       <Todo2List />
-      <div className="absolute inset-0 z-[7] bg-(--c-bg)/55" />
-      <div className="absolute inset-x-3 bottom-[288px] z-[9]">
+      <div className="absolute inset-0 z-7 bg-(--c-bg)/55" />
+      <div className="absolute inset-x-3 bottom-72 z-9">
         <div className="rounded-[26px] px-4 pt-3.5 pb-3" style={dockStyle}>
           <div className="text-[16px] leading-[1.4] font-semibold tracking-[-.01em] text-(--c-ink)">
             习题册 P41–P45 第 3、5、7 题
-            <span className="ml-[1px] inline-block h-[19px] w-[2px] translate-y-[4px] rounded-full bg-(--c-accent)" />
+            <span className="ml-px inline-block h-4.75 w-0.5 translate-y-1 rounded-full bg-(--c-accent)" />
           </div>
           <div className="mt-3 flex items-center gap-1.5">
-            <span className="flex h-[30px] w-[30px] flex-none items-center justify-center rounded-full bg-(--c-surface2)"><CameraIcon size={16} stroke="var(--c-ink2)" /></span>
+            <span className="flex h-7.5 w-7.5 flex-none items-center justify-center rounded-full bg-(--c-surface2)"><CameraIcon size={16} stroke="var(--c-ink2)" /></span>
             <Chip2 color={C.math}>高等数学（下）</Chip2>
             <Chip2>周四 课前</Chip2>
             <span className="flex-1" />
-            <span className="flex h-[30px] w-[30px] flex-none items-center justify-center rounded-full bg-(--c-accent)"><ArrowUp /></span>
+            <span className="flex h-7.5 w-7.5 flex-none items-center justify-center rounded-full bg-(--c-accent)"><ArrowUp /></span>
           </div>
         </div>
       </div>

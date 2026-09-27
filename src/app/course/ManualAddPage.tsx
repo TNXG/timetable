@@ -67,7 +67,7 @@ export function ManualAddPage({ snap, onBack }: { snap: Snapshot | null; onBack:
         <div className="mt-5 text-[12.5px] font-semibold text-(--c-ink3)">类型</div>
         <div className="mt-2.5"><Chips items={['临时安排', '自习']} active={kind} onPick={setKind} /></div>
 
-        <div className="mt-4 divide-y divide-(--c-surface2) overflow-hidden rounded-[16px] bg-(--c-surface)">
+        <div className="mt-4 divide-y divide-(--c-surface2) overflow-hidden rounded-2xl bg-(--c-surface)">
           <Field k="名称"><TextInput value={name} onChange={(e) => setName(e.target.value)} placeholder="例如 数据结构复习" /></Field>
           <Field k="重复">
             <div className="flex gap-1.5">
@@ -96,7 +96,7 @@ export function ManualAddPage({ snap, onBack }: { snap: Snapshot | null; onBack:
         )}
 
         {clash.length > 0 && (
-          <div className="mt-3 rounded-[16px] bg-(--c-amber-soft) px-4 py-3.5">
+          <div className="mt-3 rounded-2xl bg-(--c-amber-soft) px-4 py-3.5">
             <div className="text-[12.5px] font-bold text-(--c-amber)">这个时间已有 {clash.length} 项安排</div>
             <div className="mt-1 text-[12px] font-medium text-(--c-ink4)">
               {clash.map((o) => `${o.name} ${o.startPeriod}–${o.endPeriod} 节`).join('；')}

@@ -50,7 +50,7 @@ export function EmptyArt({ kind }: { kind: EmptyKind }) {
     ),
   }
   return (
-    <svg viewBox="0 0 48 48" fill="none" style={{ stroke: 'var(--c-ink3)' }} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="h-[52px] w-[52px]">
+    <svg viewBox="0 0 48 48" fill="none" style={{ stroke: 'var(--c-ink3)' }} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="h-13 w-13">
       {art[kind]}
     </svg>
   )

@@ -60,7 +60,7 @@ export function TaskDetailPage({
 
   return (
     <Page>
-      <div className="flex flex-1 flex-col overflow-y-auto px-5 pt-12 [scrollbar-width:none]">
+      <div className="flex flex-1 flex-col overflow-y-auto px-5 pt-12 scrollbar-none">
         <div className="flex flex-none items-center justify-between">
           <button onClick={onBack} className="flex h-9 w-9 items-center justify-center rounded-full bg-(--c-surface) transition-transform duration-150 active:scale-[.92]">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style={{ stroke: 'var(--c-ink)' }} strokeWidth="2.4"><path d="M15 19 8 12l7-7" /></svg>
@@ -78,19 +78,19 @@ export function TaskDetailPage({
           className="mt-5 w-full resize-none bg-transparent text-[22px] leading-[1.3] font-extrabold tracking-[-.02em] text-(--c-ink) outline-none placeholder:text-(--c-ink5)"
         />
 
-        <div className="mt-4 flex gap-2.5 overflow-x-auto [scrollbar-width:none]">
+        <div className="mt-4 flex gap-2.5 overflow-x-auto scrollbar-none">
           {(cur.photos ?? []).map((p) => (
             <button
               key={p.id}
               onClick={() => setViewing({ id: p.id, path: p.path })}
-              className="h-[76px] w-[102px] flex-none overflow-hidden rounded-[12px] transition-transform duration-150 active:scale-[.96]"
+              className="h-19 w-25.5 flex-none overflow-hidden rounded-xl transition-transform duration-150 active:scale-[.96]"
             >
               <TaskPhotoImg path={p.path} className="h-full w-full" />
             </button>
           ))}
           <button
             onClick={onCamera}
-            className="flex h-[76px] w-[76px] flex-none items-center justify-center rounded-[12px] border-[1.5px] border-dashed border-(--c-ink5) transition-transform duration-150 active:scale-[.94]"
+            className="flex h-19 w-19 flex-none items-center justify-center rounded-xl border-[1.5px] border-dashed border-(--c-ink5) transition-transform duration-150 active:scale-[.94]"
           >
             <CameraIcon stroke="var(--c-ink4)" />
           </button>
@@ -109,19 +109,19 @@ export function TaskDetailPage({
           />
         </div>
 
-        <div className="mt-4 rounded-[16px] bg-(--c-surface) px-4 py-3.5">
+        <div className="mt-4 rounded-2xl bg-(--c-surface) px-4 py-3.5">
           <textarea
             rows={1}
             value={note}
             onChange={(e) => setNote(e.target.value)}
             placeholder="备注"
-            className="w-full resize-none bg-transparent text-[14px] leading-[1.5] font-medium text-(--c-ink) outline-none placeholder:text-(--c-ink4)"
+            className="w-full resize-none bg-transparent text-[14px] leading-normal font-medium text-(--c-ink) outline-none placeholder:text-(--c-ink4)"
           />
         </div>
 
         <button
           onClick={() => toggleDone(cur)}
-          className="mt-3 flex w-full items-center gap-3 rounded-[16px] bg-(--c-surface) px-4 py-3.5 text-left transition-transform duration-150 active:scale-[.98]"
+          className="mt-3 flex w-full items-center gap-3 rounded-2xl bg-(--c-surface) px-4 py-3.5 text-left transition-transform duration-150 active:scale-[.98]"
         >
           <CheckBox done={cur.done} color={state.courses.find((c) => c.id === meta.cid)?.color ?? 'var(--c-accent)'} />
           <span className={`text-[14px] font-bold ${cur.done ? 'text-(--c-ink4)' : 'text-(--c-ink)'}`}>{cur.done ? '已完成' : '完成'}</span>

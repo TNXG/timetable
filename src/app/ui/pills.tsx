@@ -35,7 +35,7 @@ export function Chip({ color, children, tone = 'plain', onClick, shrink = false 
       onClick={onClick}
       className={`inline-flex h-[30px] max-w-[160px] min-w-0 ${shrink ? 'shrink' : 'flex-none'} items-center gap-1.5 rounded-full px-3 text-[12.5px] font-bold ${tone === 'accent' ? 'bg-(--c-accent-soft) text-(--c-accent)' : 'bg-(--c-surface2) text-(--c-ink2)'} ${onClick ? 'transition-transform duration-150 active:scale-[.96]' : ''}`}
     >
-      {color && <span className="h-[7px] w-[7px] flex-none rounded-full" style={{ background: color }} />}
+      {color && <span className="h-1.75 w-1.75 flex-none rounded-full" style={{ background: color }} />}
       <span className="min-w-0 truncate">{children}</span>
     </Tag>
   )
@@ -54,8 +54,8 @@ export function QuickBar({ onCamera, onText, placeholder = '新待办', layoutId
   layoutId?: string
 }) {
   return (
-    <div className="absolute inset-x-4 bottom-[92px] z-[9]">
-      <motion.div layoutId={layoutId} transition={SHEET} className="flex items-center gap-2 p-[6px] pr-3.5" style={{ ...dockStyle, borderRadius: COMPOSE_RADIUS }}>
+    <div className="absolute inset-x-4 bottom-23 z-9">
+      <motion.div layoutId={layoutId} transition={SHEET} className="flex items-center gap-2 p-1.5 pr-3.5" style={{ ...dockStyle, borderRadius: COMPOSE_RADIUS }}>
         <button
           onClick={onCamera}
           className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-(--c-surface2) transition-transform duration-150 active:scale-[.92]"
@@ -72,8 +72,8 @@ export function QuickBar({ onCamera, onText, placeholder = '新待办', layoutId
 export function WeekBand({ tone, title, meta }: { tone: 'gray' | 'amber'; title: string; meta: string }) {
   const c = tone === 'amber' ? '#C29155' : '#8A8E97'
   return (
-    <div className="flex items-center gap-2 rounded-[8px] px-2.5 py-[6px]" style={{ background: tint(c, 12) }}>
-      <i className="h-[14px] w-[3px] flex-none rounded-full" style={{ background: c }} />
+    <div className="flex items-center gap-2 rounded-lg px-2.5 py-1.5" style={{ background: tint(c, 12) }}>
+      <i className="h-3.5 w-0.75 flex-none rounded-full" style={{ background: c }} />
       <span className="text-[11.5px] font-bold" style={{ color: `color-mix(in srgb, ${c} 80%, var(--c-ink-mix))` }}>{title}</span>
       <span className="ml-auto text-[10.5px] font-semibold tabular-nums" style={{ color: `color-mix(in srgb, ${c} 65%, var(--c-ink-mix))` }}>{meta}</span>
     </div>
@@ -102,12 +102,12 @@ export function GhostEvent({ name, color, top, h, note = '停课' }: {
 /** 底栏上方的悬浮胶囊动作 */
 export function FloatPills({ actions }: { actions: [string, () => void][] }) {
   return (
-    <div className="absolute inset-x-0 bottom-[100px] z-[9] flex justify-center gap-2">
+    <div className="absolute inset-x-0 bottom-25 z-9 flex justify-center gap-2">
       {actions.map(([label, fn], i) => (
         <button
           key={label}
           onClick={fn}
-          className={`flex h-[36px] items-center rounded-full px-4 text-[13px] font-bold transition-transform duration-150 active:scale-[.96] ${i === 0 ? 'text-(--c-accent)' : 'text-(--c-ink)'}`}
+          className={`flex h-9 items-center rounded-full px-4 text-[13px] font-bold transition-transform duration-150 active:scale-[.96] ${i === 0 ? 'text-(--c-accent)' : 'text-(--c-ink)'}`}
           style={dockStyle}
         >
           {label}
@@ -128,12 +128,12 @@ export function BackPill({ show, label, bottom, onClick }: { show: boolean; labe
           animate={{ y: 0, opacity: 1, scale: 1 }}
           exit={{ y: 14, opacity: 0, scale: 0.94 }}
           transition={{ type: 'spring', bounce: 0.18, duration: 0.4 }}
-          className="pointer-events-none absolute inset-x-0 z-[9] flex justify-center"
+          className="pointer-events-none absolute inset-x-0 z-9 flex justify-center"
           style={{ bottom }}
         >
           <button
             onClick={onClick}
-            className="pointer-events-auto flex h-[36px] items-center gap-1.5 rounded-full pr-4 pl-3 text-[13px] font-bold text-(--c-accent) transition-transform duration-150 active:scale-[.96]"
+            className="pointer-events-auto flex h-9 items-center gap-1.5 rounded-full pr-4 pl-3 text-[13px] font-bold text-(--c-accent) transition-transform duration-150 active:scale-[.96]"
             style={dockStyle}
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><path d="M9 14 4 9l5-5" /><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11" /></svg>

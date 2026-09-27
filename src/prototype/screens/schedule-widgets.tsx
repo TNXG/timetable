@@ -17,13 +17,13 @@ export const gapText = (m: number) => (m >= 60 ? `${Math.floor(m / 60)} 小时${
 export function Stepper({ value, unit }: { value: number; unit?: string }) {
   return (
     <div className="flex items-center gap-1">
-      <span className="flex h-[28px] w-[28px] items-center justify-center rounded-full bg-(--c-surface2)">
+      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-(--c-surface2)">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink)" strokeWidth="2.6" strokeLinecap="round"><path d="M5 12h14" /></svg>
       </span>
-      <span className="min-w-[56px] text-center text-[15px] font-bold tabular-nums text-(--c-ink)">
+      <span className="min-w-14 text-center text-[15px] font-bold tabular-nums text-(--c-ink)">
         {value}{unit && <span className="ml-0.5 text-[12px] font-semibold text-(--c-ink4)">{unit}</span>}
       </span>
-      <span className="flex h-[28px] w-[28px] items-center justify-center rounded-full bg-(--c-surface2)">
+      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-(--c-surface2)">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink)" strokeWidth="2.6" strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>
       </span>
     </div>
@@ -56,11 +56,11 @@ export function ScheduleScreen({ overlay }: { overlay?: React.ReactNode }) {
           <div className="mt-2 rounded-[18px] bg-(--c-surface) px-4">
             {/* 序号 | 开始 | 箭头 | 下课 | 时长：两个胶囊平分余宽，右侧时长列改过的用主题色 */}
             <div className="flex items-center pt-3 pb-1 text-[11px] font-semibold text-(--c-ink5)">
-              <span className="w-[26px] flex-none" />
+              <span className="w-6.5 flex-none" />
               <span className="flex-1 text-center">开始</span>
-              <span className="mx-2 w-[16px] flex-none" />
+              <span className="mx-2 w-4 flex-none" />
               <span className="flex-1 text-center">下课</span>
-              <span className="ml-3 w-[46px] flex-none text-right">时长</span>
+              <span className="ml-3 w-11.5 flex-none text-right">时长</span>
             </div>
             {rows.map((r, i) => {
               const prev = rows[i - 1]
@@ -69,19 +69,19 @@ export function ScheduleScreen({ overlay }: { overlay?: React.ReactNode }) {
               return (
                 <React.Fragment key={r.i}>
                   {prev && (
-                    <div className={`flex items-center ${big ? 'h-[30px]' : 'h-[18px]'}`}>
-                      <span className="w-[26px] flex-none" />
+                    <div className={`flex items-center ${big ? 'h-7.5' : 'h-4.5'}`}>
+                      <span className="w-6.5 flex-none" />
                       <span className={`flex-1 border-t border-dashed ${big ? 'border-(--c-line)' : 'border-(--c-line2)'}`} />
                       <span className={`px-2 text-[11px] font-semibold tabular-nums ${big ? 'text-(--c-ink4)' : 'text-(--c-ink5)'}`}>{big ? (r.s < 15 * 60 ? '午休' : r.s < 20 * 60 ? '晚饭' : '休息') + ' ' : ''}{gapText(gap)}</span>
                       <span className={`flex-1 border-t border-dashed ${big ? 'border-(--c-line)' : 'border-(--c-line2)'}`} />
                     </div>
                   )}
                   <div className="flex items-center py-1.5">
-                    <span className="w-[26px] flex-none text-[12.5px] font-bold tabular-nums text-(--c-ink4)">{r.i}</span>
+                    <span className="w-6.5 flex-none text-[12.5px] font-bold tabular-nums text-(--c-ink4)">{r.i}</span>
                     <span className="flex-1 rounded-[10px] bg-(--c-surface2) py-1.5 text-center text-[15px] font-bold tabular-nums text-(--c-ink)">{hm(r.s)}</span>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink4)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mx-2 flex-none"><path d="M4 12h16M14 6l6 6-6 6" /></svg>
                     <span className={`flex-1 rounded-[10px] py-1.5 text-center text-[15px] tabular-nums ${r.custom ? 'font-bold text-(--c-ink)' : 'font-medium text-(--c-ink4)'}`} style={r.custom ? { boxShadow: 'inset 0 0 0 1.5px var(--c-accent)' } : undefined}>{hm(r.e)}</span>
-                    <span className={`ml-3 w-[46px] flex-none text-right text-[12px] font-semibold tabular-nums ${r.custom ? 'text-(--c-accent)' : 'text-(--c-ink5)'}`}>{r.e - r.s} 分</span>
+                    <span className={`ml-3 w-11.5 flex-none text-right text-[12px] font-semibold tabular-nums ${r.custom ? 'text-(--c-accent)' : 'text-(--c-ink5)'}`}>{r.e - r.s} 分</span>
                   </div>
                 </React.Fragment>
               )
@@ -90,7 +90,7 @@ export function ScheduleScreen({ overlay }: { overlay?: React.ReactNode }) {
           </div>
         </div>
         <div className="sticky bottom-0 mt-6 px-5 pb-6 pt-3" style={{ background: 'var(--c-fade)' }}>
-          <div className="rounded-[18px] bg-(--c-accent) py-[15px] text-center text-[15px] font-bold text-white">保存</div>
+          <div className="rounded-[18px] bg-(--c-accent) py-3.75 text-center text-[15px] font-bold text-white">保存</div>
         </div>
         {overlay}
       </div>
@@ -139,7 +139,7 @@ export function OnboardScheduleScreen() {
           <div className="mt-5 grid grid-cols-2 gap-x-4 rounded-[18px] bg-(--c-surface) px-4 py-2">
             {rows.map(([a, b], i) => (
               <div key={i} className={`flex items-center py-[7px] ${i >= 2 ? 'border-t border-(--c-line2)' : ''}`}>
-                <span className="w-[24px] text-[12px] font-bold tabular-nums text-(--c-ink5)">{i + 1}</span>
+                <span className="w-6 text-[12px] font-bold tabular-nums text-(--c-ink5)">{i + 1}</span>
                 <span className="text-[13px] font-semibold tabular-nums text-(--c-ink)">{hm(a)}</span>
                 <span className="mx-1.5 text-[12px] text-(--c-ink5)">–</span>
                 <span className="text-[13px] font-medium tabular-nums text-(--c-ink4)">{hm(b)}</span>
@@ -150,7 +150,7 @@ export function OnboardScheduleScreen() {
         <div className="mt-auto" />
       </div>
       <div className="px-5 pb-6">
-        <div className="rounded-[18px] bg-(--c-accent) py-[15px] text-center text-[15px] font-bold text-white">继续</div>
+        <div className="rounded-[18px] bg-(--c-accent) py-3.75 text-center text-[15px] font-bold text-white">继续</div>
       </div>
     </Phone>
   )
@@ -161,20 +161,20 @@ export function ScheduleTimeSheet() {
   const hours = ['12', '13', '14', '15', '16']
   const mins = ['50', '55', '00', '05', '10']
   return (
-    <div className="absolute inset-0 z-[20]" style={{ background: 'var(--c-scrim)' }}>
+    <div className="absolute inset-0 z-20" style={{ background: 'var(--c-scrim)' }}>
       <div className="absolute inset-x-0 bottom-0 rounded-t-[26px] bg-(--c-surface) px-5 pt-5 pb-9 shadow-(--c-lift-shadow)">
         <div className="flex items-baseline justify-between">
           <div className="text-[17px] font-extrabold tracking-[-.02em] text-(--c-ink)">第 5 节 开始</div>
           <div className="text-[13px] font-semibold tabular-nums text-(--c-ink4)">14:00 – 14:45</div>
         </div>
         <div className="relative mt-3 flex items-center gap-2 px-10 py-3" style={{ height: 200 + 24 }}>
-          <div className="pointer-events-none absolute inset-x-10 top-1/2 h-[40px] -translate-y-1/2 rounded-[10px] bg-(--c-surface2)" />
+          <div className="pointer-events-none absolute inset-x-10 top-1/2 h-10 -translate-y-1/2 rounded-[10px] bg-(--c-surface2)" />
           {[hours, mins].map((col, ci) => (
             <React.Fragment key={ci}>
               {ci === 1 && <span className="text-[18px] font-bold text-(--c-ink3)">:</span>}
               <div className="relative flex flex-1 flex-col">
                 {col.map((t, i) => (
-                  <span key={t} className={`flex h-[40px] items-center justify-center text-[16px] tabular-nums ${i === 2 ? 'font-bold text-(--c-ink)' : 'font-medium text-(--c-ink4)'}`} style={{ opacity: i === 2 ? 1 : i === 1 || i === 3 ? 0.7 : 0.3 }}>{t}</span>
+                  <span key={t} className={`flex h-10 items-center justify-center text-[16px] tabular-nums ${i === 2 ? 'font-bold text-(--c-ink)' : 'font-medium text-(--c-ink4)'}`} style={{ opacity: i === 2 ? 1 : i === 1 || i === 3 ? 0.7 : 0.3 }}>{t}</span>
                 ))}
               </div>
             </React.Fragment>
@@ -182,9 +182,9 @@ export function ScheduleTimeSheet() {
         </div>
         <div className="mt-1 flex items-center rounded-[14px] bg-(--c-row-muted) px-3.5 py-3">
           <span className="flex-1 text-[13.5px] font-semibold text-(--c-ink)">后续节次同步平移</span>
-          <span className="relative h-[26px] w-[44px] rounded-full bg-(--c-accent)"><i className="absolute top-[3px] right-[3px] h-[20px] w-[20px] rounded-full bg-white" /></span>
+          <span className="relative h-6.5 w-11 rounded-full bg-(--c-accent)"><i className="absolute top-0.75 right-0.75 h-5 w-5 rounded-full bg-white" /></span>
         </div>
-        <div className="mt-4 rounded-[16px] bg-(--c-accent) py-[15px] text-center text-[15px] font-bold text-white">确定</div>
+        <div className="mt-4 rounded-2xl bg-(--c-accent) py-3.75 text-center text-[15px] font-bold text-white">确定</div>
       </div>
     </div>
   )
@@ -209,7 +209,7 @@ export function CalendarIntroScreen() {
           <div className="rounded-[18px] bg-(--c-surface) px-4">
             {calendarIntroRows.map(([c, k, v], i) => (
               <div key={k} className={`flex items-center py-3.5 ${i ? 'border-t border-(--c-line2)' : ''}`}>
-                <i className="mr-3 h-[9px] w-[9px] flex-none rounded-full" style={{ background: c }} />
+                <i className="mr-3 h-2.25 w-2.25 flex-none rounded-full" style={{ background: c }} />
                 <span className="flex-1 text-[14px] font-semibold text-(--c-ink)">{k}</span>
                 <span className="text-[12.5px] font-medium tabular-nums text-(--c-ink4)">{v}</span>
               </div>
@@ -219,7 +219,7 @@ export function CalendarIntroScreen() {
         <div className="mt-auto" />
       </div>
       <div className="px-5 pb-6">
-        <button className="w-full rounded-[18px] bg-(--c-accent) py-[15px] text-[15px] font-bold text-white">开启同步</button>
+        <button className="w-full rounded-[18px] bg-(--c-accent) py-3.75 text-[15px] font-bold text-white">开启同步</button>
       </div>
     </Phone>
   )

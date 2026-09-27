@@ -78,7 +78,7 @@ export function PeriodPicker({
   }, [])
   const fade = 'linear-gradient(to right, transparent, #000 16px, #000 calc(100% - 16px), transparent)'
   return (
-    <div className="rounded-[16px] bg-(--c-surface) py-3.5">
+    <div className="rounded-2xl bg-(--c-surface) py-3.5">
       <div className="flex items-baseline justify-between px-4">
         <span className="text-[12.5px] font-medium text-(--c-ink4)">节次</span>
         <span className="text-[13px] font-bold tabular-nums text-(--c-ink)">
@@ -88,7 +88,7 @@ export function PeriodPicker({
       </div>
       <div
         ref={row}
-        className="mt-2.5 flex gap-1.5 overflow-x-auto px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="mt-2.5 flex gap-1.5 overflow-x-auto px-4 scrollbar-none [&::-webkit-scrollbar]:hidden"
         style={{ maskImage: fade, WebkitMaskImage: fade }}
       >
         {grid.map((t) => {
@@ -111,7 +111,7 @@ export function PeriodPicker({
 
 export function PageBody({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={`flex-1 overflow-y-auto px-5 pb-[130px] [scrollbar-width:none] ${className}`}>
+    <div className={`flex-1 overflow-y-auto px-5 pb-[130px] scrollbar-none ${className}`}>
       {children}
     </div>
   )

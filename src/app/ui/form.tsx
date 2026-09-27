@@ -22,7 +22,7 @@ export function Chips({ items, active, onPick }: { items: string[]; active: numb
 export function Field({ k, children, sub }: { k: string; children: React.ReactNode; sub?: string }) {
   return (
     <div className="flex items-baseline px-4 py-3">
-      <span className="w-[62px] flex-none text-[12.5px] font-medium text-(--c-ink4)">{k}</span>
+      <span className="w-15.5 flex-none text-[12.5px] font-medium text-(--c-ink4)">{k}</span>
       <div className="min-w-0 flex-1">
         {children}
         {sub && <div className="mt-1 text-[11.5px] font-medium text-(--c-ink4)">{sub}</div>}
@@ -94,7 +94,7 @@ export function Row({ title, desc, badge, right, onClick, danger, active }: { ti
       <div className="min-w-0 flex-1">
         <div className={`flex items-center gap-2 text-[14px] font-bold ${danger ? 'text-(--c-danger)' : active ? 'text-(--c-accent)' : 'text-(--c-ink)'}`}>
           <span className="truncate">{title}</span>
-          {badge && <span className="flex-none rounded-[7px] bg-(--c-accent-soft) px-2 py-[3px] text-[10.5px] font-bold text-(--c-accent)">{badge}</span>}
+          {badge && <span className="flex-none rounded-[7px] bg-(--c-accent-soft) px-2 py-0.75 text-[10.5px] font-bold text-(--c-accent)">{badge}</span>}
         </div>
         {desc && <div className="mt-0.5 text-[12px] font-medium text-(--c-ink4)">{desc}</div>}
       </div>
@@ -127,7 +127,7 @@ export function Stepper({ value, unit, min, max, step = 1, onChange }: { value: 
   return (
     <div className="flex items-center gap-1">
       {btn(-1, 'M5 12h14')}
-      <span className="min-w-[56px] text-center text-[15px] font-bold tabular-nums text-(--c-ink)">
+      <span className="min-w-14 text-center text-[15px] font-bold tabular-nums text-(--c-ink)">
         {value}{unit && <span className="ml-0.5 text-[12px] font-semibold text-(--c-ink4)">{unit}</span>}
       </span>
       {btn(1, 'M12 5v14M5 12h14')}
@@ -143,7 +143,7 @@ export function Switch({ on, onChange }: { on: boolean; onChange: (v: boolean) =
       onClick={() => { haptic('light'); onChange(!on) }}
       className={`relative h-[26px] w-[44px] flex-none rounded-full transition-colors duration-200 ${on ? 'bg-(--c-accent)' : 'bg-(--c-line)'}`}
     >
-      <i className={`absolute top-[3px] h-[20px] w-[20px] rounded-full bg-white transition-[left] duration-200 ${on ? 'left-[21px]' : 'left-[3px]'}`} />
+      <i className={`absolute top-[3px] h-[20px] w-[20px] rounded-full bg-white transition-[left] duration-200 ${on ? 'left-5.25' : 'left-0.75'}`} />
     </button>
   )
 }

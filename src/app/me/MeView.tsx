@@ -56,21 +56,21 @@ export function MeView({ onPage }: { onPage: (p: MePage) => void }) {
   const meWhite = useTransform(meInk, (v) => 1 - v)
   return (
     <>
-      <div ref={meHead} className="pointer-events-none absolute inset-x-0 top-0 z-[30] isolate px-5 pt-[max(52px,calc(env(safe-area-inset-top)+22px))] pb-3">
+      <div ref={meHead} className="pointer-events-none absolute inset-x-0 top-0 z-30 isolate px-5 pt-[max(52px,calc(env(safe-area-inset-top)+22px))] pb-3">
         <TopVeil progress={meVeil} />
       </div>
-      <div className="relative flex-1 overflow-y-auto pb-[130px] [scrollbar-width:none]">
-        <div ref={meHero} className="relative h-[258px] overflow-hidden bg-[#5d6d55]">
+      <div className="relative flex-1 overflow-y-auto pb-32.5 scrollbar-none">
+        <div ref={meHero} className="relative h-64.5 overflow-hidden bg-[#5d6d55]">
           <button onClick={() => onPage('profile')} className="absolute inset-0 transition-opacity active:opacity-85">
             <img src={wall} alt="" className="h-full w-full object-cover object-[50%_32%]" />
           </button>
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[150px] bg-gradient-to-t from-(--c-bg) via-(--c-bg)/70 to-transparent" />
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-[92px] bg-gradient-to-b from-black/25 to-transparent" />
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-37.5 bg-linear-to-t from-(--c-bg) via-(--c-bg)/70 to-transparent" />
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-23 bg-linear-to-b from-black/25 to-transparent" />
           <button onClick={() => onPage('profile')} className="absolute inset-x-5 bottom-3 flex items-end text-left transition-opacity active:opacity-70">
-            <img src={avatar} alt="" className="h-[62px] w-[62px] flex-none rounded-full border-[1.5px] border-(--c-bg) bg-(--c-accent) object-cover" />
+            <img src={avatar} alt="" className="h-15.5 w-15.5 flex-none rounded-full border-[1.5px] border-(--c-bg) bg-(--c-accent) object-cover" />
             <div className="mb-1 ml-3.5 flex-1">
               <div className="text-[19px] font-extrabold tracking-[-.02em] text-(--c-ink)">{state.prefs.name || sem?.name || '我的课表'}</div>
-              <div className="mt-[3px] flex items-center gap-2.5 text-[12px] font-semibold text-(--c-ink3)">
+              <div className="mt-0.75 flex items-center gap-2.5 text-[12px] font-semibold text-(--c-ink3)">
                 <span>{sem ? `第 ${Math.max(0, Math.min(sem.totalWeeks, week))} / ${sem.totalWeeks} 周` : '未设置学期'}</span>
                 {sem && <span className="tabular-nums text-(--c-ink5)">{md(sem.startDate)} 起</span>}
               </div>

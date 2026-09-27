@@ -69,8 +69,8 @@ function WeekGrid({ snap, week, anchor, today, now, setAnchor, onPick, onMenu, l
 
   return (
     <>
-      <div className="flex items-stretch gap-[5px]">
-        <div className="-mr-[5px] flex w-8 flex-none items-center justify-center text-[10.5px] font-semibold text-(--c-ink4)">
+      <div className="flex items-stretch gap-1.25">
+        <div className="-mr-1.25 flex w-8 flex-none items-center justify-center text-[10.5px] font-semibold text-(--c-ink4)">
           {Number(monday.slice(5, 7))}月
         </div>
         {days.map((d) => {
@@ -78,8 +78,8 @@ function WeekGrid({ snap, week, anchor, today, now, setAnchor, onPick, onMenu, l
           const isToday = d === today
           const n = (byDay.get(weekdayOf(d)) ?? []).length
           return (
-            <button key={d} onClick={() => setAnchor(d)} className="relative flex flex-1 flex-col items-center py-[5px]">
-              {on && <motion.i layoutId="week-strip-indicator" transition={SPRING} className="absolute inset-x-[-4px] inset-y-0 rounded-[13px] bg-(--c-accent-soft)" />}
+            <button key={d} onClick={() => setAnchor(d)} className="relative flex flex-1 flex-col items-center py-1.25">
+              {on && <motion.i layoutId="week-strip-indicator" transition={SPRING} className="absolute -inset-x-1 inset-y-0 rounded-[13px] bg-(--c-accent-soft)" />}
               <span className={`relative z-10 flex h-[24px] w-[24px] items-center justify-center text-[17px] leading-none font-bold tabular-nums ${isToday || on ? 'text-(--c-accent)' : 'text-(--c-ink)'}`}>{Number(d.slice(8))}</span>
               <span className={`relative z-10 mt-0.5 text-[10.5px] font-semibold ${on || isToday ? 'text-(--c-accent)' : 'text-(--c-ink4)'}`}>{isToday ? '今天' : WD[weekdayOf(d)]}</span>
               {n > 0 && <span className={`absolute top-[3px] right-[2px] z-10 text-[9px] font-bold tabular-nums ${on ? 'text-(--c-accent2)' : 'text-(--c-ink5)'}`}>{n}</span>}
@@ -92,7 +92,7 @@ function WeekGrid({ snap, week, anchor, today, now, setAnchor, onPick, onMenu, l
         <WeekLines axis={axis} />
         <div className="flex pt-1.5">
           <WeekAxis axis={axis} nowTop={todayIdx >= 0 && nowTop > 0 ? nowTop : undefined} nowLabel={fmtMinutes(now)} />
-          <div ref={setGridEl} className="relative flex flex-1 gap-[5px]" style={{ height: gridH }}>
+          <div ref={setGridEl} className="relative flex flex-1 gap-1.25" style={{ height: gridH }}>
             {days.map((d, i) => {
               const occ = byDay.get(weekdayOf(d)) ?? []
               const pastCol = d < today
@@ -151,7 +151,7 @@ function WeekGrid({ snap, week, anchor, today, now, setAnchor, onPick, onMenu, l
                         />
                       </button>
                       {stacked && lane === 0 && (
-                        <span className="pointer-events-none absolute top-[-5px] right-[-6px] z-10 flex h-[14px] w-[14px] items-center justify-center rounded-full bg-[#D9A94B] text-[8.5px] leading-none font-bold text-white ring-[2px] ring-(--c-bg)">
+                        <span className="pointer-events-none absolute -top-1.25 -right-1.5 z-10 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-[#D9A94B] text-[8.5px] leading-none font-bold text-white ring-2 ring-(--c-bg)">
                           {cluster.length}
                         </span>
                       )}
@@ -167,7 +167,7 @@ function WeekGrid({ snap, week, anchor, today, now, setAnchor, onPick, onMenu, l
                     )
                   })}
                   {i === todayIdx && nowTop > 0 && (
-                    <div className="pointer-events-none absolute right-[-2px] left-[-2px] z-20" style={{ top: nowTop }}>
+                    <div className="pointer-events-none absolute -right-0.5 -left-0.5 z-20" style={{ top: nowTop }}>
                       <i className="block h-[1.5px] w-full rounded-full bg-(--c-accent)" />
                     </div>
                   )}
@@ -282,7 +282,7 @@ export function WeekView({ snap, anchor, setAnchor, onPick, onMenu, onSearch, li
 
   return (
     <>
-      <div ref={scroller} className="flex-1 overflow-y-auto pb-[130px] [scrollbar-width:none]">
+      <div ref={scroller} className="flex-1 overflow-y-auto pb-32.5 scrollbar-none">
         <StickyHead className="px-5">
           <div className="flex items-center justify-between">
           <button onClick={() => setCal(true)} className="flex items-center gap-1.5 text-[17px] font-extrabold tracking-[-.01em]">
@@ -315,7 +315,7 @@ export function WeekView({ snap, anchor, setAnchor, onPick, onMenu, onSearch, li
               transition={{ type: 'tween', ease: SWIPE_EASE, duration: 0.22 }}
               className="-mx-1 overflow-hidden px-1"
             >
-              <motion.div className="flex w-[300%] -ml-[100%] items-start" style={{ x }}>
+              <motion.div className="flex w-[300%] ml-[-100%] items-start" style={{ x }}>
                 {panes.map((w) => (
                   <div key={w} className="w-1/3 flex-none px-1">
                     {w >= 1 && w <= sem.totalWeeks && (

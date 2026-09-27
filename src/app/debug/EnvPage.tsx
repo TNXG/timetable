@@ -38,7 +38,7 @@ export function EnvPage({ onBack }: { onBack: () => void }) {
   const chrome = navigator.userAgent.match(/Chrome\/([\d.]+)/)?.[1] ?? ''
   return (
     <Page>
-      <div className="flex-1 overflow-y-auto px-5 pb-10 [scrollbar-width:none]">
+      <div className="flex-1 overflow-y-auto px-5 pb-10 scrollbar-none">
         <TopBar title="环境" sub="平台、设备与原生桥" onBack={onBack} />
         <Group title="应用">
           <KV k="版本" v={version || '—'} />

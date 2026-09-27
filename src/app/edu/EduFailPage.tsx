@@ -51,16 +51,16 @@ export function EduFailPage({ info, onBack }: { info: EduFailInfo; onBack: () =>
   return (
     <Page>
       <div className="flex flex-1 flex-col overflow-hidden px-5">
-        <div className="flex-1 overflow-y-auto pb-6 [scrollbar-width:none]">
+        <div className="flex-1 overflow-y-auto pb-6 scrollbar-none">
           <TopBar title="没有识别到课表" onBack={onBack} />
 
-          <div className="mt-6 rounded-[16px] bg-(--c-surface) px-4 py-3.5">
+          <div className="mt-6 rounded-2xl bg-(--c-surface) px-4 py-3.5">
             <div className="text-[11.5px] font-semibold text-(--c-ink4)">页面</div>
             <div className="mt-1.5 truncate font-mono text-[12.5px] text-(--c-ink)">{scrubUrl(info.url).replace(/^https?:\/\//, '')}</div>
             {info.system && <div className="mt-1 text-[11.5px] font-medium text-(--c-ink4)">{SYSTEM_LABEL[info.system]}</div>}
           </div>
 
-          <div className="mt-6 divide-y divide-(--c-surface2) overflow-hidden rounded-[16px] bg-(--c-surface)">
+          <div className="mt-6 divide-y divide-(--c-surface2) overflow-hidden rounded-2xl bg-(--c-surface)">
             {update && <Row title="更新到最新版本" desc="新版本可能已支持这个页面" onClick={() => openExternal(update)} />}
             <Row title="反馈这个页面" desc="只提交页面地址、系统猜测和版本号" onClick={() => openExternal(issueUrl({ url: info.url, system: info.system, version }))} />
             {info.capture && (
@@ -77,7 +77,7 @@ export function EduFailPage({ info, onBack }: { info: EduFailInfo; onBack: () =>
         </div>
 
         <div className="flex-none pt-2 pb-[max(22px,env(safe-area-inset-bottom))]">
-          <button onClick={onBack} className="w-full rounded-[18px] bg-(--c-surface) py-[15px] text-[15px] font-bold text-(--c-ink) transition-transform duration-150 active:scale-[.985]">返回</button>
+          <button onClick={onBack} className="w-full rounded-[18px] bg-(--c-surface) py-3.75 text-[15px] font-bold text-(--c-ink) transition-transform duration-150 active:scale-[.985]">返回</button>
         </div>
       </div>
     </Page>

@@ -42,17 +42,17 @@ export function ProfileScreen() {
       <div className="flex-1 overflow-hidden pt-12">
         <SubHead title="个人资料" />
         <div className="mt-6 px-5">
-          <div className="relative h-[172px] overflow-hidden rounded-[18px] bg-[#5d6d55]">
+          <div className="relative h-43 overflow-hidden rounded-[18px] bg-[#5d6d55]">
             <img src="/wall.jpg" alt="" className="h-full w-full object-cover object-[50%_32%]" />
-            <div className="absolute inset-x-0 bottom-0 h-[96px] bg-gradient-to-t from-black/50 to-transparent" />
-            <CamBadge className="absolute top-3 right-3 h-[28px] w-[28px] bg-black/35 text-white backdrop-blur-md" />
-            <div className="absolute bottom-4 left-4 h-[64px] w-[64px]">
+            <div className="absolute inset-x-0 bottom-0 h-24 bg-linear-to-t from-black/50 to-transparent" />
+            <CamBadge className="absolute top-3 right-3 h-7 w-7 bg-black/35 text-white backdrop-blur-md" />
+            <div className="absolute bottom-4 left-4 h-16 w-16">
               <img src="/avatar.jpg" alt="" className="h-full w-full rounded-full border-2 border-white/90 object-cover" />
-              <CamBadge className="absolute -right-0.5 -bottom-0.5 h-[24px] w-[24px] bg-(--c-ink) text-(--c-bg) ring-2 ring-white" />
+              <CamBadge className="absolute -right-0.5 -bottom-0.5 h-6 w-6 bg-(--c-ink) text-(--c-bg) ring-2 ring-white" />
             </div>
           </div>
-          <div className="mt-5 flex items-baseline rounded-[16px] bg-(--c-surface) px-4 py-3">
-            <span className="w-[62px] flex-none text-[12.5px] font-medium text-(--c-ink4)">名称</span>
+          <div className="mt-5 flex items-baseline rounded-2xl bg-(--c-surface) px-4 py-3">
+            <span className="w-15.5 flex-none text-[12.5px] font-medium text-(--c-ink4)">名称</span>
             <span className="text-[14px] font-semibold text-(--c-ink)">李思远</span>
           </div>
         </div>
@@ -80,7 +80,7 @@ export function StatsScreen() {
               <span className="text-[22px] font-extrabold tracking-[-.02em] text-(--c-ink)">第 6 周</span>
               <span className="text-[12.5px] font-medium tabular-nums text-(--c-ink4)">共 18 周</span>
             </div>
-            <div className="mt-3 h-[5px] overflow-hidden rounded-full bg-(--c-surface2)">
+            <div className="mt-3 h-1.25 overflow-hidden rounded-full bg-(--c-surface2)">
               <div className="h-full w-1/3 rounded-full bg-(--c-ink)" />
             </div>
             <div className="mt-3.5 flex gap-3 text-[12.5px] font-medium tabular-nums text-(--c-ink3)">
@@ -96,7 +96,7 @@ export function StatsScreen() {
                     <span className="flex-1 text-[14px] font-semibold text-(--c-ink)">{n}</span>
                     <span className="ml-3 text-[12.5px] font-semibold tabular-nums text-(--c-ink3)">{done} / {total} 节</span>
                   </div>
-                  <div className="mt-2 h-[4px] overflow-hidden rounded-full bg-(--c-surface2)">
+                  <div className="mt-2 h-1 overflow-hidden rounded-full bg-(--c-surface2)">
                     <div className="h-full rounded-full" style={{ width: `${(done / total) * 100}%`, background: c }} />
                   </div>
                   <div className="mt-1.5 flex items-baseline text-[12px] font-medium tabular-nums text-(--c-ink4)">
@@ -140,7 +140,7 @@ export function EraseScreen() {
         <div className="mt-auto" />
       </div>
       <div className="px-5 pb-6">
-        <button className="w-full rounded-[18px] bg-(--c-danger) py-[15px] text-[15px] font-bold text-white">清除全部数据</button>
+        <button className="w-full rounded-[18px] bg-(--c-danger) py-3.75 text-[15px] font-bold text-white">清除全部数据</button>
       </div>
     </Phone>
   )
@@ -154,7 +154,7 @@ export function AboutScreen() {
       <div className="flex flex-1 flex-col pt-12">
         <SubHead title="关于" />
         <div className="mt-10 flex flex-col items-center">
-          <img src="/icon.png" alt="" className="h-[84px] w-[84px]" />
+          <img src="/icon.png" alt="" className="h-21 w-21" />
           <div className="mt-4 text-[22px] font-extrabold tracking-[-.02em] text-(--c-ink)">Koma</div>
           <div className="mt-1 text-[12.5px] font-medium tabular-nums text-(--c-ink4)">1.4.78</div>
         </div>
@@ -203,18 +203,18 @@ export function MeScreen() {
   return (
     <Phone>
       <div className="flex-1 overflow-hidden">
-        <div className="relative h-[258px]">
+        <div className="relative h-64.5">
           <img src="/wall.jpg" alt="" className="absolute inset-0 h-full w-full object-cover object-[50%_32%]" />
-          <div className="absolute inset-x-0 bottom-0 h-[150px] bg-(--c-fade-photo)" />
-          <div className="absolute inset-x-0 top-0 h-[92px] bg-gradient-to-b from-black/25 to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 h-37.5 bg-(--c-fade-photo)" />
+          <div className="absolute inset-x-0 top-0 h-23 bg-linear-to-b from-black/25 to-transparent" />
           <div className="absolute top-12 right-5 left-5">
             <span className="text-[15px] font-bold tracking-[-.01em] text-white drop-shadow-[0_1px_6px_rgba(0,0,0,.35)]">我的</span>
           </div>
           <div className="absolute inset-x-5 bottom-3 flex items-end">
-            <img src="/avatar.jpg" alt="" className="h-[62px] w-[62px] flex-none rounded-full border-[1.5px] border-white object-cover" />
+            <img src="/avatar.jpg" alt="" className="h-15.5 w-15.5 flex-none rounded-full border-[1.5px] border-white object-cover" />
             <div className="mb-1 ml-3.5 flex-1">
               <div className="text-[19px] font-extrabold tracking-[-.02em] text-(--c-ink)">李思远</div>
-              <div className="mt-[3px] flex items-center gap-2.5 text-[12px] font-semibold text-(--c-ink3)">
+              <div className="mt-0.75 flex items-center gap-2.5 text-[12px] font-semibold text-(--c-ink3)">
                 <span>计算机学院 2023 级</span>
                 <span className="tabular-nums text-(--c-ink4b)">20231234</span>
               </div>
@@ -249,7 +249,7 @@ export function MeScreen() {
         </div>
       </div>
       <div
-        className="pointer-events-none absolute inset-x-0 bottom-0 z-[7] h-[150px]"
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-7 h-37.5"
         style={{ background: 'var(--c-fade)' }}
       />
       <Nav active={3} />

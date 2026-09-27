@@ -26,10 +26,10 @@ function WHead({ d, w, sub }: { d: string; w: string; sub?: string }) {
 function WRow({ name, time, loc, color, big = true }: { name: string; time?: string; loc?: string; color: string; big?: boolean }) {
   return (
     <div className="flex items-center gap-2 rounded-[10px] py-1.5 pr-2.5 pl-0" style={{ background: tint(color, 8) }}>
-      <i className="my-[3px] ml-1.5 w-[3px] flex-none self-stretch rounded-full" style={{ background: color }} />
+      <i className="my-0.75 ml-1.5 w-0.75 flex-none self-stretch rounded-full" style={{ background: color }} />
       <div className="min-w-0 flex-1">
         <div className={`truncate ${big ? 'text-[13px]' : 'text-[12px]'} leading-[1.3] font-bold tracking-[-.01em] text-(--c-ink)`}>{name}</div>
-        {loc && <div className="mt-[1px] truncate text-[11px] leading-[1.25] font-medium text-(--c-ink3)">{loc}</div>}
+        {loc && <div className="mt-px truncate text-[11px] leading-tight font-medium text-(--c-ink3)">{loc}</div>}
       </div>
       {time && <div className="flex-none text-right text-[11.5px] leading-[1.3] font-semibold tabular-nums text-(--c-ink3)">{time}</div>}
     </div>
@@ -85,7 +85,7 @@ export function WidgetPage({ snap, onBack }: { snap: Snapshot; onBack: () => voi
     switch (style) {
       case 'today':
         return (
-          <WCard className="h-[162px] w-[162px]">
+          <WCard className="h-40.5 w-40.5">
             <WHead d={dayNum} w={wdName} sub={left > 0 ? `还剩 ${left} 节` : '没有课了'} />
             <div className="mt-2.5 space-y-1.5">
               {remain.slice(0, 2).map((o) => (
@@ -96,7 +96,7 @@ export function WidgetPage({ snap, onBack }: { snap: Snapshot; onBack: () => voi
         )
       case 'next':
         return (
-          <WCard className="flex h-[162px] w-[162px] flex-col">
+          <WCard className="flex h-40.5 w-40.5 flex-col">
             <div className="text-[11.5px] font-bold text-(--c-ink3)">{cur ? '上课中' : '下一节'}</div>
             <div className="mt-1 flex items-baseline gap-1">
               <span className="text-[38px] leading-none font-semibold tracking-[-.035em] tabular-nums text-(--c-ink)">
@@ -118,7 +118,7 @@ export function WidgetPage({ snap, onBack }: { snap: Snapshot; onBack: () => voi
         )
       case 'twoDays':
         return (
-          <WCard className="flex h-[162px] w-full gap-3.5">
+          <WCard className="flex h-40.5 w-full gap-3.5">
             <div className="min-w-0 flex-1">
               <WHead d={dayNum} w={wdName} sub={left > 0 ? `还剩 ${left} 节` : '没有课了'} />
               <div className="mt-2.5 space-y-1.5">
@@ -157,12 +157,12 @@ export function WidgetPage({ snap, onBack }: { snap: Snapshot; onBack: () => voi
                     return (
                       <div
                         key={o.key}
-                        className="h-[64px] rounded-[10px] px-1.5 py-2"
+                        className="h-16 rounded-[10px] px-1.5 py-2"
                         style={{ background: tint(o.color, isNow ? 16 : 8), boxShadow: isNow ? `inset 0 0 0 1.5px ${o.color}` : undefined }}
                       >
-                        <div className="truncate text-[11px] leading-[1.25] font-bold" style={{ color: `color-mix(in srgb, ${o.color} 88%, var(--c-ink))` }}>{o.name}</div>
+                        <div className="truncate text-[11px] leading-tight font-bold" style={{ color: `color-mix(in srgb, ${o.color} 88%, var(--c-ink))` }}>{o.name}</div>
                         <div className="mt-1.5 text-[10px] leading-[1.3] font-semibold tabular-nums text-(--c-ink3)">{fmtMinutes(o.start)}</div>
-                        <div className="mt-[1px] truncate text-[10px] leading-[1.3] font-medium text-(--c-ink4)">{o.location ?? ''}</div>
+                        <div className="mt-px truncate text-[10px] leading-[1.3] font-medium text-(--c-ink4)">{o.location ?? ''}</div>
                       </div>
                     )
                   })}
@@ -178,12 +178,12 @@ export function WidgetPage({ snap, onBack }: { snap: Snapshot; onBack: () => voi
     <Page className="bg-[#5d6d55]">
       <img src="/wall.jpg" alt="" className="absolute inset-0 h-full w-full object-cover object-[50%_28%]" />
       <div className="absolute inset-0 bg-black/25" />
-      <StickyHead bleed={0} className="relative z-[30] px-5 pb-1">
+      <StickyHead bleed={0} className="relative z-30 px-5 pb-1">
         <div className="flex h-9 items-center">
           <BackButton onClick={onBack} />
         </div>
       </StickyHead>
-      <div className="relative flex-1 overflow-y-auto px-4 pb-[130px] [scrollbar-width:none]">
+      <div className="relative flex-1 overflow-y-auto px-4 pb-32.5 scrollbar-none">
         <h1 className="px-1 text-[26px] font-extrabold tracking-[-.02em] text-white">桌面小组件</h1>
         <div className="mt-5">
           <div className="flex gap-3.5">

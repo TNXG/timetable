@@ -79,7 +79,7 @@ export function WeekAxis({ axis, nowTop, nowLabel }: { axis: TimeAxis; nowTop?: 
       {periods.map((s) => (
         <div key={s.index} className="absolute right-1.5 left-0 text-right" style={{ top: s.y0 + 4 }}>
           <div className="text-[10.5px] leading-none font-bold tabular-nums text-(--c-ink4)">{s.index}</div>
-          <div className="mt-[3px] text-[8.5px] leading-none font-semibold tabular-nums text-(--c-ink5)">{fmtMinutes(s.t0).replace(/^0/, '')}</div>
+          <div className="mt-0.75 text-[8.5px] leading-none font-semibold tabular-nums text-(--c-ink5)">{fmtMinutes(s.t0).replace(/^0/, '')}</div>
         </div>
       ))}
       {nowTop != null && nowLabel && periods.every((s) => Math.abs(nowTop - s.y0) >= 22) && (

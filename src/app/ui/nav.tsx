@@ -13,29 +13,29 @@ export const NAV_ITEMS: [React.ReactNode, string][] = [
 export function Nav({ active, onTab, hidden }: { active: number; onTab: (i: number) => void; hidden?: boolean }) {
   const shrink = useImeShrink()
   return (
-    <motion.div className="pointer-events-none absolute inset-x-0 bottom-0 z-[8]" style={{ y: shrink }}>
+    <motion.div className="pointer-events-none absolute inset-x-0 bottom-0 z-8" style={{ y: shrink }}>
     <motion.div
       animate={{ y: hidden ? 130 : 0, opacity: hidden ? 0 : 1 }}
       transition={{ type: 'spring', bounce: 0.18, duration: 0.45 }}
       className="pointer-events-none absolute inset-x-0 bottom-[max(24px,env(safe-area-inset-bottom))] flex justify-center px-4"
     >
-      <div className="pointer-events-auto flex w-[92%] items-center justify-between rounded-full p-[5px]" style={dockStyle}>
+      <div className="pointer-events-auto flex w-[92%] items-center justify-between rounded-full p-1.25" style={dockStyle}>
         {NAV_ITEMS.map(([ic, label], i) => {
           const on = i === active
           return (
             <button
               key={label}
               onClick={() => onTab(i)}
-              className="relative flex flex-1 flex-col items-center gap-[2px] px-1 pt-[6px] pb-[5px] transition-transform duration-150 active:scale-[.94]"
+              className="relative flex flex-1 flex-col items-center gap-0.5 px-1 pt-1.5 pb-1.25 transition-transform duration-150 active:scale-[.94]"
             >
               {on && (
                 <motion.i
                   layoutId="nav-indicator"
-                  className="absolute inset-x-[1px] inset-y-0 rounded-full bg-(--c-accent-soft)"
+                  className="absolute inset-x-px inset-y-0 rounded-full bg-(--c-accent-soft)"
                   transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
                 />
               )}
-              <svg viewBox="0 0 24 24" fill="none" stroke={on ? 'var(--c-accent)' : 'var(--c-ink)'} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="relative z-10 h-[19px] w-[19px] transition-colors duration-200">{ic}</svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke={on ? 'var(--c-accent)' : 'var(--c-ink)'} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="relative z-10 h-4.75 w-4.75 transition-colors duration-200">{ic}</svg>
               <span className={`relative z-10 text-[9.5px] font-bold transition-colors duration-200 ${on ? 'text-(--c-accent)' : 'text-(--c-ink)'}`}>{label}</span>
             </button>
           )

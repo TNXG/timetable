@@ -16,10 +16,10 @@ export function SheetHead({ title, sub, trail }: { title: string; sub?: string; 
 export function MenuRow({ icon, title, desc, onClick, danger, first }: { icon: React.ReactNode; title: string; desc?: string; onClick: () => void; danger?: boolean; first?: boolean }) {
   return (
     <button onClick={onClick} className={`mx-3 flex w-[calc(100%-24px)] items-center rounded-[13px] px-3 py-[10px] text-left transition-colors active:bg-(--c-surface2) ${first ? 'bg-(--c-bg)' : ''}`}>
-      <svg viewBox="0 0 24 24" fill="none" stroke={danger ? 'var(--c-danger)' : 'var(--c-ink2)'} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" className="mr-3 h-[17px] w-[17px] flex-none">{icon}</svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke={danger ? 'var(--c-danger)' : 'var(--c-ink2)'} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" className="mr-3 h-4.25 w-4.25 flex-none">{icon}</svg>
       <div className="min-w-0 flex-1">
         <div className={`truncate text-[14px] font-medium ${danger ? 'text-(--c-danger)' : 'text-(--c-ink)'}`}>{title}</div>
-        {desc && <div className="mt-[2px] truncate text-[11.5px] font-medium text-(--c-ink4)">{desc}</div>}
+        {desc && <div className="mt-0.5 truncate text-[11.5px] font-medium text-(--c-ink4)">{desc}</div>}
       </div>
     </button>
   )
@@ -98,11 +98,11 @@ export function SheetClose({ onClick }: { onClick: () => void }) {
 export function SheetRow({ item, onPick }: { item: ActionItem; onPick: (it: ActionItem) => void }) {
   const tone = item.danger ? 'var(--c-danger)' : item.selected ? 'var(--c-accent)' : 'var(--c-ink2)'
   return (
-    <button onClick={() => onPick(item)} className="flex h-[52px] w-full items-center rounded-[14px] px-3 text-left transition-colors active:bg-(--c-surface2)">
+    <button onClick={() => onPick(item)} className="flex h-13 w-full items-center rounded-[14px] px-3 text-left transition-colors active:bg-(--c-surface2)">
       {item.icon ? (
-        <svg viewBox="0 0 24 24" fill="none" stroke={tone} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="mr-3.5 h-[19px] w-[19px] flex-none">{item.icon}</svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke={tone} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="mr-3.5 h-4.75 w-4.75 flex-none">{item.icon}</svg>
       ) : (
-        <span className="mr-3.5 h-[19px] w-[19px] flex-none rounded-full border-[1.8px] border-dashed border-(--c-ink5)" />
+        <span className="mr-3.5 h-4.75 w-4.75 flex-none rounded-full border-[1.8px] border-dashed border-(--c-ink5)" />
       )}
       <span className={`min-w-0 flex-1 truncate text-[15px] font-medium ${item.danger ? 'text-(--c-danger)' : 'text-(--c-ink)'}`}>{item.title}</span>
       {item.value != null && <span className="ml-3 flex-none text-[14px] font-medium tabular-nums text-(--c-ink4)">{item.value}</span>}

@@ -45,10 +45,10 @@ export function RuleEditorPage({ rule, onBack }: { rule: RuleManifest | null; on
 
   return (
     <Page>
-      <div className="flex-1 overflow-y-auto px-5 pb-10 [scrollbar-width:none]">
+      <div className="flex-1 overflow-y-auto px-5 pb-10 scrollbar-none">
         <TopBar title={rule ? '编辑规则' : '添加规则'} onBack={onBack} />
 
-        <div className="mt-6 divide-y divide-(--c-surface2) overflow-hidden rounded-[16px] bg-(--c-surface)">
+        <div className="mt-6 divide-y divide-(--c-surface2) overflow-hidden rounded-2xl bg-(--c-surface)">
           <Field k="规则名"><TextInput value={name} onChange={(e) => setName(e.target.value)} placeholder={KIND_LABEL[input]} /></Field>
         </div>
 
@@ -63,13 +63,13 @@ export function RuleEditorPage({ rule, onBack }: { rule: RuleManifest | null; on
               value={script}
               onChange={(e) => setScript(e.target.value)}
               spellCheck={false}
-              className="mt-4 h-56 w-full rounded-[16px] bg-(--c-surface) p-3.5 font-mono text-[11.5px] leading-relaxed outline-none focus:ring-1 focus:ring-(--c-accent-line)"
+              className="mt-4 h-56 w-full rounded-2xl bg-(--c-surface) p-3.5 font-mono text-[11.5px] leading-relaxed outline-none focus:ring-1 focus:ring-(--c-accent-line)"
             />
           </>
         )}
 
         {rule && !builtin && (
-          <div className="mt-5 overflow-hidden rounded-[16px] bg-(--c-surface)">
+          <div className="mt-5 overflow-hidden rounded-2xl bg-(--c-surface)">
             <Row title="删除规则" danger onClick={() => { store.removeRule(rule.id); onBack() }} right={<span />} />
           </div>
         )}

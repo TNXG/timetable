@@ -283,7 +283,7 @@ export function EduBrowserPage({ plugin, startUrl, active, onBack, onImport, onF
         </div>
 
         {showPill && (
-        <div className="pointer-events-none absolute inset-x-0 bottom-[max(36px,calc(env(safe-area-inset-bottom)+20px))] z-[9] flex justify-center">
+        <div className="pointer-events-none absolute inset-x-0 bottom-[max(36px,calc(env(safe-area-inset-bottom)+20px))] z-9 flex justify-center">
           <button
             ref={pill}
             onClick={onImportTap}

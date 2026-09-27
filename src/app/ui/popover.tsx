@@ -59,7 +59,7 @@ export function Popover({ anchor, ghost, onClose, dismissRef, children }: { anch
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={FADE}
-            className="absolute inset-0 z-[60] bg-(--c-bg)/72"
+            className="absolute inset-0 z-60 bg-(--c-bg)/72"
             onClick={close}
           />
           {ghost && (
@@ -98,7 +98,7 @@ export function Popover({ anchor, ghost, onClose, dismissRef, children }: { anch
               transformOrigin: originTop ? 'top center' : 'bottom center',
               boxShadow: 'var(--c-menu-shadow)',
             }}
-            className="absolute z-[70] w-[226px] overflow-hidden rounded-[17px] border border-(--c-menu-line) bg-(--c-surface) py-2 will-change-transform"
+            className="absolute z-70 w-56.5 overflow-hidden rounded-[17px] border border-(--c-menu-line) bg-(--c-surface) py-2 will-change-transform"
             onClick={close}
           >
             {children}

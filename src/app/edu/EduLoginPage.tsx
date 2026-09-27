@@ -258,7 +258,7 @@ export function EduLoginPage({ plugin, onBack, onDone }: {
         <TopBar title="登录" sub={plugin.name} onBack={onBack} />
 
         {fatal ? (
-          <div className="mt-6 rounded-[16px] bg-(--c-surface) px-4 py-6 text-center">
+          <div className="mt-6 rounded-2xl bg-(--c-surface) px-4 py-6 text-center">
             <div className="text-[13.5px] font-bold text-(--c-ink)">{fatal}</div>
             {native && flow && (
               <button className="mt-3 text-[13px] font-bold text-(--c-accent) transition-opacity active:opacity-60" onClick={() => void begin()}>
@@ -273,7 +273,7 @@ export function EduLoginPage({ plugin, onBack, onDone }: {
           </div>
         ) : (
           <form className="flex flex-1 flex-col" onSubmit={(e) => { e.preventDefault(); void submit() }}>
-            <div className="mt-5 divide-y divide-(--c-surface2) overflow-hidden rounded-[16px] bg-(--c-surface)">
+            <div className="mt-5 divide-y divide-(--c-surface2) overflow-hidden rounded-2xl bg-(--c-surface)">
               <Field k="学号">
                 <TextInput value={username} onChange={(e) => setUsername(e.target.value)} autoComplete="username" autoCapitalize="off" autoCorrect="off" spellCheck={false} />
               </Field>
@@ -290,9 +290,9 @@ export function EduLoginPage({ plugin, onBack, onDone }: {
                       className="flex-none transition-transform duration-150 active:scale-[.95]"
                     >
                       {captcha && !capBusy ? (
-                        <img src={captcha} alt="验证码" className="block h-[40px] rounded-[8px] bg-white" />
+                        <img src={captcha} alt="验证码" className="block h-10 rounded-lg bg-white" />
                       ) : (
-                        <span className="flex h-[40px] w-[92px] items-center justify-center rounded-[8px] bg-(--c-bg)"><Loader size={12} /></span>
+                        <span className="flex h-10 w-23 items-center justify-center rounded-lg bg-(--c-bg)"><Loader size={12} /></span>
                       )}
                     </button>
                     <TextInput value={authcode} onChange={(e) => setAuthcode(e.target.value)} inputMode="numeric" placeholder="得数" className="flex-1" />

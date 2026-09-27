@@ -43,7 +43,7 @@ export function OcrPage({ onBack }: { onBack: () => void }) {
 
   return (
     <Page>
-      <div className="flex-1 overflow-y-auto px-5 pb-10 [scrollbar-width:none]">
+      <div className="flex-1 overflow-y-auto px-5 pb-10 scrollbar-none">
         <TopBar title="推理" sub="本地 OCR" onBack={onBack} />
         {error ? <Failed text={error} /> : !info ? <Pending text="正在检测" /> : null}
         {info && (

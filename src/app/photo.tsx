@@ -25,7 +25,7 @@ export function TaskPhotoImg({ path, className = '', alt = '', fit = 'cover' }: 
   if (!src || failed) {
     return (
       <span className={`flex items-center justify-center bg-(--c-surface2) ${className}`}>
-        <svg viewBox="0 0 24 24" fill="none" style={{ stroke: 'var(--c-ink5)' }} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-[18px] w-[18px]">
+        <svg viewBox="0 0 24 24" fill="none" style={{ stroke: 'var(--c-ink5)' }} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-4.5 w-4.5">
           <rect x="3" y="5" width="18" height="14" rx="3" />
           <path d="m3 16 5-4 4 3 3-2 6 4" />
         </svg>
@@ -98,7 +98,7 @@ export function PhotoViewer({ path, onClose, onDelete }: { path: string; onClose
   return (
     <div
       ref={root}
-      className="absolute inset-0 z-[80] bg-black select-none"
+      className="absolute inset-0 z-80 bg-black select-none"
       style={{ WebkitTouchCallout: 'none', opacity: 0 }}
       onContextMenu={(e) => e.preventDefault()}
     >

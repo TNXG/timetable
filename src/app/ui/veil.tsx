@@ -124,7 +124,7 @@ const BOTTOM_VEIL = `linear-gradient(to top, var(--c-bg) 0%, var(--c-bg) ${BOTTO
 export function BottomVeil({ height }: { height: number }) {
   const shrink = useImeShrink()
   return (
-    <motion.div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 z-[7]" style={{ height, y: shrink }}>
+    <motion.div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 z-7" style={{ height, y: shrink }}>
       {BOTTOM_BANDS.map(([r, a, b]) => {
         /* 原遮罩在 [BOTTOM_SOLID, b] 这段的取值原样映射到缩小后的层上 */
         const mask = a > BOTTOM_SOLID
@@ -206,7 +206,7 @@ export function TopBar({ title, sub, onBack, trail }: { title: string; sub?: str
         </div>
       </StickyHead>
       <h1 ref={h1} className="mt-4 text-[26px] font-extrabold tracking-[-.02em] text-(--c-ink)">{title}</h1>
-      {sub && <div className="mt-1.5 text-[13px] leading-[1.5] font-medium text-(--c-ink4)">{sub}</div>}
+      {sub && <div className="mt-1.5 text-[13px] leading-normal font-medium text-(--c-ink4)">{sub}</div>}
     </>
   )
 }

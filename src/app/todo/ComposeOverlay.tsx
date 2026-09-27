@@ -59,7 +59,7 @@ export function ComposeOverlay({
   }
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={FADE} className="absolute inset-0 z-[50]">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={FADE} className="absolute inset-0 z-50">
       <button onClick={onClose} className="absolute inset-0 bg-(--c-bg)/55" />
       <div className="pointer-events-none absolute inset-0">
       <motion.div
@@ -81,12 +81,12 @@ export function ComposeOverlay({
               }
             }}
             placeholder="新待办"
-            className="max-h-[120px] w-full resize-none bg-transparent text-[16px] leading-[1.4] font-semibold tracking-[-.01em] text-(--c-ink) outline-none placeholder:font-medium placeholder:text-(--c-ink4)"
+            className="max-h-30 w-full resize-none bg-transparent text-[16px] leading-[1.4] font-semibold tracking-[-.01em] text-(--c-ink) outline-none placeholder:font-medium placeholder:text-(--c-ink4)"
           />
           <div className="mt-3 flex items-center gap-1.5">
             <button
               onClick={onCamera}
-              className="flex h-[30px] w-[30px] flex-none items-center justify-center rounded-full bg-(--c-surface2) transition-transform duration-150 active:scale-[.92]"
+              className="flex h-7.5 w-7.5 flex-none items-center justify-center rounded-full bg-(--c-surface2) transition-transform duration-150 active:scale-[.92]"
             >
               <CameraIcon size={16} stroke="var(--c-ink2)" />
             </button>
@@ -97,7 +97,7 @@ export function ComposeOverlay({
             <button
               onClick={send}
               disabled={!text.trim()}
-              className="flex h-[30px] w-[30px] flex-none items-center justify-center rounded-full bg-(--c-accent) transition-transform duration-150 active:scale-[.92] disabled:bg-(--c-line)"
+              className="flex h-7.5 w-7.5 flex-none items-center justify-center rounded-full bg-(--c-accent) transition-transform duration-150 active:scale-[.92] disabled:bg-(--c-line)"
             >
               <ArrowUpIcon />
             </button>

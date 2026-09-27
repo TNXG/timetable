@@ -28,15 +28,15 @@ export function FreeDayScreen() {
 
         <div className="mt-10 px-5">
           <div className="px-1 text-[12px] font-bold tracking-[-.01em] text-(--c-ink4)">下一节</div>
-          <div className="mt-2 flex items-center rounded-[16px] bg-(--c-surface) px-4 py-3.5">
-            <div className="w-[46px] flex-none">
+          <div className="mt-2 flex items-center rounded-2xl bg-(--c-surface) px-4 py-3.5">
+            <div className="w-11.5 flex-none">
               <div className="text-[13px] font-extrabold tabular-nums text-(--c-ink)">08:00</div>
               <div className="mt-0.5 text-[11px] font-medium tabular-nums text-(--c-ink5)">09:40</div>
             </div>
-            <i className="mr-3.5 h-[34px] w-[3px] flex-none rounded-full" style={{ background: C.eng }} />
+            <i className="mr-3.5 h-8.5 w-0.75 flex-none rounded-full" style={{ background: C.eng }} />
             <div className="min-w-0 flex-1">
               <div className="text-[14px] font-bold tracking-[-.01em] text-(--c-ink)">大学英语（三）</div>
-              <div className="mt-[3px] text-[11.5px] font-medium text-(--c-ink3)">外语楼 105，陈晓</div>
+              <div className="mt-0.75 text-[11.5px] font-medium text-(--c-ink3)">外语楼 105，陈晓</div>
             </div>
             <span className="ml-2 flex-none text-[11.5px] font-semibold text-(--c-ink4)">周一</span>
           </div>
@@ -81,12 +81,12 @@ export function PartialFailScreen() {
       <div className="flex-1 overflow-hidden px-5 pt-12">
         <TopBar title="3 门课导入失败" sub="其余 18 门已导入，失败的可稍后重试。" />
 
-        <div className="mt-6 rounded-[16px] bg-(--c-surface) px-4 py-3.5">
+        <div className="mt-6 rounded-2xl bg-(--c-surface) px-4 py-3.5">
           <div className="flex items-baseline justify-between">
             <span className="text-[13.5px] font-bold text-(--c-ink)">正方教务 通用规则 v2.3</span>
             <span className="text-[11.5px] font-semibold tabular-nums text-(--c-ink4)">用时 6 秒</span>
           </div>
-          <div className="mt-3 flex h-[3px] overflow-hidden rounded-full bg-(--c-surface2)">
+          <div className="mt-3 flex h-0.75 overflow-hidden rounded-full bg-(--c-surface2)">
             <i className="block h-full" style={{ width: '86%', background: '#4F5BD5' }} />
             <i className="block h-full" style={{ width: '14%', background: '#E8C39A' }} />
           </div>
@@ -99,7 +99,7 @@ export function PartialFailScreen() {
         <div className="mt-5 text-[12.5px] font-semibold text-(--c-ink3)">失败的课</div>
         <div className="mt-2.5 space-y-2">
           {failedRows.map(([name, why]) => (
-            <div key={name} className="rounded-[12px] bg-(--c-surface) px-3.5 py-3">
+            <div key={name} className="rounded-xl bg-(--c-surface) px-3.5 py-3">
               <div className="text-[13.5px] font-bold tracking-[-.01em] text-(--c-ink)">{name}</div>
               <div className="mt-1 text-[12px] font-medium text-(--c-ink3)">{why}</div>
             </div>

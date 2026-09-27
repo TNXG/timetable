@@ -49,7 +49,7 @@ export function NotifCard({ n }: { n: Notif }) {
       }}
     >
       <div className="flex items-center">
-        <span className="flex h-[18px] w-[18px] flex-none items-center justify-center rounded-[5px] bg-(--c-accent)">
+        <span className="flex h-4.5 w-4.5 flex-none items-center justify-center rounded-[5px] bg-(--c-accent)">
           <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.6"><rect x="3" y="4" width="18" height="17" rx="4" /><path d="M3 9h18" /></svg>
         </span>
         <span className="ml-1.5 flex-1 text-[11.5px] font-semibold tracking-[-.01em] text-white/75">日历</span>

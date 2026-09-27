@@ -34,7 +34,7 @@ export function CompleteInfoPage({ onDone }: { onDone: () => void }) {
         <div className="mt-6 space-y-5">
           {needDate && <StartDateField value={date} onChange={setDate} />}
           {needName && (
-            <div className="divide-y divide-(--c-surface2) overflow-hidden rounded-[16px] bg-(--c-surface)">
+            <div className="divide-y divide-(--c-surface2) overflow-hidden rounded-2xl bg-(--c-surface)">
               <Field k="姓名">
                 <TextInput value={name} onChange={(e) => setName(e.target.value)} placeholder="姓名" />
               </Field>

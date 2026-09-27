@@ -38,7 +38,7 @@ export function DataPage({ onBack }: { onBack: () => void }) {
   }
   return (
     <Page>
-      <div className="flex-1 overflow-y-auto px-5 pb-10 [scrollbar-width:none]">
+      <div className="flex-1 overflow-y-auto px-5 pb-10 scrollbar-none">
         <TopBar title="数据" sub="本机数据与持久化" onBack={onBack} />
         <Group title="课表">
           <KV k="学期" v={s.semester?.name || '未设置'} sub={s.semester ? `${s.semester.startDate} 起 · ${s.semester.totalWeeks} 周` : ''} />
