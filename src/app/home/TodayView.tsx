@@ -164,7 +164,7 @@ export function TodayView({
       if (!day.adjustment && day.occ.length === 0) {
         const kind = day.vacation ? "vacation" : "free";
         const name = day.vacation ?? "无课";
-        if (previous && previous.kind === kind && previous.name === name && weekdayOf(day.date) !== 1)
+        if (previous && previous.kind === kind && previous.name === name && (kind === "vacation" || weekdayOf(day.date) !== 1))
           previous.dates.push(day);
         else
           groups.push({ kind, name, dates: [day] });
@@ -281,13 +281,13 @@ export function TodayView({
               const rangeEnd = full?.end ?? last.date;
               return (
                 <Fragment key={`${item.kind}-${first.date}`}>
-                  {weekdayOf(first.date) === 1 && <div className="flex items-center gap-3 py-5 text-[11px] font-semibold text-(--c-ink5)"><span className="h-px flex-1 bg-(--c-line)" />第 {weekOf(snap.semester, first.date)} 周<span className="h-px flex-1 bg-(--c-line)" /></div>}
+                  {weekdayOf(first.date) === 1 && first.date >= snap.semester.startDate && first.date <= termEndDay && <div className="flex items-center gap-3 py-5 text-[11px] font-semibold text-(--c-ink5)"><span className="h-px flex-1 bg-(--c-line)" />第 {weekOf(snap.semester, first.date)} 周<span className="h-px flex-1 bg-(--c-line)" /></div>}
                   <div data-group-start={first.date} data-group-end={last.date} className={`relative mb-6 overflow-hidden rounded-2xl px-5 py-5 ${item.kind === "vacation" ? "bg-(--c-amber-soft)" : "bg-(--c-surface)"}`}>
                     {item.dates.map(day => <span key={day.date} data-day={day.date} className="pointer-events-none absolute top-0 left-0 h-0 w-0" />)}
                     {item.kind === "vacation" && <div className="flex items-center justify-between gap-3"><span className="text-[11px] font-bold tracking-wide text-(--c-amber)">假期安排</span><button onClick={onAdjustment} className="rounded-full bg-(--c-surface) px-3 py-1.5 text-[12px] font-bold text-(--c-amber)">调休安排</button></div>}
                     <div className="mt-2 text-[20px] font-extrabold tracking-[-.02em] text-(--c-ink)">{item.name}</div>
                     <div className="mt-1 text-[13px] font-semibold tabular-nums text-(--c-ink3)">{md(rangeStart)}{rangeStart !== rangeEnd ? `—${md(rangeEnd)}` : ""} · {diffDays(rangeEnd, rangeStart) + 1} 天</div>
-                    {item.dates.filter(day => weekdayOf(day.date) === 1 && day.date !== first.date).map(day => (
+                    {item.dates.filter(day => weekdayOf(day.date) === 1 && day.date !== first.date && day.date >= snap.semester.startDate && day.date <= termEndDay).map(day => (
                       <div key={`week-${day.date}`} className={`mt-4 flex items-center gap-3 text-[11px] font-semibold ${item.kind === "vacation" ? "text-(--c-amber)" : "text-(--c-ink5)"}`}><span className="h-px flex-1 bg-(--c-line)" />第 {weekOf(snap.semester, day.date)} 周<span className="h-px flex-1 bg-(--c-line)" /></div>
                     ))}
                   </div>
@@ -302,7 +302,7 @@ export function TodayView({
             const adjustment = day.adjustment;
             return (
               <Fragment key={day.date}>
-              {weekdayOf(day.date) === 1 && <div className="flex items-center gap-3 py-5 text-[11px] font-semibold text-(--c-ink5)"><span className="h-px flex-1 bg-(--c-line)" />第 {weekOf(snap.semester, day.date)} 周<span className="h-px flex-1 bg-(--c-line)" /></div>}
+              {weekdayOf(day.date) === 1 && day.date >= snap.semester.startDate && day.date <= termEndDay && <div className="flex items-center gap-3 py-5 text-[11px] font-semibold text-(--c-ink5)"><span className="h-px flex-1 bg-(--c-line)" />第 {weekOf(snap.semester, day.date)} 周<span className="h-px flex-1 bg-(--c-line)" /></div>}
               <div data-day={day.date} className="min-h-22">
               <div className="flex items-baseline justify-between pb-4">
                 <div className="flex items-baseline gap-2.5">
