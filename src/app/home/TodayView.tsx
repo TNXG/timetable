@@ -1,7 +1,9 @@
 import type { Snapshot } from "../../domain/engine";
 import type { Occurrence, ScheduleAdjustment } from "../../domain/types";
 import type { Rect } from "../ui";
-import { AnimatePresence } from "motion/react";
+import DownLine from "~icons/mingcute/down-line";
+import UpLine from "~icons/mingcute/up-line";
+import { AnimatePresence, motion } from "motion/react";
 /** 今天：跨日连续时间线 + 底部日期条；轻点进详情，长按弹快捷菜单 */
 import { Fragment, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { addDays, diffDays, fmtDuration, fmtMinutes, inVacation, weekdayOf, weekOf } from "../../domain/dates";
@@ -62,6 +64,24 @@ export function TodayView({
     el.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop;
   const restoreRef = useRef<{ date: string; top: number } | null>(null);
   const jumpRef = useRef<string | null>(null);
+  const holidayAnchorRef = useRef(new Map<string, number>());
+  const toggleHoliday = (name: string, firstDate: string) => {
+    const sc = scrollRef.current;
+    const group = sc?.querySelector<HTMLElement>(`[data-group-start="${firstDate}"]`);
+    const open = expandedHolidays.includes(name);
+    if (group && sc) {
+      const top = group.getBoundingClientRect().top;
+      if (open) {
+        const anchorTop = holidayAnchorRef.current.get(firstDate);
+        if (anchorTop != null)
+          sc.scrollTo({ top: sc.scrollTop + top - anchorTop, behavior: "smooth" });
+      } else {
+        holidayAnchorRef.current.set(firstDate, top);
+      }
+    }
+    selectedGroupRef.current = view;
+    setExpandedHolidays(xs => xs.includes(name) ? xs.filter(x => x !== name) : [...xs, name]);
+  };
   useLayoutEffect(() => {
     const restore = restoreRef.current;
     if (!restore)
@@ -161,7 +181,12 @@ export function TodayView({
     const groups: ({ kind: "day"; day: typeof days[number] } | { kind: "vacation" | "free"; name: string; dates: typeof days })[] = [];
     for (const day of days) {
       const previous = groups.at(-1);
-      if (!day.adjustment && day.occ.length === 0) {
+      if (day.vacation && expandedHolidays.includes(day.vacation)) {
+        if (previous?.kind === "vacation" && previous.name === day.vacation)
+          previous.dates.push(day);
+        else
+          groups.push({ kind: "vacation", name: day.vacation, dates: [day] });
+      } else if (!day.adjustment && day.occ.length === 0) {
         const kind = day.vacation ? "vacation" : "free";
         const name = day.vacation ?? "无课";
         if (previous && previous.kind === kind && previous.name === name && (kind === "vacation" || weekdayOf(day.date) !== 1))
@@ -281,24 +306,18 @@ export function TodayView({
               const rangeEnd = full?.end ?? last.date;
               return (
                 <Fragment key={`${item.kind}-${first.date}`}>
-                  {weekdayOf(first.date) === 1 && first.date >= snap.semester.startDate && first.date <= termEndDay && (
+                  {weekdayOf(first.date) === 1 && first.date >= snap.semester.startDate && first.date <= termEndDay && !(item.kind === "vacation" && expandedHolidays.includes(item.name)) && (
                     <div className="flex items-center gap-3 py-5 text-[11px] font-semibold text-(--c-ink5)">
-                      <span className="h-px flex-1 bg-(--c-line)" />
-                      第
-                      {" "}
-                      {weekOf(snap.semester, first.date)}
-                      {" "}
-                      周
-                      <span className="h-px flex-1 bg-(--c-line)" />
+                      <span className="h-px flex-1 bg-(--c-line)" />第 {weekOf(snap.semester, first.date)} 周<span className="h-px flex-1 bg-(--c-line)" />
                     </div>
                   )}
-                  <div data-group-start={first.date} data-group-end={last.date} className={`relative mb-6 overflow-hidden rounded-2xl px-5 py-5 ${item.kind === "vacation" ? "bg-(--c-amber-soft)" : "bg-(--c-surface)"}`}>
-                    {item.dates.map(day => <span key={day.date} data-day={day.date} className="pointer-events-none absolute top-0 left-0 h-0 w-0" />)}
+                  <div data-group-start={first.date} data-group-end={last.date} className={`relative mb-6 overflow-visible rounded-2xl px-5 py-5 ${item.kind === "vacation" ? "bg-(--c-amber-soft)" : "bg-(--c-surface)"}`}>
+                    {item.kind === "free" && item.dates.map(day => <span key={day.date} data-day={day.date} className="pointer-events-none absolute top-0 left-0 h-0 w-0" />)}
                     {item.kind === "vacation" && (
                       <div className="flex items-center justify-between gap-3">
                         <span className="text-[11px] font-bold tracking-wide text-(--c-amber)">假期安排</span>
                         <div className="flex items-center gap-3">
-                          <button onClick={() => setExpandedHolidays(xs => xs.includes(item.name) ? xs.filter(x => x !== item.name) : [...xs, item.name])} className="rounded-full bg-(--c-surface) px-3 py-1.5 text-[12px] font-bold text-(--c-amber)">{expandedHolidays.includes(item.name) ? "收起课表" : "展开课表"}</button>
+                          <span />
                           <button onClick={onAdjustment} className="rounded-full bg-(--c-surface) px-3 py-1.5 text-[12px] font-bold text-(--c-amber)">调休安排</button>
                         </div>
                       </div>
@@ -313,17 +332,70 @@ export function TodayView({
                       {" "}
                       天
                     </div>
-                    {item.dates.filter(day => weekdayOf(day.date) === 1 && day.date !== first.date && day.date >= snap.semester.startDate && day.date <= termEndDay).map(day => (
-                      <div key={`week-${day.date}`} className={`mt-4 flex items-center gap-3 text-[11px] font-semibold ${item.kind === "vacation" ? "text-(--c-amber)" : "text-(--c-ink5)"}`}>
-                        <span className="h-px flex-1 bg-(--c-line)" />
-                        第
-                        {" "}
-                        {weekOf(snap.semester, day.date)}
-                        {" "}
-                        周
-                        <span className="h-px flex-1 bg-(--c-line)" />
-                      </div>
-                    ))}
+                    <AnimatePresence initial={false}>
+                      {item.kind === "vacation" && expandedHolidays.includes(item.name) && (
+                        <motion.div initial={{ height: 0, opacity: 0, y: 24 }} animate={{ height: "auto", opacity: 1, y: 0 }} exit={{ height: 0, opacity: 0, y: 18 }} transition={{ height: { duration: 0.65, ease: [0.25, 1, 0.5, 1] }, opacity: { duration: 0.48 }, y: { duration: 0.58, ease: [0.25, 1, 0.5, 1] } }} className="overflow-hidden">
+                          {item.kind === "vacation" && weekdayOf(first.date) === 1 && first.date >= snap.semester.startDate && first.date <= termEndDay && (
+                            <div className="mt-4 flex items-center gap-3 text-[11px] font-semibold text-(--c-amber)">
+                              <span className="h-px flex-1 bg-(--c-line)" />第 {weekOf(snap.semester, first.date)} 周<span className="h-px flex-1 bg-(--c-line)" />
+                            </div>
+                          )}
+                          {item.dates.filter(day => day.occ.length > 0).map(day => (
+                            <Fragment key={day.date}>
+                              {weekdayOf(day.date) === 1 && day.date !== first.date && day.date >= snap.semester.startDate && day.date <= termEndDay && (
+                                <div className="mt-4 flex items-center gap-3 text-[11px] font-semibold text-(--c-amber)">
+                                  <span className="h-px flex-1 bg-(--c-line)" />第 {weekOf(snap.semester, day.date)} 周<span className="h-px flex-1 bg-(--c-line)" />
+                                </div>
+                              )}
+                              <div data-day={day.date} className={`mt-5 pt-4 ${day.date !== first.date && weekdayOf(day.date) !== 1 ? "border-t border-(--c-amber)/20" : ""}`}>
+                                <div className="flex items-baseline justify-between pb-4">
+                                  <div className="flex items-baseline gap-2.5">
+                                    <span className="text-[17px] leading-none font-extrabold tracking-[-.02em]">{md(day.date)}</span>
+                                    <span className="text-[12.5px] font-semibold text-(--c-ink4)">{WD[weekdayOf(day.date)]}</span>
+                                  </div>
+                                  <span className="text-[12px] font-semibold tabular-nums text-(--c-ink5)">{day.occ.length ? `${day.occ.length} 节假期课程` : "假期 · 无课"}</span>
+                                </div>
+                                {day.occ.map(o => {
+                                  const sticker = stickerOfOcc(o, snap.courses);
+                                  return (
+                                    <button key={o.key} {...pressProps(() => onPick(o), (r, el) => onMenu(o, r, el))} className="flex w-full py-1.5 text-left active:scale-[.985]">
+                                      <div className="w-11 flex-none pt-3.5">
+                                        <div className="text-[11px] font-bold text-(--c-ink2)">{o.startPeriod === o.endPeriod ? `${o.startPeriod}节` : `${o.startPeriod}–${o.endPeriod}节`}</div>
+                                        <div className="mt-1 text-[11px] font-medium tabular-nums text-(--c-ink4)">{fmtMinutes(o.start)}</div>
+                                        <div className="text-[11px] font-medium tabular-nums text-(--c-ink5)">{fmtMinutes(o.end)}</div>
+                                      </div>
+                                      <div className="-my-1.5 ml-3 w-0.5 flex-none self-stretch bg-(--c-line)" />
+                                      <div className="min-w-0 flex-1 pl-4">
+                                        <div className="relative rounded-2xl bg-(--c-surface) px-4 py-3.5">
+                                          <div className="flex items-start gap-2">
+                                            <div className="min-w-0 flex-1">
+                                              <div className={`text-[16px] leading-tight font-bold tracking-[-.01em] ${o.status === "cancelled" ? "line-through" : ""}`}>{o.name}</div>
+                                              <div className="mt-1 flex items-center gap-2 text-[12.5px] font-medium text-(--c-ink3)">
+                                                <span className="min-w-0 truncate">{[o.location, o.teacher].filter(Boolean).join("，") || "—"}</span>
+                                                {o.conflict && <span className="flex-none rounded-[7px] bg-(--c-amber-soft) px-2 py-0.75 text-[10.5px] font-bold text-(--c-amber)">冲突</span>}
+                                                {o.status === "moved" && <span className="flex-none rounded-[7px] bg-(--c-accent-soft) px-2 py-0.75 text-[10.5px] font-bold text-(--c-accent)">已调课</span>}
+                                                {o.status === "cancelled" && <span className="flex-none rounded-[7px] bg-(--c-surface2) px-2 py-0.75 text-[10.5px] font-bold text-(--c-ink3)">停课</span>}
+                                                {o.status === "leave" && <span className="flex-none rounded-[7px] bg-(--c-rose-soft) px-2 py-0.75 text-[10.5px] font-bold text-(--c-rose)">请假</span>}
+                                              </div>
+                                            </div>
+                                            {sticker && <Sticker id={sticker} size={24} tilt={-4} className="flex-none" />}
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </Fragment>
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                    {item.kind === "vacation" && (
+                      <button data-holiday-toggle aria-label={expandedHolidays.includes(item.name) ? "收起假期课程" : "展开假期课程"} onClick={() => toggleHoliday(item.name, first.date)} className="absolute bottom-[-20px] left-1/2 z-1 flex h-6 w-12 -translate-x-1/2 items-center justify-center rounded-b-lg bg-(--c-amber-soft) text-(--c-amber) transition-transform active:scale-95">
+                        {expandedHolidays.includes(item.name) ? <UpLine width={15} height={15} /> : <DownLine width={15} height={15} />}
+                      </button>
+                    )}
                   </div>
                 </Fragment>
               );
