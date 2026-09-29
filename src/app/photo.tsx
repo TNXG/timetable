@@ -1,9 +1,9 @@
-import PicLine from "~icons/mingcute/pic-line";
-import CloseLine from "~icons/mingcute/close-line";
-import Download2Line from "~icons/mingcute/download-2-line";
-import Delete2Line from "~icons/mingcute/delete-2-line";
 import { animate } from "motion/react";
 import { useEffect, useRef, useState } from "react";
+import CloseLine from "~icons/mingcute/close-line";
+import Delete2Line from "~icons/mingcute/delete-2-line";
+import Download2Line from "~icons/mingcute/download-2-line";
+import PicLine from "~icons/mingcute/pic-line";
 import { camera } from "./camera";
 import { loadPhotoSrc, photoSrc } from "./photo-src";
 import { ActionSheet, FADE, useBackClose } from "./ui";

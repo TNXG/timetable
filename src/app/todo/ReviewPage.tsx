@@ -1,7 +1,7 @@
-import LeftLine from "~icons/mingcute/left-line";
 import type { Snapshot } from "../../domain/engine";
 import type { CapturedPhoto } from "../camera";
 import { useMemo, useState } from "react";
+import LeftLine from "~icons/mingcute/left-line";
 import { captureContext, suggestedDue } from "../../domain/next-class";
 import { uid } from "../../domain/store";
 import { TaskPhotoImg } from "../photo";

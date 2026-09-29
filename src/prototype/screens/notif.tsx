@@ -1,7 +1,7 @@
+import React from "react";
 import CalendarLine from "~icons/mingcute/calendar-line";
 import LeftLine from "~icons/mingcute/left-line";
 import RightLine from "~icons/mingcute/right-line";
-import React from "react";
 import { Phone } from "../shared";
 
 /* ---------------- 09 notifications ---------------- */

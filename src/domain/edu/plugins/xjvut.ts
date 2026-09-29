@@ -1,26 +1,27 @@
 import type { EduCookieJar, EduHttp, EduHttpRequest, EduHttpResult, EduKbFetch, EduLoginBegin, EduLoginFlow, EduPlugin } from "../plugin";
-import type { ZfTerm } from "../zhengfang";
+import type { ZfKb, ZfTerm, ZfWeeklyTimetable } from "../zhengfang";
 import { applySetCookie, casErrorText, cookieHeaderValue, describeCasError, encryptCasPassword, extractExecution, isCaptchaError, parseCookieHeader } from "../cas";
-import { guessTerm, parseZfKbList, termLabel, zfTimeGrid } from "../zhengfang";
+import { guessTerm, parseZfWeekly, termLabel, zfTermWeeks, zfTimeGrid } from "../zhengfang";
 
 /**
  * 新疆理工职业大学：统一身份认证（CAS）直登 + 教务（正方新版）原生取课表。
- *  流程（docs/CAS_LOGIN.md 第 5-6 步，2026-09 实测）：CAS 表单登录拿 TGT →
- *  GET jw/sso/zfiotlogin?url=课表索引页（教务不认 CAS 跳转、表单也不吃 CAS 密码，
- *  唯它拿 TGT 换 ticket → 内部 ticketlogin 以 uid+timestamp+verify 签发已认证教务会话）→
- *  POST xskbcx_cxXsgrkb.html 拿课表 JSON。全程原生 HTTP 逐跳收 Cookie，不经 WebView；
+ * CAS 表单登录拿 TGT → jw/sso/zfiotlogin 换 ticket → ticketlogin 签发教务会话 →
+ * POST xskbcxMobile_cxXsKb.html 取整学期课表 JSON（不传 zs；传入则只返回该周）。
+ * 全程原生 HTTP 逐跳收 Cookie，不经 WebView；
  * 用户开启保存密码时，凭据由 Android Keystore 保护，仅用于后续会话失效时自动重建 Cookie。
  */
 
 const CAS_ORIGIN = "https://qyrz.xjvut.edu.cn";
 const CAS_LOGIN = `${CAS_ORIGIN}/cas/login`;
 const JW_ORIGIN = "https://jw.xjvut.edu.cn:6082";
-/** 教务 SSO 入口：portal「学生课表查询」服务的 fwdz 就是它；gnmkdm=N2151 = 学生个人课表 */
-const SSO_JUMP = `${JW_ORIGIN}/sso/zfiotlogin?url=kbcx/xskbcx_cxXskbcxIndex.html?gnmkdm=N2151&layout=default`;
-/** 个人课表数据接口：GET 是页面，POST 是 JSON */
-const KB_URL = `${JW_ORIGIN}/jwglxt/kbcx/xskbcx_cxXsgrkb.html?gnmkdm=N2151`;
-/** SSO 成功的落点：课表索引页（学期下拉在这里） */
-const INDEX_RE = /xskbcx_cxXskbcxIndex\.html/;
+/** 教务 SSO 入口：移动端学生课表页；Y253510 = 移动端课表模块 */
+const SSO_JUMP = `${JW_ORIGIN}/sso/zfiotlogin?url=kbcx/xskbcxMobile_cxXskbcxIndex.html?gnmkdm=Y253510&layout=default`;
+/** 移动端个人课表数据接口：POST 返回 JSON */
+const KB_URL = `${JW_ORIGIN}/jwglxt/kbcx/xskbcxMobile_cxXsKb.html`;
+/** 学校公布的每周起止日期；首周周一和周数用于正确映射 zcd */
+const WEEKS_URL = `${JW_ORIGIN}/jwglxt/kbcx/xskbcxMobile_cxZc.html`;
+/** SSO 成功的落点：移动端课表索引页 */
+const INDEX_RE = /xskbcxMobile_cxXskbcxIndex\.html/;
 /** 作息接口：POST xnm/xqm → 每节 jcmc/qssj/jssj（"10:00 - 10:45"） */
 const RJC_URL = `${JW_ORIGIN}/jwglxt/kbcx/xskbcx_cxRjc.html?gnmkdm=N2151`;
 
@@ -105,58 +106,94 @@ function browserJars(): EduCookieJar[] {
   return out;
 }
 
-/** 索引页里选中的学期：xnm/xqm 下拉的 selected 项；读不到给 null（调用方按月份猜） */
+/** 移动端索引页用隐藏字段 xnm_hide/xqm_hide；桌面索引页用下拉。 */
 function termFromIndex(html: string): ZfTerm | null {
+  const hidden = (id: string) => {
+    const tag = new RegExp(`<input\\b[^>]*\\bid=["']${id}["'][^>]*>`, "i").exec(html)?.[0];
+    return tag ? /\\bvalue\\s*=\\s*["']([^"']+)["']/i.exec(tag)?.[1] : undefined;
+  };
   const selectedIn = (id: string) => {
     const seg = new RegExp(`<select[^>]*id="${id}"[\\s\\S]*?</select>`).exec(html);
     if (!seg)
       return null;
     return /<option[^>]*value="([^"]*)"[^>]*selected/.exec(seg[0])?.[1] ?? null;
   };
-  const xnm = selectedIn("xnm");
-  const xqm = selectedIn("xqm");
+  const xnm = hidden("xnm_hide") ?? selectedIn("xnm");
+  const xqm = hidden("xqm_hide") ?? selectedIn("xqm");
   return xnm && xqm ? { xnm, xqm } : null;
 }
 
-/**
- * 登录后原生拉课表（docs/CAS_LOGIN.md 第 5-6 步）：先走一遍 zfiotlogin 确保教务会话是活的
- *  （TGT 活着就能换到已认证会话；死了链子停在 CAS 登录表单），读索引页选中的学期，
- *  POST 拿 JSON 转规则输出。没接上或没有课给 null，页面退回浏览器兜底。
- */
+/** 登录后逐周拉取移动端课表；周课表决定最终排课，学期接口不参与覆盖。 */
 async function fetchTimetable(http: EduHttp): Promise<EduKbFetch | null> {
   const page = await follow(http, SSO_JUMP);
   if (hostOf(page.url) !== new URL(JW_ORIGIN).host || !INDEX_RE.test(page.url))
     return null;
   const term = termFromIndex(page.body) ?? guessTerm();
-  const r = await call(http, {
-    url: KB_URL,
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded", "X-Requested-With": "XMLHttpRequest", "Referer": page.url, "Accept": "application/json, text/javascript, */*; q=0.01" },
-    body: new URLSearchParams({ xnm: term.xnm, xqm: term.xqm, kzlx: "ck", xsdm: "", kclbdm: "", kclxdm: "" }).toString(),
-  });
-  let json: unknown;
-  try {
-    json = JSON.parse(r.body);
-  } catch {
+  const weekly = await fetchWeeklyTimetable(http, term);
+  if (!weekly)
     return null;
-  }
-  const out = { ...parseZfKbList(json), semester: { name: termLabel(term) } };
+  const out = { ...parseZfWeekly(weekly), semester: { name: termLabel(term), ...weekly.meta } };
   if (out.courses.length === 0)
     return null;
   out.timeGrid = zfTimeGrid(await rjc(http, term));
-  const studentName = cleanXsxxName(json);
-  return { out, term, pageUrl: page.url, studentName };
+  return { out, term, pageUrl: page.url, studentName: weekly.studentName };
 }
 
-/** xsxx.XM = 学生姓名；没有或空串给空 */
-function cleanXsxxName(json: unknown): string {
-  if (!json || typeof json !== "object" || !("xsxx" in json))
-    return "";
-  const xsxx: unknown = json.xsxx;
-  if (!xsxx || typeof xsxx !== "object" || !("XM" in xsxx))
-    return "";
-  const xm: unknown = xsxx.XM;
-  return typeof xm === "string" ? xm.trim() : "";
+interface WeeklyFetch extends ZfWeeklyTimetable {
+  meta: { startDate: string; totalWeeks: number };
+  studentName: string;
+}
+
+async function fetchWeeklyTimetable(http: EduHttp, term: ZfTerm): Promise<WeeklyFetch | null> {
+  const weeks = await fetchWeeks(http, term);
+  const meta = zfTermWeeks(weeks);
+  if (!meta || !Array.isArray(weeks))
+    return null;
+  const courses: ZfKb[] = [];
+  let studentName = "";
+  for (const week of weeks) {
+    const zs = String(week.zs ?? "");
+    if (!/^\d+$/.test(zs))
+      return null;
+    const r = await call(http, {
+      url: KB_URL,
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8", "X-Requested-With": "XMLHttpRequest", "Referer": SSO_JUMP, "Accept": "application/json, text/javascript, */*; q=0.01" },
+      body: new URLSearchParams({ xnm: term.xnm, xqm: term.xqm, zs, kblx: "1", doType: "app" }).toString(),
+    });
+    let json: unknown;
+    try {
+      json = JSON.parse(r.body);
+    } catch {
+      return null;
+    }
+    if (!json || typeof json !== "object" || !("kbList" in json) || !Array.isArray(json.kbList))
+      return null;
+    const student = "xsxx" in json && json.xsxx && typeof json.xsxx === "object" && "XM" in json.xsxx ? json.xsxx.XM : undefined;
+    if (typeof student === "string" && student.trim())
+      studentName = student.trim();
+    for (const item of json.kbList) {
+      if (!item || typeof item !== "object")
+        return null;
+      courses.push({ ...item, zcd: zs });
+    }
+  }
+  return { weeks, courses, meta, studentName };
+}
+
+/** 同学期周次接口：失败时不沿用猜测的开学日。 */
+async function fetchWeeks(http: EduHttp, term: ZfTerm): Promise<unknown> {
+  try {
+    const r = await call(http, {
+      url: WEEKS_URL,
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8", "X-Requested-With": "XMLHttpRequest" },
+      body: new URLSearchParams({ xnm: term.xnm, xqm: term.xqm }).toString(),
+    });
+    return JSON.parse(r.body);
+  } catch {
+    return null;
+  }
 }
 
 /** 作息：日课表接口按学期给每节的起止钟点；失败不阻断导入（应用默认作息兜底） */

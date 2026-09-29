@@ -1,5 +1,5 @@
-import CheckLine from "~icons/mingcute/check-line";
 import type { ThemePref } from "../theme";
+import CheckLine from "~icons/mingcute/check-line";
 import { setStickersOn, useStickersOn } from "../Sticker";
 /** 主题选择：三块小预览用各主题色板渲染，选项同提醒设置页 */
 import { resolve, setDynamic, setTheme, THEME_LABEL, useDynamic, useTheme } from "../theme";

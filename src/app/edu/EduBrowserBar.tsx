@@ -1,9 +1,9 @@
-import LockLine from "~icons/mingcute/lock-line";
-import CloseLine from "~icons/mingcute/close-line";
-import Refresh2Line from "~icons/mingcute/refresh-2-line";
-import More1Line from "~icons/mingcute/more-1-line";
 /** 教务浏览器顶栏：返回、地址与加载进度、停止/刷新、更多菜单入口 */
 import type { EduNav } from "../edu-browser";
+import CloseLine from "~icons/mingcute/close-line";
+import LockLine from "~icons/mingcute/lock-line";
+import More1Line from "~icons/mingcute/more-1-line";
+import Refresh2Line from "~icons/mingcute/refresh-2-line";
 import { hostOf } from "../../domain/edu/systems";
 import { edu } from "../edu-browser";
 import { BackButton } from "../ui";

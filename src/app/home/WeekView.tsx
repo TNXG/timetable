@@ -1,4 +1,3 @@
-import DownLine from "~icons/mingcute/down-line";
 import type { Snapshot } from "../../domain/engine";
 import type { Occurrence } from "../../domain/types";
 import type { Rect } from "../ui";
@@ -6,6 +5,7 @@ import { animate, motion, useMotionValue } from "motion/react";
 /** 周视图：节次网格（domain/time-axis）+ 横滑翻周；轻点进详情，长按弹快捷菜单 */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { flushSync } from "react-dom";
+import DownLine from "~icons/mingcute/down-line";
 import { addDays, dateOf, fmtMinutes, weekdayOf, weekOf } from "../../domain/dates";
 import { occurrencesInWeek } from "../../domain/engine";
 import { stickerOfOcc } from "../../domain/stickers";

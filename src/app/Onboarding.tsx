@@ -81,7 +81,9 @@ export default function Onboarding({ onDone, initialStep = 0, backRef }: { onDon
                     store.setSemester({ ...defaultSemester(mondayOf(todayStr())), totalWeeks: 20 });
                     onDone(null);
                   }}
-                >稍后</TextAction>
+                >
+                  稍后
+                </TextAction>
               </div>
             )}
           >

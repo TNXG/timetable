@@ -1,10 +1,10 @@
-import PhoneLine from "~icons/mingcute/phone-line";
-import EditLine from "~icons/mingcute/edit-line";
-import SearchLine from "~icons/mingcute/search-line";
 import type { Snapshot } from "../../domain/engine";
 import type { Course, Task } from "../../domain/types";
 /** 课程详情：下一次上课、学期进度、出勤、待办、贴纸与隐藏 */
 import { useMemo, useRef, useState } from "react";
+import EditLine from "~icons/mingcute/edit-line";
+import PhoneLine from "~icons/mingcute/phone-line";
+import SearchLine from "~icons/mingcute/search-line";
 import { dateOf, fmtMinutes, weekdayOf } from "../../domain/dates";
 import { searchStickers, stickerFor, stickerOf } from "../../domain/stickers";
 import { maskHasWeek } from "../../domain/weeks";

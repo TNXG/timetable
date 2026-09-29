@@ -1,8 +1,8 @@
+import { useState } from "react";
 /** 个人资料：顶部是「我」页头图的缩影，点背景换背景、点头像换头像 */
 import CameraLine from "~icons/mingcute/camera-line";
 import PhotoAlbumLine from "~icons/mingcute/photo-album-line";
 import RestoreLine from "~icons/mingcute/restore-line";
-import { useState } from "react";
 import { camera } from "../camera";
 import { store, useStore } from "../store";
 import { ActionSheet, Field, SubPage, TextInput } from "../ui";
@@ -48,7 +48,7 @@ export function ProfilePage({ onBack, onPick }: { onBack: () => void; onPick: (t
           title={menu === "avatar" ? "头像" : "背景"}
           groups={[[
             { title: "从相册选择", icon: <PhotoAlbumLine />, onClick: () => onPick(menu) },
-            { title: "恢复默认", icon: <RestoreLine />, onClick: () => { reset(menu); haptic("light"); } }
+            { title: "恢复默认", icon: <RestoreLine />, onClick: () => { reset(menu); haptic("light"); } },
           ]]}
           onClose={() => setMenu(null)}
         />

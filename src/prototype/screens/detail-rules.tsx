@@ -1,10 +1,10 @@
+import React from "react";
 import BookmarkFill from "~icons/mingcute/bookmark-fill";
 import CopyLine from "~icons/mingcute/copy-line";
+import LeftLine from "~icons/mingcute/left-line";
 import LoadingLine from "~icons/mingcute/loading-3-line";
 import PhoneLine from "~icons/mingcute/phone-line";
-import LeftLine from "~icons/mingcute/left-line";
 import RightLine from "~icons/mingcute/right-line";
-import React from "react";
 import { Sticker, stickerTilt } from "../../app/Sticker";
 import { Board, C, CameraIcon, Card, Nav, Phone, tint, TopBar } from "../shared";
 import { WEEK_COLS } from "./today-week";
@@ -29,7 +29,7 @@ export function DetailScreen({ tall }: { tall?: boolean }) {
       <div className={`flex-1 space-y-3 px-4 pt-12 ${tall ? "" : "overflow-hidden"}`}>
         <div className="flex items-center justify-between px-1">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-(--c-surface)">
-            <LeftLine width="15" height="15" style={{ color: "var(--c-ink)" }}  />
+            <LeftLine width="15" height="15" style={{ color: "var(--c-ink)" }} />
           </div>
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-(--c-surface)">
             <BookmarkFill width="16" height="16" style={{ color: "#6D78D6" }} />
@@ -170,7 +170,7 @@ export function AddScreen() {
       <div className="flex-1 overflow-hidden px-5 pt-12">
         <div className="flex items-center">
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-(--c-surface)">
-            <LeftLine width="14" height="14" style={{ color: "var(--c-ink)" }}  />
+            <LeftLine width="14" height="14" style={{ color: "var(--c-ink)" }} />
           </div>
         </div>
         <h1 className="mt-4 text-[26px] font-extrabold tracking-[-.02em] text-(--c-ink)">导入课表</h1>

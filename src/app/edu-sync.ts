@@ -1,5 +1,5 @@
 import type { EduHttp, EduPlugin, School } from "../domain/edu/plugin";
-import type { ZfKb, ZfTerm } from "../domain/edu/zhengfang";
+import type { ZfTerm, ZfWeeklyTimetable } from "../domain/edu/zhengfang";
 import type { NormalizedCourse, RuleOutput } from "../domain/importer";
 import type { RuleManifest } from "../domain/rules";
 import type { EduBgNav } from "./edu-browser";
@@ -8,7 +8,7 @@ import { useSyncExternalStore } from "react";
 import { captchaAnswer } from "../domain/edu/captcha";
 import { EDU_PLUGINS } from "../domain/edu/plugin";
 import { detectSystem, isTimetablePage, scrubUrl } from "../domain/edu/systems";
-import { parseZfKbList, termLabel } from "../domain/edu/zhengfang";
+import { parseZfWeekly, termLabel } from "../domain/edu/zhengfang";
 import { normalize } from "../domain/importer";
 import { parseHtml } from "../domain/importers/html";
 import { uid } from "../domain/store";
@@ -134,6 +134,19 @@ export function setEduSyncEnabled(on: boolean) {
   save({ ...s, enabled: on, failStreak: on ? 0 : s.failStreak });
 }
 
+/* 会话级可变状态：退出登录要立刻打断在途同步，后台抓取共用这几项 */
+let logoutTask: Promise<void> | null = null;
+let running: Promise<SyncOutcome> | null = null;
+/** 内置浏览器正在前台时不做后台抓取 */
+let browserOpen = false;
+let sessionVersion = 0;
+let loggingOut = false;
+let cancelPage: (() => void) | null = null;
+
+export const setEduBrowserOpen = (v: boolean) => {
+  browserOpen = v;
+};
+
 /** 退出登录：先阻止同步写回和重建 Cookie，等在途请求结束后清除会话与凭据。 */
 export async function logoutEduSync(): Promise<void> {
   if (logoutTask)
@@ -143,8 +156,6 @@ export async function logoutEduSync(): Promise<void> {
   });
   return logoutTask;
 }
-
-let logoutTask: Promise<void> | null = null;
 
 async function clearEduSession(): Promise<void> {
   const s = load();
@@ -156,34 +167,30 @@ async function clearEduSession(): Promise<void> {
     if (running)
       await running;
   } finally {
-    let profileError: unknown;
-    try {
-      if (s && !await edu.clearProfile(s.school.url))
-        throw new Error("学校会话未能彻底删除");
-    } catch (e) {
-      profileError = e;
-    }
-    let cleared = false;
-    try {
-      cleared = await eduCredentials.clear();
-    } finally {
-      loggingOut = false;
-    }
-    if (!cleared && nativeEdu())
-      throw new Error("保存的教务凭据未能删除");
-    if (profileError)
-      throw profileError;
+    await purgeEduSession(s);
   }
 }
 
-/** 内置浏览器正在前台时不做后台抓取 */
-let browserOpen = false;
-export const setEduBrowserOpen = (v: boolean) => {
-  browserOpen = v;
-};
-let sessionVersion = 0;
-let loggingOut = false;
-let cancelPage: (() => void) | null = null;
+/** 删 Profile 与已保存凭据：两步都要走完，再抛出先出现的那一个错误。 */
+async function purgeEduSession(s: EduSync | null): Promise<void> {
+  let profileError: unknown;
+  try {
+    if (s && !await edu.clearProfile(s.school.url))
+      throw new Error("学校会话未能彻底删除");
+  } catch (e) {
+    profileError = e;
+  }
+  let cleared = false;
+  try {
+    cleared = await eduCredentials.clear();
+  } finally {
+    loggingOut = false;
+  }
+  if (!cleared && nativeEdu())
+    throw new Error("保存的教务凭据未能删除");
+  if (profileError)
+    throw profileError;
+}
 
 const aborted = (): SyncOutcome => ({ result: "error", changes: 0, message: "已退出登录" });
 
@@ -330,8 +337,11 @@ async function doSync(): Promise<SyncOutcome> {
 
       let out: RuleOutput;
       if (sys === "zhengfang_new" && s.term) {
-        const list: ZfKb[] = await edu.bgZfFetch(s.term.xnm, s.term.xqm);
-        out = { ...parseZfKbList(list), semester: { name: termLabel(s.term) } };
+        const data = await edu.bgZfWeeklyFetch(s.term.xnm, s.term.xqm) as ZfWeeklyTimetable;
+        out = parseZfWeekly(data);
+        if (out.diagnostics.some(d => d.level === "error"))
+          throw new Error("周课表读取失败");
+        out.semester = { ...out.semester, name: termLabel(s.term) };
       } else {
         out = parseHtml(await edu.bgPageHtml(), { mode: "grid" });
       }
@@ -341,13 +351,14 @@ async function doSync(): Promise<SyncOutcome> {
         throw new Error("没有解析出课程");
 
       const need = Math.min(20, Math.max(0, ...out.courses.map(c => c.endPeriod)));
-      const target = need > sem.timeGrid.length ? { ...sem, timeGrid: extendGrid(sem.timeGrid, need) } : sem;
+      const target = { ...sem, ...out.semester, timeGrid: extendGrid(sem.timeGrid, need) };
       const pending = normalize(out, target);
       const changes = countChanges(pending.courses);
+      const metaChanged = target.startDate !== sem.startDate || target.totalWeeks !== sem.totalWeeks || target.timeGrid !== sem.timeGrid || target.name !== sem.name;
+      if (metaChanged)
+        store.setSemester(target);
       if (changes === 0)
         return finish(s, "nochange");
-      if (target !== sem)
-        store.setSemester(target);
       store.applyImport(pending.courses, {
         id: uid(),
         semesterId: target.id,
@@ -387,8 +398,6 @@ async function doSync(): Promise<SyncOutcome> {
   }
   return finish(s, "error", "课表抓取重试未完成");
 }
-
-let running: Promise<SyncOutcome> | null = null;
 
 /** 立即更新；同时只跑一个 */
 export function syncNow(): Promise<SyncOutcome> {

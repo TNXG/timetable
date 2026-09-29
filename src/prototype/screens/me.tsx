@@ -1,6 +1,6 @@
+import React from "react";
 import CameraLine from "~icons/mingcute/camera-2-line";
 import RightLine from "~icons/mingcute/right-line";
-import React from "react";
 import { Nav, Phone, SubHead } from "../shared";
 
 /* ---------------- 08 me ---------------- */

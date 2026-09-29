@@ -1,6 +1,6 @@
+import React from "react";
 import ArrowUpLine from "~icons/mingcute/arrow-up-line";
 import RightLine from "~icons/mingcute/right-line";
-import React from "react";
 import { Board, C, CameraIcon, dockStyle, Nav, Phone } from "../shared";
 
 /* ---------------- 07b todo v2：先记下，再整理 ---------------- */
@@ -61,7 +61,7 @@ export function Todo2Row({ t }: { t: Todo2 }) {
         {t.suggest && (
           <div className="mt-2 inline-flex items-center gap-1 rounded-full bg-(--c-accent-soft) px-2.5 py-1.25 text-[11.5px] font-bold text-(--c-accent)">
             {t.suggest}
-            <RightLine width="10" height="10" style={{ color: "currentColor" }}  />
+            <RightLine width="10" height="10" style={{ color: "currentColor" }} />
           </div>
         )}
       </div>
@@ -99,7 +99,7 @@ export function Todo2List() {
         ))}
         <div className="flex items-center justify-between px-0.5 py-1">
           <span className="text-[13px] font-extrabold tracking-[-.01em] text-(--c-ink4)">已完成 4 项</span>
-          <RightLine width="12" height="12" style={{ color: "var(--c-ink5)" }}  />
+          <RightLine width="12" height="12" style={{ color: "var(--c-ink5)" }} />
         </div>
       </div>
     </div>

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { buildDebugPackage } from "../edu/debug";
 import { DEFAULT_PLUGIN, EDU_PLUGINS, hasDirectLogin } from "../edu/plugin";
 import { isNewer, issueUrl } from "../edu/release";
-import { wrapRun, zfTermOptions } from "../edu/scripts";
+import { PROBE_JS, wrapRun, zfTermOptions } from "../edu/scripts";
 import { detectSystem, hostOf, isTimetablePage, scrubUrl } from "../edu/systems";
 import { guessTerm, parseJcs, parseZfKbList, termLabel, zcdToWeeks } from "../edu/zhengfang";
 import { parseHtml } from "../importers/html";
@@ -67,6 +67,15 @@ describe("正方新版课表解析", () => {
       { xnm: "2024", xqm: "16" },
     ]);
   });
+
+  it("移动端课表页隐藏字段识别当前学期及上一学年", () => {
+    const elements: Record<string, { value: string }> = { xnm_hide: { value: "2026" }, xqm_hide: { value: "3" } };
+    const getElementById = (id: string) => elements[id] ?? null;
+    // eslint-disable-next-line no-new-func -- 实际执行注入 WebView 的脚本体
+    const probe = new Function("document", "location", PROBE_JS) as (doc: unknown, loc: unknown) => { zf: unknown };
+    const result = probe({ getElementsByTagName: () => [], getElementById }, { href: "https://jw.xjvut.edu.cn/jwglxt/kbcx/xskbcxMobile_cxXskbcxIndex.html" });
+    expect(result.zf).toEqual({ xnm: ["2026", "2025"], xqm: ["3", "12", "16"], sel: { xnm: "2026", xqm: "3" } });
+  });
 });
 
 describe("教务系统指纹", () => {
@@ -78,7 +87,7 @@ describe("教务系统指纹", () => {
   });
 
   it("课表页判断", () => {
-    expect(isTimetablePage("zhengfang_new", "https://x/jwglxt/kbcx/xskbcx_cxXskbcxIndex.html?gnmkdm=N2151&layout=default", "")).toBe(true);
+    expect(isTimetablePage("zhengfang_new", "https://x/jwglxt/kbcx/xskbcxMobile_cxXskbcxIndex.html?gnmkdm=Y253510", "")).toBe(true);
     expect(isTimetablePage("zhengfang_new", "https://x/jwglxt/xtgl/index_initMenu.html", "课表")).toBe(false);
     expect(isTimetablePage("qiangzhi", "http://x/jsxsd/xskb/xskb_list.do", "学生个人课表")).toBe(true);
     expect(isTimetablePage(null, "http://x/login", "统一身份认证")).toBe(false);

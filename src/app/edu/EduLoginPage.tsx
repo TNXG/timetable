@@ -1,5 +1,3 @@
-import EyeLine from "~icons/mingcute/eye-2-line";
-import EyeCloseLine from "~icons/mingcute/eye-close-line";
 import type { EduCookieJar, EduHttp, EduKbFetch, EduPlugin } from "../../domain/edu/plugin";
 /**
      教务直登：应用自己的登录页（学号/密码/验证码可选）。是否启用、验证码怎么取与登录方式，
@@ -10,6 +8,8 @@ import type { EduCookieJar, EduHttp, EduKbFetch, EduPlugin } from "../../domain/
     验证码默认不显示，登录时在设备本地 OCR；识别或提交失败后提供手动输入。
  */
 import { useCallback, useEffect, useRef, useState } from "react";
+import EyeLine from "~icons/mingcute/eye-2-line";
+import EyeCloseLine from "~icons/mingcute/eye-close-line";
 import { captchaAnswer } from "../../domain/edu/captcha";
 import { PageBody } from "../course/shared";
 import { CAPTCHA_OCR_VIEWS, edu, eduCredentials, eduOcr, eduProfile, nativeEdu } from "../edu-browser";
@@ -274,7 +274,7 @@ export function EduLoginPage({ plugin, onBack, onDone }: {
       if (!doneRef.current)
         setEduBrowserOpen(false);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react/exhaustive-deps -- 仅挂载时初始化一次：begin/flow/native 在本次会话内不变
   }, []);
 
   useEffect(() => {
@@ -313,11 +313,11 @@ export function EduLoginPage({ plugin, onBack, onDone }: {
                 <form className="flex flex-1 flex-col" onSubmit={(e) => { e.preventDefault(); void submit(); }}>
                   <div className="mt-5 divide-y divide-(--c-surface2) overflow-hidden rounded-2xl bg-(--c-surface)">
                     <Field k="学号">
-                      <TextInput value={username} onChange={e => { credentialsTouchedRef.current = true; setSaved(null); setUsername(e.target.value); }} autoComplete="username" autoCapitalize="off" autoCorrect="off" spellCheck={false} />
+                      <TextInput value={username} onChange={(e) => { credentialsTouchedRef.current = true; setSaved(null); setUsername(e.target.value); }} autoComplete="username" autoCapitalize="off" autoCorrect="off" spellCheck={false} />
                     </Field>
                     <Field k="密码">
                       <div className="flex min-w-0 items-center gap-2">
-                        <TextInput type={passwordVisible ? "text" : "password"} value={password} onChange={e => { credentialsTouchedRef.current = true; setSaved(null); setPassword(e.target.value); }} autoComplete="current-password" className="min-w-0 flex-1" />
+                        <TextInput type={passwordVisible ? "text" : "password"} value={password} onChange={(e) => { credentialsTouchedRef.current = true; setSaved(null); setPassword(e.target.value); }} autoComplete="current-password" className="min-w-0 flex-1" />
                         <button type="button" onClick={() => setPasswordVisible(v => !v)} aria-label={passwordVisible ? "隐藏密码" : "显示密码"} className="flex h-7 w-7 flex-none items-center justify-center text-(--c-ink4)">
                           {passwordVisible ? <EyeCloseLine width={18} height={18} /> : <EyeLine width={18} height={18} />}
                         </button>

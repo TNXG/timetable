@@ -1,10 +1,10 @@
-import LeftLine from "~icons/mingcute/left-line";
-import More1Line from "~icons/mingcute/more-1-line";
 import type { Snapshot } from "../../domain/engine";
 import type { Task } from "../../domain/types";
 import type { ActionItem } from "../ui";
-import Delete2Line from "~icons/mingcute/delete-2-line";
 import { useEffect, useState } from "react";
+import Delete2Line from "~icons/mingcute/delete-2-line";
+import LeftLine from "~icons/mingcute/left-line";
+import More1Line from "~icons/mingcute/more-1-line";
 import { camera } from "../camera";
 import { PhotoViewer, TaskPhotoImg } from "../photo";
 import { todayStr } from "../semester";

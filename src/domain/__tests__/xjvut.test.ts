@@ -1,5 +1,6 @@
 import type { EduHttpRequest, EduHttpResult } from "../edu/plugin";
 import { beforeEach, describe, expect, it } from "vitest";
+import { addDays } from "../dates";
 import { encryptCasPassword } from "../edu/cas";
 import { flow } from "../edu/plugins/xjvut";
 
@@ -10,10 +11,11 @@ const N_HEX = `f${"ab".repeat(63)}d`;
 
 const CAS = "https://qyrz.xjvut.edu.cn";
 const JW = "https://jw.xjvut.edu.cn:6082";
-/** 教务 SSO 入口（portal 服务记录里的 fwdz）：TGT 在这里换 ticket，ticketlogin 签发会话 */
-const SSO_JUMP = `${JW}/sso/zfiotlogin?url=kbcx/xskbcx_cxXskbcxIndex.html?gnmkdm=N2151&layout=default`;
-const INDEX_URL = `${JW}/jwglxt/kbcx/xskbcx_cxXskbcxIndex.html?gnmkdm=N2151&layout=default`;
-const KB_URL = `${JW}/jwglxt/kbcx/xskbcx_cxXsgrkb.html?gnmkdm=N2151`;
+/** 教务 SSO 入口（移动端课表模块） */
+const SSO_JUMP = `${JW}/sso/zfiotlogin?url=kbcx/xskbcxMobile_cxXskbcxIndex.html?gnmkdm=Y253510&layout=default`;
+const INDEX_URL = `${JW}/jwglxt/kbcx/xskbcxMobile_cxXskbcxIndex.html?gnmkdm=Y253510&layout=default`;
+const KB_URL = `${JW}/jwglxt/kbcx/xskbcxMobile_cxXsKb.html`;
+const WEEKS_URL = `${JW}/jwglxt/kbcx/xskbcxMobile_cxZc.html`;
 const RJC_URL = `${JW}/jwglxt/kbcx/xskbcx_cxRjc.html?gnmkdm=N2151`;
 /* 作息：qssj/jssj 形如 "10:00 - 10:45" */
 const rjcJson = JSON.stringify([
@@ -23,9 +25,7 @@ const rjcJson = JSON.stringify([
 
 const loginPage = (error = "") =>
   `<html><form><input name="execution" value="e-token"><span class="error">${error}</span></form></html>`;
-const indexPage
-  = "<html><select name=\"xnm\" id=\"xnm\"><option value=\"2025\">2025</option><option value=\"2026\" selected>2026</option></select>"
-    + "<select name=\"xqm\" id=\"xqm\"><option value=\"3\" selected>第1学期</option><option value=\"12\">第2学期</option></select></html>";
+const indexPage = "<html><input id=\"xnm_hide\" value=\"2026\"><input id=\"xqm_hide\" value=\"3\"></html>";
 const kbJson = JSON.stringify({
   xsxx: { XH: "202312345", XM: "张三" },
   kbList: [
@@ -33,6 +33,7 @@ const kbJson = JSON.stringify({
     { kcmc: "大学英语Ⅰ", xm: "陶俊", cdmc: "综合教学楼511", xqj: "2", jcs: "3-4", zcd: "5-16周" },
   ],
 });
+const weeksJson = JSON.stringify(Array.from({ length: 19 }, (_, i) => ({ zs: String(i + 1), rq: `${addDays("2026-08-31", i * 7)}/${addDays("2026-08-31", i * 7 + 6)}` })));
 
 interface Hop {
   url: string;
@@ -85,11 +86,11 @@ function makeServer(opts: { loginError?: string; kaptcha?: boolean } = {}) {
       if (url.includes("&ticket="))
         return out("", 302, SSO_JUMP, ["JSESSIONID=js0; Path=/"]);
       if (cookie?.includes("JSESSIONID=js0"))
-        return out("", 302, `${JW}/jwglxt/ticketlogin?uid=202312345&timestamp=1790264217&verify=c6815060b217e55ff9fa23bd4f4e4236&url=kbcx%2Fxskbcx_cxXskbcxIndex.html`);
+        return out("", 302, `${JW}/jwglxt/ticketlogin?uid=202312345&timestamp=1790264217&verify=c6815060b217e55ff9fa23bd4f4e4236&url=kbcx%2FxskbcxMobile_cxXskbcxIndex.html`);
       return out("", 302, `${CAS}/cas/login?service=${encodeURIComponent(SSO_JUMP)}`, ["route=jw-route; Path=/"]);
     }
     if (url.startsWith(`${JW}/jwglxt/ticketlogin?`)) {
-      return out("", 302, "kbcx/xskbcx_cxXskbcxIndex.html?gnmkdm=N2151&layout=default", ["JSESSIONID=js2; Path=/jwglxt", "rememberMe=r1; Path=/"]);
+      return out("", 302, "kbcx/xskbcxMobile_cxXskbcxIndex.html?gnmkdm=Y253510&layout=default", ["JSESSIONID=js2; Path=/jwglxt", "rememberMe=r1; Path=/"]);
     }
     if (url === INDEX_URL)
       return out(indexPage);
@@ -101,6 +102,8 @@ function makeServer(opts: { loginError?: string; kaptcha?: boolean } = {}) {
       }
       return out("", 302, "/jwglxt/xtgl/login_slogin.html");
     }
+    if (url === WEEKS_URL)
+      return out(weeksJson);
     if (url === RJC_URL)
       return out(rjcJson);
     throw new Error(`仿真学校不认识 ${method} ${url}`);
@@ -159,8 +162,7 @@ describe("xjvut 直登流程", () => {
     if (!kb)
       return;
     expect(kb.term).toEqual({ xnm: "2026", xqm: "3" });
-    expect(kb.pageUrl).toBe(INDEX_URL);
-    expect(kb.out.semester).toEqual({ name: "2026–2027 学年 第 1 学期" });
+    expect(kb.out.semester).toEqual({ name: "2026–2027 学年 第 1 学期", startDate: "2026-08-31", totalWeeks: 19 });
     expect(kb.out.courses.map(c => c.name)).toEqual(["高等数学A1", "大学英语Ⅰ"]);
     expect(kb.out.timeGrid).toEqual([
       { index: 1, start: 600, end: 645 },
@@ -168,7 +170,9 @@ describe("xjvut 直登流程", () => {
     ]);
     const kbPost = server.hops.find(h => h.method === "POST" && h.url === KB_URL);
     expect(kbPost?.cookie).toContain("JSESSIONID=js2");
-    expect(kbPost?.body).toBe("xnm=2026&xqm=3&kzlx=ck&xsdm=&kclbdm=&kclxdm=");
+    expect(kbPost?.body).toBe("xnm=2026&xqm=3&zs=1&kblx=1&doType=app");
+    const weeksPost = server.hops.find(h => h.method === "POST" && h.url === WEEKS_URL);
+    expect(weeksPost?.body).toBe("xnm=2026&xqm=3");
     const rjcPost = server.hops.find(h => h.method === "POST" && h.url === RJC_URL);
     expect(rjcPost?.body).toBe("xnm=2026&xqm=3");
   });

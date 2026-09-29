@@ -1,8 +1,8 @@
-import FlashFill from "~icons/mingcute/flash-fill";
-import CloseLine from "~icons/mingcute/close-line";
-import FlashLine from "~icons/mingcute/flash-line";
 import { useIsPresent } from "motion/react";
 import { useEffect, useRef, useState } from "react";
+import CloseLine from "~icons/mingcute/close-line";
+import FlashFill from "~icons/mingcute/flash-fill";
+import FlashLine from "~icons/mingcute/flash-line";
 import { builtinRuleFor, resolveScan } from "../domain/importers/url";
 import { camera } from "./camera";
 import { cameraLeave, CircleBtn, layoutRect } from "./todo";

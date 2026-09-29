@@ -1,8 +1,8 @@
-import CalendarLine from "~icons/mingcute/calendar-line";
 import type { Snapshot } from "../../domain/engine";
 import { motion } from "motion/react";
 /** 底部日期条：整学期连续横向滚动（原生惯性），选中项居中；只在关掉日历重新出现时播出场动画 */
 import { useEffect, useMemo, useRef } from "react";
+import CalendarLine from "~icons/mingcute/calendar-line";
 import { addDays, weekdayOf } from "../../domain/dates";
 import { occurrencesOn } from "../../domain/engine";
 import { termEnd, todayStr } from "../semester";

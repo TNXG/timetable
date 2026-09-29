@@ -1,7 +1,7 @@
-import CheckLine from "~icons/mingcute/check-line";
-import Copy2Line from "~icons/mingcute/copy-2-line";
 /** AI 转换课表：复制 Prompt → AI 输出 JSON → 粘贴 → 走 JSON 规则解析 */
 import { useRef, useState } from "react";
+import CheckLine from "~icons/mingcute/check-line";
+import Copy2Line from "~icons/mingcute/copy-2-line";
 import { AI_IMPORT_PROMPT } from "../../domain/ai-prompt";
 import { Page, PrimaryButton, TextAction, TopBar } from "../ui";
 import { copyText, haptic, nativeToast, pasteText } from "../widgets";

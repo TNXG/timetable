@@ -1,8 +1,7 @@
 import type { PluginListenerHandle } from "@capacitor/core";
 import type { PageCapture, ProbeResult } from "../domain/edu/scripts";
-import type { ZfKb } from "../domain/edu/zhengfang";
 import { Capacitor, registerPlugin } from "@capacitor/core";
-import { PAGE_CAPTURE_JS, PAGE_HTML_JS, PAGE_TEXT_JS, PROBE_JS, wrapRun, zfFetchJs } from "../domain/edu/scripts";
+import { PAGE_CAPTURE_JS, PAGE_HTML_JS, PAGE_TEXT_JS, PROBE_JS, wrapRun, zfWeeklyFetchJs } from "../domain/edu/scripts";
 import { uid } from "../domain/store";
 
 /**
@@ -271,7 +270,7 @@ export const edu = {
     const h = TtEdu.addListener("bgNav", fn);
     return () => void h.then(x => x.remove());
   },
-  bgZfFetch: (xnm: string, xqm: string) => run<ZfKb[]>(zfFetchJs(xnm, xqm), RUN_TIMEOUT, true),
+  bgZfWeeklyFetch: (xnm: string, xqm: string) => run<unknown>(zfWeeklyFetchJs(xnm, xqm), RUN_TIMEOUT, true),
   bgPageHtml: () => run<string>(PAGE_HTML_JS, RUN_TIMEOUT, true),
   navigate: (url: string) => (nativeEdu() ? TtEdu.navigate({ url }) : Promise.resolve()),
   reload: () => (nativeEdu() ? TtEdu.reload() : Promise.resolve()),
@@ -289,7 +288,7 @@ export const edu = {
     return () => void h.then(x => x.remove());
   },
   probe: () => run<ProbeResult>(PROBE_JS),
-  zfFetch: (xnm: string, xqm: string) => run<ZfKb[]>(zfFetchJs(xnm, xqm)),
+  zfWeeklyFetch: (xnm: string, xqm: string) => run<unknown>(zfWeeklyFetchJs(xnm, xqm)),
   pageHtml: () => run<string>(PAGE_HTML_JS),
   pageText: () => run<string>(PAGE_TEXT_JS),
   /** 调试包：主文档与同源子框架的 HTML 及编码信息 */

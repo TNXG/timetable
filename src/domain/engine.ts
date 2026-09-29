@@ -24,8 +24,8 @@ function slotTime(sem: Semester, startPeriod: number, endPeriod: number) {
   return { start: s?.start ?? 0, end: e?.end ?? 0 };
 }
 
-/** 展开某一天的全部 Occurrence（含手动条目与例外），按开始时间排序并标冲突。 */
-export function occurrencesOn(snap: Snapshot, date: LocalDate): Occurrence[] {
+/** 展开某一天的全部 Occurrence；includeVacation 用于假期折叠块查看原始周课表。 */
+export function occurrencesOn(snap: Snapshot, date: LocalDate, includeVacation = false): Occurrence[] {
   const { semester: sem } = snap;
   const adjustment = (sem.scheduleAdjustments ?? []).find(a => a.date === date);
   const teachingDate = adjustment?.teachingDate ?? date;
@@ -34,7 +34,7 @@ export function occurrencesOn(snap: Snapshot, date: LocalDate): Occurrence[] {
   const actualWd = weekdayOf(date);
   const out: Occurrence[] = [];
   const mapped = !!adjustment;
-  if (week >= 1 && week <= sem.totalWeeks && (mapped || !inVacation(sem, date))) {
+  if (week >= 1 && week <= sem.totalWeeks && (mapped || includeVacation || !inVacation(sem, date))) {
     for (const rule of snap.rules) {
       const course = snap.courses.find(c => c.id === rule.courseId);
       if (!course || course.hidden)

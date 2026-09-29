@@ -1,5 +1,5 @@
-import CheckLine from "~icons/mingcute/check-line";
 import React from "react";
+import CheckLine from "~icons/mingcute/check-line";
 import { C, Nav, Phone } from "../shared";
 
 /* ---------------- 07 todo ---------------- */
@@ -60,7 +60,7 @@ export function TodoScreen() {
                         className="flex h-4.25 w-4.25 items-center justify-center rounded-md border-[1.8px]"
                         style={{ borderColor: t.done ? t.color : "var(--c-radio-border)", background: t.done ? t.color : "transparent" }}
                       >
-                        {t.done && <CheckLine width="10" height="10" style={{ color: "#fff" }}  />}
+                        {t.done && <CheckLine width="10" height="10" style={{ color: "#fff" }} />}
                       </span>
                     </div>
                     <div className="flex-1">

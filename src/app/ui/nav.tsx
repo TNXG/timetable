@@ -1,18 +1,18 @@
-import Home2Line from "~icons/mingcute/home-2-line";
-import CalendarLine from "~icons/mingcute/calendar-line";
-import TaskLine from "~icons/mingcute/task-line";
-import Settings3Line from "~icons/mingcute/settings-3-line";
-import LeftLine from "~icons/mingcute/left-line";
 import { motion } from "motion/react";
 import React from "react";
+import CalendarLine from "~icons/mingcute/calendar-line";
+import Home2Line from "~icons/mingcute/home-2-line";
+import LeftLine from "~icons/mingcute/left-line";
+import Settings3Line from "~icons/mingcute/settings-3-line";
+import TaskLine from "~icons/mingcute/task-line";
 import { useImeShrink } from "../ime";
 import { dockStyle } from "./constants";
 
 export const NAV_ITEMS: [React.ReactNode, string][] = [
-  [<Home2Line />, "今天"],
-  [<CalendarLine />, "课表"],
-  [<TaskLine />, "待办"],
-  [<Settings3Line />, "我的"],
+  [<Home2Line key="home" />, "今天"],
+  [<CalendarLine key="calendar" />, "课表"],
+  [<TaskLine key="task" />, "待办"],
+  [<Settings3Line key="settings" />, "我的"],
 ];
 
 export function Nav({ active, onTab, hidden }: { active: number; onTab: (i: number) => void; hidden?: boolean }) {

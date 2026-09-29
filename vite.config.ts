@@ -1,6 +1,6 @@
 import tailwindcss from "@tailwindcss/vite";
-import Icons from "unplugin-icons/vite";
 import react from "@vitejs/plugin-react";
+import Icons from "unplugin-icons/vite";
 import { defineConfig } from "vite";
 
 function jsxCompiler(svg: string) {

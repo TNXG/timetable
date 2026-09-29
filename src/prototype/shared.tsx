@@ -1,10 +1,10 @@
+import React from "react";
 import CalendarLine from "~icons/mingcute/calendar-line";
+import CameraLine from "~icons/mingcute/camera-line";
 import HomeLine from "~icons/mingcute/home-1-line";
+import LeftLine from "~icons/mingcute/left-line";
 import SettingsLine from "~icons/mingcute/settings-3-line";
 import TaskLine from "~icons/mingcute/task-line";
-import CameraLine from "~icons/mingcute/camera-line";
-import LeftLine from "~icons/mingcute/left-line";
-import React from "react";
 import { Sticker } from "../app/Sticker";
 import { stickerOf } from "../domain/stickers";
 

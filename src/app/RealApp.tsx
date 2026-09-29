@@ -242,7 +242,6 @@ export default function RealApp() {
                 onSearch={() => setSearching(true)}
                 onImport={openEduLogin}
                 onManual={() => push({ k: "manual" })}
-                onSemester={() => push({ k: "semester" })}
                 onAdjustment={() => push({ k: "adjustments" })}
                 onNewSemester={() => push({ k: "newSemester" })}
                 onCapture={openCapture}

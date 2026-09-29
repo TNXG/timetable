@@ -1,8 +1,8 @@
-import SearchLine from "~icons/mingcute/search-line";
 import type { State } from "../../domain/store";
 import type { Course, Task } from "../../domain/types";
 /** 搜索：课程、老师、教室、待办，盖在 Tab 上的浮层 */
 import { useEffect, useMemo, useRef, useState } from "react";
+import SearchLine from "~icons/mingcute/search-line";
 import { todayStr } from "../semester";
 import { dueText, KIND_LABEL as TASK_KIND_LABEL } from "../todo";
 import { WD } from "../ui";

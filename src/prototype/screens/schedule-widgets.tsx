@@ -1,7 +1,7 @@
-import ArrowRightLine from "~icons/mingcute/arrow-right-line";
-import AddLine from "~icons/mingcute/add-line";
-import SubtractLine from "~icons/mingcute/subtract-line";
 import React from "react";
+import AddLine from "~icons/mingcute/add-line";
+import ArrowRightLine from "~icons/mingcute/arrow-right-line";
+import SubtractLine from "~icons/mingcute/subtract-line";
 import { Phone, SubHead } from "../shared";
 
 /* ---------------- 作息时间：总节数 + 标准时长，每节只填开始，下课自动算；单节下课可单独改 ---------------- */

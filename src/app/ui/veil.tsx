@@ -171,6 +171,7 @@ export function StickyHead({ children, bleed = 0, feather, className = "" }: {
      host 从占位节点解析——占位节点始终挂载；head 依赖 host 才渲染，从它解析会互相等待 */
   useLayoutEffect(() => {
     const sc = scrollParent(ref.current);
+    // eslint-disable-next-line react/set-state-in-effect -- useLayoutEffect 里同步落地 portal 目标，head 与占位节点同帧渲染，首帧不闪
     setHost((ref.current?.closest("[data-veil-host]") as HTMLElement | null) ?? sc?.parentElement ?? null);
   }, []);
   useLayoutEffect(() => {

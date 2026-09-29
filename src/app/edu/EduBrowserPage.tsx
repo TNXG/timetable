@@ -1,6 +1,6 @@
 import type { EduPlugin } from "../../domain/edu/plugin";
 import type { ProbeResult } from "../../domain/edu/scripts";
-import type { ZfTerm } from "../../domain/edu/zhengfang";
+import type { ZfTerm, ZfWeeklyTimetable } from "../../domain/edu/zhengfang";
 import type { RuleOutput } from "../../domain/importer";
 import type { EduNav } from "../edu-browser";
 import type { EduSyncSource } from "../edu-sync";
@@ -14,7 +14,7 @@ import { motion, useIsPresent } from "motion/react";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { issueUrl } from "../../domain/edu/release";
 import { detectSystem, hostOf, isTimetablePage } from "../../domain/edu/systems";
-import { parseZfKbList, termLabel } from "../../domain/edu/zhengfang";
+import { parseZfWeekly, termLabel } from "../../domain/edu/zhengfang";
 import { parseHtml } from "../../domain/importers/html";
 import { edu, nativeEdu, profilesSupported } from "../edu-browser";
 import { setEduBrowserOpen } from "../edu-sync";
@@ -72,6 +72,8 @@ export function EduBrowserPage({ plugin, startUrl, active, onBack, onImport, onF
   const [busy, setBusy] = useState(false);
   const [sheet, setSheet] = useState(false);
   const [menu, setMenu] = useState(false);
+  /** 只在本次课表页停留期间复用探测结果；换页/学期重新从接口获取。 */
+  const kbCacheRef = useRef<{ url: string; xnm: string; xqm: string; data: ZfWeeklyTimetable } | null>(null);
   /** 离场时学校页面的定格图；'' 表示已离场但没拿到图 */
   const [shot, setShot] = useState<string | null>(null);
   const holeRef = useRef<HTMLDivElement>(null);
@@ -175,10 +177,12 @@ export function EduBrowserPage({ plugin, startUrl, active, onBack, onImport, onF
   useEffect(() => {
     if (!onPage) {
       probedRef.current = "";
+      kbCacheRef.current = null;
       return;
     }
     if (probedRef.current === nav.url)
       return;
+    kbCacheRef.current = null;
     probedRef.current = nav.url;
     let alive = true;
     void (async () => {
@@ -188,9 +192,11 @@ export function EduBrowserPage({ plugin, startUrl, active, onBack, onImport, onF
           return;
         if (p.zf && sys === "zhengfang_new") {
           setProbedReady({ kind: "zf", zf: p.zf, count: null });
-          const list = await edu.zfFetch(p.zf.sel.xnm, p.zf.sel.xqm);
-          if (alive)
-            setProbedReady({ kind: "zf", zf: p.zf, count: parseZfKbList(list).courses.length });
+          const data = await edu.zfWeeklyFetch(p.zf.sel.xnm, p.zf.sel.xqm) as ZfWeeklyTimetable;
+          if (alive) {
+            kbCacheRef.current = { url: nav.url, xnm: p.zf.sel.xnm, xqm: p.zf.sel.xqm, data };
+            setProbedReady({ kind: "zf", zf: p.zf, count: parseZfWeekly(data).courses.length });
+          }
         } else {
           setProbedReady(p.table ? { kind: "table" } : { kind: "none" });
         }
@@ -271,8 +277,14 @@ export function EduBrowserPage({ plugin, startUrl, active, onBack, onImport, onF
   const importZf = async (t: ZfTerm) => {
     setBusy(true);
     try {
-      const list = await edu.zfFetch(t.xnm, t.xqm);
-      await finish({ ...parseZfKbList(list), semester: { name: termLabel(t) } }, t);
+      const cached = kbCacheRef.current;
+      const data = cached && cached.url === nav.url && cached.xnm === t.xnm && cached.xqm === t.xqm
+        ? cached.data
+        : await edu.zfWeeklyFetch(t.xnm, t.xqm) as ZfWeeklyTimetable;
+      const out = parseZfWeekly(data);
+      if (out.diagnostics.some(d => d.level === "error"))
+        throw new Error("周课表读取失败");
+      await finish({ ...out, semester: { ...out.semester, name: termLabel(t) } }, t);
     } catch {
       await fail();
     } finally {

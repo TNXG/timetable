@@ -1,11 +1,11 @@
-import CameraRotateLine from "~icons/mingcute/camera-rotate-line";
-import FlashLine from "~icons/mingcute/flash-line";
-import MoreFill from "~icons/mingcute/more-1-fill";
-import CloseLine from "~icons/mingcute/close-line";
-import DownLine from "~icons/mingcute/down-line";
-import LeftLine from "~icons/mingcute/left-line";
 import type { Course } from "../shared";
 import React from "react";
+import CameraRotateLine from "~icons/mingcute/camera-rotate-line";
+import CloseLine from "~icons/mingcute/close-line";
+import DownLine from "~icons/mingcute/down-line";
+import FlashLine from "~icons/mingcute/flash-line";
+import LeftLine from "~icons/mingcute/left-line";
+import MoreFill from "~icons/mingcute/more-1-fill";
 import { Board, C, CameraIcon, CourseRow, days, EmptyBlock, Nav, Phone, todayIndex } from "../shared";
 import { Chip2 } from "./todo2";
 
@@ -21,7 +21,7 @@ export function Todo2CameraScreen() {
           <span className="flex items-center gap-1.5 rounded-full bg-white/12 px-3 py-1.5 text-[12.5px] font-bold text-white">
             <span className="h-1.75 w-1.75 rounded-full" style={{ background: C.math }} />
             高等数学（下）
-            <DownLine width="10" height="10" style={{ color: "rgba(255,255,255,.6)" }}  />
+            <DownLine width="10" height="10" style={{ color: "rgba(255,255,255,.6)" }} />
           </span>
           <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white/12">
             <FlashLine width="15" height="15" className="text-white" />
@@ -86,7 +86,7 @@ export function Todo2PickerScreen() {
           </span>
           <span className="flex items-center gap-1.5 rounded-full bg-white/12 px-3 py-1.5 text-[12.5px] font-bold text-white">
             最近项目
-            <DownLine width="10" height="10" style={{ color: "rgba(255,255,255,.6)" }}  />
+            <DownLine width="10" height="10" style={{ color: "rgba(255,255,255,.6)" }} />
           </span>
           <span className="w-9" />
         </div>
@@ -127,7 +127,7 @@ export function Todo2PickerScreen() {
 export function BackCircle() {
   return (
     <div className="flex h-9 w-9 items-center justify-center rounded-full bg-(--c-surface)">
-      <LeftLine width="14" height="14" style={{ color: "var(--c-ink)" }}  />
+      <LeftLine width="14" height="14" style={{ color: "var(--c-ink)" }} />
     </div>
   );
 }

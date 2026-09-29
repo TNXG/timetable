@@ -9,10 +9,10 @@ import { occurrencesOn } from "../../domain/engine";
 import { holidaysBetween } from "../../domain/holidays";
 import { justEndedClass } from "../../domain/next-class";
 import { stickerOfOcc } from "../../domain/stickers";
-import { Sticker } from "../Sticker";
 import { termEnd } from "../semester";
+import { Sticker } from "../Sticker";
 import { ClassEndCard } from "../todo";
-import { BackPill, BottomVeil, EmptyBlock, md, SearchButton, StickyHead, WD } from "../ui";
+import { BackPill, BottomVeil, md, SearchButton, StickyHead, WD } from "../ui";
 import { CalendarSheet } from "./calendar";
 import { DateStrip } from "./DateStrip";
 import { useNowMinutes, useToday } from "./hooks";
@@ -27,7 +27,6 @@ export function TodayView({
   onSearch,
   onImport,
   onManual,
-  onSemester,
   onAdjustment,
   onNewSemester,
   onCapture,
@@ -41,7 +40,6 @@ export function TodayView({
   onSearch: () => void;
   onImport: () => void;
   onManual: () => void;
-  onSemester: () => void;
   onAdjustment: () => void;
   onNewSemester: () => void;
   onCapture: (kind: "camera" | "text", courseId?: string) => void;
@@ -50,6 +48,7 @@ export function TodayView({
   const today = useToday();
   const now = useNowMinutes();
   const [cal, setCal] = useState(false);
+  const [expandedHolidays, setExpandedHolidays] = useState<string[]>([]);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const firstDay = snap.semester.startDate < anchor ? snap.semester.startDate : anchor;
   const lastDay = termEnd(snap.semester) > anchor ? termEnd(snap.semester) : anchor;
@@ -58,6 +57,9 @@ export function TodayView({
     setRange({ anchor, start: addDays(anchor, -21), end: addDays(anchor, 34) });
   const start = range.anchor !== anchor ? (addDays(anchor, -21) < firstDay ? firstDay : addDays(anchor, -21)) : range.start < firstDay ? firstDay : range.start;
   const end = range.anchor !== anchor ? (addDays(anchor, 34) > lastDay ? lastDay : addDays(anchor, 34)) : range.end > lastDay ? lastDay : range.end;
+  /* 吸顶标题下方的日期与日期条保持一致 */
+  const dayTop = (sc: HTMLElement, el: HTMLElement) =>
+    el.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop;
   const restoreRef = useRef<{ date: string; top: number } | null>(null);
   const jumpRef = useRef<string | null>(null);
   useLayoutEffect(() => {
@@ -89,9 +91,6 @@ export function TodayView({
     prevAnchorRef.current = anchor;
     setView(anchor);
   }
-  /* 吸顶标题下方的日期与日期条保持一致 */
-  const dayTop = (sc: HTMLElement, el: HTMLElement) =>
-    el.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop;
   const glidingRef = useRef(0);
   const onScroll = () => {
     const sc = scrollRef.current;
@@ -151,12 +150,13 @@ export function TodayView({
   const days = useMemo(() => {
     const out: { date: string; rel: string; occ: Occurrence[]; vacation: string | null; adjustment?: ScheduleAdjustment }[] = [];
     for (let d = start; d <= end; d = addDays(d, 1)) {
-      const occ = occurrencesOn(snap, d);
+      const vacation = inVacation(snap.semester, d);
+      const occ = occurrencesOn(snap, d, !!vacation && expandedHolidays.includes(vacation));
       const rel = d === today ? "今天" : d === addDays(today, 1) ? "明天" : d === addDays(today, 2) ? "后天" : WD[weekdayOf(d)];
-      out.push({ date: d, rel, occ, vacation: inVacation(snap.semester, d), adjustment: snap.semester.scheduleAdjustments?.find(a => a.date === d) });
+      out.push({ date: d, rel, occ, vacation, adjustment: snap.semester.scheduleAdjustments?.find(a => a.date === d) });
     }
     return out;
-  }, [snap, start, end, today]);
+  }, [snap, start, end, today, expandedHolidays]);
   const timeline = useMemo(() => {
     const groups: ({ kind: "day"; day: typeof days[number] } | { kind: "vacation" | "free"; name: string; dates: typeof days })[] = [];
     for (const day of days) {
@@ -275,20 +275,54 @@ export function TodayView({
               const last = item.dates[item.dates.length - 1];
               const full = item.kind === "vacation"
                 ? snap.semester.vacations.find(v => v.name === item.name && v.start <= first.date && v.end >= last.date)
-                  ?? (snap.semester.holidays === false ? undefined : holidayRanges.find(h => h.name === item.name && h.start <= first.date && h.end >= last.date))
+                ?? (snap.semester.holidays === false ? undefined : holidayRanges.find(h => h.name === item.name && h.start <= first.date && h.end >= last.date))
                 : undefined;
               const rangeStart = full?.start ?? first.date;
               const rangeEnd = full?.end ?? last.date;
               return (
                 <Fragment key={`${item.kind}-${first.date}`}>
-                  {weekdayOf(first.date) === 1 && first.date >= snap.semester.startDate && first.date <= termEndDay && <div className="flex items-center gap-3 py-5 text-[11px] font-semibold text-(--c-ink5)"><span className="h-px flex-1 bg-(--c-line)" />第 {weekOf(snap.semester, first.date)} 周<span className="h-px flex-1 bg-(--c-line)" /></div>}
+                  {weekdayOf(first.date) === 1 && first.date >= snap.semester.startDate && first.date <= termEndDay && (
+                    <div className="flex items-center gap-3 py-5 text-[11px] font-semibold text-(--c-ink5)">
+                      <span className="h-px flex-1 bg-(--c-line)" />
+                      第
+                      {" "}
+                      {weekOf(snap.semester, first.date)}
+                      {" "}
+                      周
+                      <span className="h-px flex-1 bg-(--c-line)" />
+                    </div>
+                  )}
                   <div data-group-start={first.date} data-group-end={last.date} className={`relative mb-6 overflow-hidden rounded-2xl px-5 py-5 ${item.kind === "vacation" ? "bg-(--c-amber-soft)" : "bg-(--c-surface)"}`}>
                     {item.dates.map(day => <span key={day.date} data-day={day.date} className="pointer-events-none absolute top-0 left-0 h-0 w-0" />)}
-                    {item.kind === "vacation" && <div className="flex items-center justify-between gap-3"><span className="text-[11px] font-bold tracking-wide text-(--c-amber)">假期安排</span><button onClick={onAdjustment} className="rounded-full bg-(--c-surface) px-3 py-1.5 text-[12px] font-bold text-(--c-amber)">调休安排</button></div>}
+                    {item.kind === "vacation" && (
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-[11px] font-bold tracking-wide text-(--c-amber)">假期安排</span>
+                        <div className="flex items-center gap-3">
+                          <button onClick={() => setExpandedHolidays(xs => xs.includes(item.name) ? xs.filter(x => x !== item.name) : [...xs, item.name])} className="rounded-full bg-(--c-surface) px-3 py-1.5 text-[12px] font-bold text-(--c-amber)">{expandedHolidays.includes(item.name) ? "收起课表" : "展开课表"}</button>
+                          <button onClick={onAdjustment} className="rounded-full bg-(--c-surface) px-3 py-1.5 text-[12px] font-bold text-(--c-amber)">调休安排</button>
+                        </div>
+                      </div>
+                    )}
                     <div className="mt-2 text-[20px] font-extrabold tracking-[-.02em] text-(--c-ink)">{item.name}</div>
-                    <div className="mt-1 text-[13px] font-semibold tabular-nums text-(--c-ink3)">{md(rangeStart)}{rangeStart !== rangeEnd ? `—${md(rangeEnd)}` : ""} · {diffDays(rangeEnd, rangeStart) + 1} 天</div>
+                    <div className="mt-1 text-[13px] font-semibold tabular-nums text-(--c-ink3)">
+                      {md(rangeStart)}
+                      {rangeStart !== rangeEnd ? `—${md(rangeEnd)}` : ""}
+                      {" "}
+                      ·
+                      {diffDays(rangeEnd, rangeStart) + 1}
+                      {" "}
+                      天
+                    </div>
                     {item.dates.filter(day => weekdayOf(day.date) === 1 && day.date !== first.date && day.date >= snap.semester.startDate && day.date <= termEndDay).map(day => (
-                      <div key={`week-${day.date}`} className={`mt-4 flex items-center gap-3 text-[11px] font-semibold ${item.kind === "vacation" ? "text-(--c-amber)" : "text-(--c-ink5)"}`}><span className="h-px flex-1 bg-(--c-line)" />第 {weekOf(snap.semester, day.date)} 周<span className="h-px flex-1 bg-(--c-line)" /></div>
+                      <div key={`week-${day.date}`} className={`mt-4 flex items-center gap-3 text-[11px] font-semibold ${item.kind === "vacation" ? "text-(--c-amber)" : "text-(--c-ink5)"}`}>
+                        <span className="h-px flex-1 bg-(--c-line)" />
+                        第
+                        {" "}
+                        {weekOf(snap.semester, day.date)}
+                        {" "}
+                        周
+                        <span className="h-px flex-1 bg-(--c-line)" />
+                      </div>
                     ))}
                   </div>
                 </Fragment>
@@ -302,117 +336,149 @@ export function TodayView({
             const adjustment = day.adjustment;
             return (
               <Fragment key={day.date}>
-              {weekdayOf(day.date) === 1 && day.date >= snap.semester.startDate && day.date <= termEndDay && <div className="flex items-center gap-3 py-5 text-[11px] font-semibold text-(--c-ink5)"><span className="h-px flex-1 bg-(--c-line)" />第 {weekOf(snap.semester, day.date)} 周<span className="h-px flex-1 bg-(--c-line)" /></div>}
-              <div data-day={day.date} className="min-h-22">
-              <div className="flex items-baseline justify-between pb-4">
-                <div className="flex items-baseline gap-2.5">
-                  <span className="text-[17px] leading-none font-extrabold tracking-[-.02em]">{day.rel}</span>
-                  <span className="text-[12.5px] font-semibold text-(--c-ink4)">
-                    {md(day.date)}
-                    {day.rel !== WD[weekdayOf(day.date)] ? ` ${WD[weekdayOf(day.date)]}` : ""}
-                  </span>
+                {weekdayOf(day.date) === 1 && day.date >= snap.semester.startDate && day.date <= termEndDay && (
+                  <div className="flex items-center gap-3 py-5 text-[11px] font-semibold text-(--c-ink5)">
+                    <span className="h-px flex-1 bg-(--c-line)" />
+                    第
+                    {" "}
+                    {weekOf(snap.semester, day.date)}
+                    {" "}
+                    周
+                    <span className="h-px flex-1 bg-(--c-line)" />
+                  </div>
+                )}
+                <div data-day={day.date} className="min-h-22">
+                  <div className="flex items-baseline justify-between pb-4">
+                    <div className="flex items-baseline gap-2.5">
+                      <span className="text-[17px] leading-none font-extrabold tracking-[-.02em]">{day.rel}</span>
+                      <span className="text-[12.5px] font-semibold text-(--c-ink4)">
+                        {md(day.date)}
+                        {day.rel !== WD[weekdayOf(day.date)] ? ` ${WD[weekdayOf(day.date)]}` : ""}
+                      </span>
+                    </div>
+                    {day.occ.length > 0 && (
+                      <span className="text-[12px] font-semibold tabular-nums text-(--c-ink5)">
+                        {day.occ.length}
+                        {" "}
+                        节课，
+                        {fmtMinutes(day.occ[0].start)}
+                        {" "}
+                        开始
+                      </span>
+                    )}
+                  </div>
+                  {day.vacation && day.occ.length > 0 && (
+                    <div className="mb-4 rounded-xl bg-(--c-amber-soft) px-3 py-2 text-[12px] font-bold text-(--c-amber)">
+                      {day.vacation}
+                      {" "}
+                      · 假期课程
+                    </div>
+                  )}
+                  {day.occ.length === 0 && (
+                    <div className="pb-7 text-[13.5px] font-semibold text-(--c-ink4)">
+                      {adjustment ? "无课" : inVacation(snap.semester, day.date) ?? (weekdayOf(day.date) >= 6 ? "周末 · 无课" : "无课")}
+                    </div>
+                  )}
+                  {adjustment && (
+                    <div className="pb-4 text-[12px] font-semibold text-(--c-accent)">
+                      调休 · 补第
+                      {weekOf(snap.semester, adjustment.teachingDate)}
+                      {" "}
+                      周
+                      {WD[weekdayOf(adjustment.teachingDate)]}
+                      课程
+                    </div>
+                  )}
+                  {day.occ.map((o, oi) => {
+                    const isLast = oi === day.occ.length - 1;
+                    const isToday = day.date === today;
+                    const past = (isToday && o.end <= now) || day.date < today;
+                    const nowOn = isToday && o.start <= now && now < o.end;
+                    const pct = ((now - o.start) / Math.max(1, o.end - o.start)) * 100;
+                    const sticker = stickerOfOcc(o, snap.courses);
+                    return (
+                      <Fragment key={o.key}>
+                        <button
+                          {...pressProps(() => onPick(o), (r, el) => onMenu(o, r, el))}
+                          className={`flex w-full py-1.5 text-left transition-transform duration-150 ${liftKey === o.key ? "" : "active:scale-[.985]"}`}
+                        >
+                          <div className={`w-11 flex-none pt-3.5 ${past ? "opacity-50" : ""}`}>
+                            <div className="text-[11px] font-bold text-(--c-ink2)">{o.startPeriod === o.endPeriod ? `${o.startPeriod}节` : `${o.startPeriod}–${o.endPeriod}节`}</div>
+                            <div className="mt-1 text-[11px] font-medium tabular-nums text-(--c-ink4)">{fmtMinutes(o.start)}</div>
+                            <div className="text-[11px] font-medium tabular-nums text-(--c-ink5)">{fmtMinutes(o.end)}</div>
+                          </div>
+                          {/* 时间轴在一天里贯穿，最后一节下方留出与日期标题下方等高的空白 */}
+                          <div className={`-my-1.5 ml-3 w-0.5 flex-none self-stretch ${isLast ? "pb-7" : ""}`}>
+                            <div className="relative h-full bg-(--c-line)">
+                              {past && <i className="absolute inset-0 bg-(--c-accent)" />}
+                              {nowOn && (
+                                <>
+                                  <i className="absolute inset-x-0 top-0 bg-(--c-accent)" style={{ height: `${pct}%` }} />
+                                  <i className="absolute left-1/2 h-2.25 w-2.25 -translate-x-1/2 -translate-y-1/2 rounded-full border-[2.5px] border-(--c-accent) bg-(--c-surface)" style={{ top: `${pct}%` }} />
+                                </>
+                              )}
+                            </div>
+                          </div>
+                          <div className={`min-w-0 flex-1 pl-4 ${isLast ? "pb-7" : ""} ${past || o.status === "cancelled" ? "opacity-50" : ""}`}>
+                            {/* 每节课一张卡；右侧竖列放学科贴纸和状态标签，右边缘对齐，贴纸随卡片一起抬起 */}
+                            <div data-lift className="relative rounded-2xl bg-(--c-surface) px-4 py-3.5">
+                              <div className="flex items-start gap-2">
+                                <div className="min-w-0 flex-1">
+                                  <div className={`text-[16px] leading-tight font-bold tracking-[-.01em] ${o.status === "cancelled" ? "line-through" : ""}`}>{o.name}</div>
+                                  <div className="mt-1 flex items-center gap-2 text-[12.5px] font-medium text-(--c-ink3)">
+                                    <span className="min-w-0 truncate">{[o.location, o.teacher].filter(Boolean).join("，") || "—"}</span>
+                                    {o.conflict && <span className="flex-none rounded-[7px] bg-(--c-amber-soft) px-2 py-0.75 text-[10.5px] font-bold text-(--c-amber)">冲突</span>}
+                                    {o.status === "moved" && <span className="flex-none rounded-[7px] bg-(--c-accent-soft) px-2 py-0.75 text-[10.5px] font-bold text-(--c-accent)">已调课</span>}
+                                    {o.status === "cancelled" && <span className="flex-none rounded-[7px] bg-(--c-surface2) px-2 py-0.75 text-[10.5px] font-bold text-(--c-ink3)">停课</span>}
+                                    {o.status === "leave" && <span className="flex-none rounded-[7px] bg-(--c-rose-soft) px-2 py-0.75 text-[10.5px] font-bold text-(--c-rose)">请假</span>}
+                                    {o.muted && o.status === "normal" && !past && <span className="flex-none rounded-[7px] bg-(--c-surface2) px-2 py-0.75 text-[10.5px] font-bold text-(--c-ink3)">静音</span>}
+                                  </div>
+                                </div>
+                                {sticker && <Sticker id={sticker} size={24} tilt={-4} className="flex-none" />}
+                              </div>
+                              {nowOn && (
+                                <div className="mt-1.5 text-[12px] font-bold tabular-nums text-(--c-accent)">
+                                  上课中，现在
+                                  {fmtMinutes(now)}
+                                  ，还剩
+                                  {fmtDuration(o.end - now)}
+                                </div>
+                              )}
+                              {!nowOn && o.key === nextKey && (!inClass && o.start - now <= 60
+                                ? (
+                                    <div className="mt-1.5 text-[12px] font-bold tabular-nums text-(--c-accent)">
+                                      还有
+                                      {fmtDuration(o.start - now)}
+                                      ，
+                                      {fmtMinutes(o.start)}
+                                      {" "}
+                                      开始
+                                    </div>
+                                  )
+                                : (
+                                    <div className="mt-1.5 text-[12px] font-semibold tabular-nums text-(--c-ink3)">
+                                      下一节，
+                                      {fmtMinutes(o.start)}
+                                      {" "}
+                                      开始
+                                    </div>
+                                  )
+                              )}
+                            </div>
+                          </div>
+                        </button>
+                        {showEnd && ended && day.date === ended.date && o.courseId === ended.courseId && o.start === ended.start && (
+                          <ClassEndCard
+                            moment={ended}
+                            onCamera={() => onCapture("camera", ended.courseId)}
+                            onText={() => onCapture("text", ended.courseId)}
+                            onDismiss={() => setEndHidden(s => [...s, endKey])}
+                          />
+                        )}
+                      </Fragment>
+                    );
+                  })}
                 </div>
-                {day.occ.length > 0 && <span className="text-[12px] font-semibold tabular-nums text-(--c-ink5)">{day.occ.length} 节课，{fmtMinutes(day.occ[0].start)} 开始</span>}
-              </div>
-              {day.vacation && day.occ.length > 0 && <div className="mb-4 rounded-xl bg-(--c-amber-soft) px-3 py-2 text-[12px] font-bold text-(--c-amber)">{day.vacation} · 假期课程</div>}
-              {day.occ.length === 0 && (
-                <div className="pb-7 text-[13.5px] font-semibold text-(--c-ink4)">
-                  {adjustment ? "无课" : inVacation(snap.semester, day.date) ?? (weekdayOf(day.date) >= 6 ? "周末 · 无课" : "无课")}
-                </div>
-              )}
-              {adjustment && (
-                <div className="pb-4 text-[12px] font-semibold text-(--c-accent)">调休 · 补第 {weekOf(snap.semester, adjustment.teachingDate)} 周{WD[weekdayOf(adjustment.teachingDate)]}课程</div>
-              )}
-                            {day.occ.map((o, oi) => {
-                              const isLast = oi === day.occ.length - 1;
-                              const isToday = day.date === today;
-                              const past = (isToday && o.end <= now) || day.date < today;
-                              const nowOn = isToday && o.start <= now && now < o.end;
-                              const pct = ((now - o.start) / Math.max(1, o.end - o.start)) * 100;
-                              const sticker = stickerOfOcc(o, snap.courses);
-                              return (
-                                <Fragment key={o.key}>
-                                  <button
-                                    {...pressProps(() => onPick(o), (r, el) => onMenu(o, r, el))}
-                                    className={`flex w-full py-1.5 text-left transition-transform duration-150 ${liftKey === o.key ? "" : "active:scale-[.985]"}`}
-                                  >
-                                    <div className={`w-11 flex-none pt-3.5 ${past ? "opacity-50" : ""}`}>
-                                      <div className="text-[11px] font-bold text-(--c-ink2)">{o.startPeriod === o.endPeriod ? `${o.startPeriod}节` : `${o.startPeriod}–${o.endPeriod}节`}</div>
-                                      <div className="mt-1 text-[11px] font-medium tabular-nums text-(--c-ink4)">{fmtMinutes(o.start)}</div>
-                                      <div className="text-[11px] font-medium tabular-nums text-(--c-ink5)">{fmtMinutes(o.end)}</div>
-                                    </div>
-                                    {/* 时间轴在一天里贯穿，最后一节下方留出与日期标题下方等高的空白 */}
-                                    <div className={`-my-1.5 ml-3 w-0.5 flex-none self-stretch ${isLast ? "pb-7" : ""}`}>
-                                      <div className="relative h-full bg-(--c-line)">
-                                        {past && <i className="absolute inset-0 bg-(--c-accent)" />}
-                                        {nowOn && (
-                                          <>
-                                            <i className="absolute inset-x-0 top-0 bg-(--c-accent)" style={{ height: `${pct}%` }} />
-                                            <i className="absolute left-1/2 h-2.25 w-2.25 -translate-x-1/2 -translate-y-1/2 rounded-full border-[2.5px] border-(--c-accent) bg-(--c-surface)" style={{ top: `${pct}%` }} />
-                                          </>
-                                        )}
-                                      </div>
-                                    </div>
-                                    <div className={`min-w-0 flex-1 pl-4 ${isLast ? "pb-7" : ""} ${past || o.status === "cancelled" ? "opacity-50" : ""}`}>
-                                      {/* 每节课一张卡；右侧竖列放学科贴纸和状态标签，右边缘对齐，贴纸随卡片一起抬起 */}
-                                      <div data-lift className="relative rounded-2xl bg-(--c-surface) px-4 py-3.5">
-                                        <div className="flex items-start gap-2">
-                                          <div className="min-w-0 flex-1">
-                                            <div className={`text-[16px] leading-tight font-bold tracking-[-.01em] ${o.status === "cancelled" ? "line-through" : ""}`}>{o.name}</div>
-                                            <div className="mt-1 flex items-center gap-2 text-[12.5px] font-medium text-(--c-ink3)">
-                                              <span className="min-w-0 truncate">{[o.location, o.teacher].filter(Boolean).join("，") || "—"}</span>
-                                              {o.conflict && <span className="flex-none rounded-[7px] bg-(--c-amber-soft) px-2 py-0.75 text-[10.5px] font-bold text-(--c-amber)">冲突</span>}
-                                              {o.status === "moved" && <span className="flex-none rounded-[7px] bg-(--c-accent-soft) px-2 py-0.75 text-[10.5px] font-bold text-(--c-accent)">已调课</span>}
-                                              {o.status === "cancelled" && <span className="flex-none rounded-[7px] bg-(--c-surface2) px-2 py-0.75 text-[10.5px] font-bold text-(--c-ink3)">停课</span>}
-                                              {o.status === "leave" && <span className="flex-none rounded-[7px] bg-(--c-rose-soft) px-2 py-0.75 text-[10.5px] font-bold text-(--c-rose)">请假</span>}
-                                              {o.muted && o.status === "normal" && !past && <span className="flex-none rounded-[7px] bg-(--c-surface2) px-2 py-0.75 text-[10.5px] font-bold text-(--c-ink3)">静音</span>}
-                                            </div>
-                                          </div>
-                                          {sticker && <Sticker id={sticker} size={24} tilt={-4} className="flex-none" />}
-                                        </div>
-                                        {nowOn && (
-                                          <div className="mt-1.5 text-[12px] font-bold tabular-nums text-(--c-accent)">
-                                            上课中，现在
-                                            {fmtMinutes(now)}
-                                            ，还剩
-                                            {fmtDuration(o.end - now)}
-                                          </div>
-                                        )}
-                                        {!nowOn && o.key === nextKey && (!inClass && o.start - now <= 60
-                                          ? (
-                                              <div className="mt-1.5 text-[12px] font-bold tabular-nums text-(--c-accent)">
-                                                还有
-                                                {fmtDuration(o.start - now)}
-                                                ，
-                                                {fmtMinutes(o.start)}
-                                                {" "}
-                                                开始
-                                              </div>
-                                            )
-                                          : (
-                                              <div className="mt-1.5 text-[12px] font-semibold tabular-nums text-(--c-ink3)">
-                                                下一节，
-                                                {fmtMinutes(o.start)}
-                                                {" "}
-                                                开始
-                                              </div>
-                                            )
-                                        )}
-                                      </div>
-                                    </div>
-                                  </button>
-                                  {showEnd && ended && day.date === ended.date && o.courseId === ended.courseId && o.start === ended.start && (
-                                    <ClassEndCard
-                                      moment={ended}
-                                      onCamera={() => onCapture("camera", ended.courseId)}
-                                      onText={() => onCapture("text", ended.courseId)}
-                                      onDismiss={() => setEndHidden(s => [...s, endKey])}
-                                    />
-                                  )}
-                                </Fragment>
-                              );
-                            })}
-              </div>
               </Fragment>
             );
           })}

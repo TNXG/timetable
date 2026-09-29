@@ -1,6 +1,6 @@
-import RightLine from "~icons/mingcute/right-line";
 /** 关于：应用信息与开发者 */
 import { useEffect, useRef, useState } from "react";
+import RightLine from "~icons/mingcute/right-line";
 import { appVersion, openExternal } from "../edu/share";
 import { Page, Row, TopBar } from "../ui";
 import { haptic } from "../widgets";

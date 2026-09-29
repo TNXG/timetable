@@ -1,11 +1,11 @@
-import CheckLine from "~icons/mingcute/check-line";
 import type { Snapshot } from "../../domain/engine";
 import type { Course, Task } from "../../domain/types";
-import Book2Line from "~icons/mingcute/book-2-line";
-import FileLine from "~icons/mingcute/file-line";
-import Flag2Line from "~icons/mingcute/flag-2-line";
 import type { ActionItem } from "../ui";
 import React, { useMemo, useRef, useState } from "react";
+import Book2Line from "~icons/mingcute/book-2-line";
+import CheckLine from "~icons/mingcute/check-line";
+import FileLine from "~icons/mingcute/file-line";
+import Flag2Line from "~icons/mingcute/flag-2-line";
 import { fmtMinutes, weekdayOf } from "../../domain/dates";
 import { suggestedDue } from "../../domain/next-class";
 import { nowMinutes, todayStr } from "../semester";

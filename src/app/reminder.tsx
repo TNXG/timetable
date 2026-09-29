@@ -1,6 +1,6 @@
-import RightLine from "~icons/mingcute/right-line";
 import type { Minutes, Prefs } from "../domain/types";
 import { useEffect, useRef, useState } from "react";
+import RightLine from "~icons/mingcute/right-line";
 import { CLASS_LEADS, EARLY_LEADS, TASK_LEADS } from "../domain/types";
 import {
   calendarSupported,

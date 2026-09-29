@@ -1,6 +1,6 @@
+import React, { useRef } from "react";
 import CheckLine from "~icons/mingcute/check-line";
 import CloseLine from "~icons/mingcute/close-line";
-import React, { useRef } from "react";
 import { Sheet } from "./sheet";
 
 export function SheetHead({ title, sub, trail }: { title: string; sub?: string; trail?: React.ReactNode }) {
@@ -128,7 +128,6 @@ export function Tick({ on, multi, className = "" }: { on: boolean; multi?: boole
   }
   return <CheckLine className={`h-[16px] w-[16px] flex-none text-(--c-accent) transition-opacity duration-150 ${on ? "opacity-100" : "opacity-0"} ${className}`} />;
 }
-
 
 export function ActionSheet({ groups, onClose, title }: { groups: ActionItem[][]; onClose: () => void; title: string }) {
   const dismissRef = useRef<(() => void) | null>(null);

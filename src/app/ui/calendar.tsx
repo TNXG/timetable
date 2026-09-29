@@ -1,9 +1,9 @@
-import LeftLine from "~icons/mingcute/left-line";
-import RightLine from "~icons/mingcute/right-line";
-import DownLine from "~icons/mingcute/down-line";
-import UpLine from "~icons/mingcute/up-line";
 import { AnimatePresence, motion } from "motion/react";
 import React, { useMemo, useRef, useState } from "react";
+import DownLine from "~icons/mingcute/down-line";
+import LeftLine from "~icons/mingcute/left-line";
+import RightLine from "~icons/mingcute/right-line";
+import UpLine from "~icons/mingcute/up-line";
 import { weekdayOf } from "../../domain/dates";
 import { haptic } from "../widgets";
 import { PrimaryButton, SheetClose, SheetHead } from "./actions";

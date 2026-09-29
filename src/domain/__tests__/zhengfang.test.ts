@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { parseJcs, parseZfKbList, zcdToWeeks, zfTimeGrid } from "../edu/zhengfang";
+import { addDays } from "../dates";
+import { parseJcs, parseZfKbList, zcdToWeeks, zfTermWeeks, zfTimeGrid } from "../edu/zhengfang";
 
 /* 字段形态取自 2026-09 实测响应：jcs/jcor 带「节」，zcd 有「(单)(双)」和「第N周」两种写法 */
 const zfRow = (over: Partial<{ kcmc: string; xm: string; cdmc: string; xqj: string; jcs: string; zcd: string }>) => ({
@@ -39,6 +40,13 @@ describe("正方课表 JSON 解析", () => {
 
   it("zcdToWeeks：单双周只作用于本段", () => {
     expect(zcdToWeeks("1-3周(双),5周")).toEqual({ weeks: "2,5" });
+  });
+
+  it("移动端周次表确定首周周一与总周数，缺周拒绝导入", () => {
+    const weeks = Array.from({ length: 19 }, (_, i) => ({ zs: String(i + 1), rq: `${addDays("2026-08-31", i * 7)}/${addDays("2026-08-31", i * 7 + 6)}` }));
+    expect(zfTermWeeks(weeks)).toEqual({ startDate: "2026-08-31", totalWeeks: 19 });
+    expect(zfTermWeeks(weeks.filter(w => w.zs !== "6"))).toBeNull();
+    expect(zfTermWeeks([{ zs: "1", rq: "2026-09-01/2026-09-07" }])).toBeNull();
   });
 
   it("zfTimeGrid：日课表行 → 作息表（qssj 含整段、jssj 兜尾都认）", () => {

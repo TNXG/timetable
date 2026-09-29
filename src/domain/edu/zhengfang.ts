@@ -1,11 +1,9 @@
 import type { RuleCourse, RuleOutput } from "../importer";
 import type { Diagnostic, TimeSlot } from "../types";
+import { addDays, weekdayOf } from "../dates";
 import { maskToWeeks, parseWeekExpr } from "../weeks";
 
-/**
- * 正方新版（jwglxt）个人课表接口 `kbcx/xskbcx_cxXsgrkb.html` 返回的一条课。
- * 只取排课字段；`xsxx`（学生信息）等不在这里，脚本侧也不回传。
- */
+/** 正方移动端课表接口的 kbList 行；周课表按查询的 zs 指定实际周次。 */
 export interface ZfKb {
   kcmc?: string; // 课程名
   xm?: string; // 教师
@@ -20,6 +18,49 @@ export interface ZfKb {
 export interface ZfTerm {
   xnm: string; // 学年，"2025" 表示 2025-2026 学年
   xqm: string; // 学期代码：3 / 12 / 16
+}
+
+/** 移动端 cxZc 返回的周次/日期范围，作为课表学期起点和总周数。 */
+export function zfTermWeeks(input: unknown): { startDate: string; totalWeeks: number } | null {
+  if (!Array.isArray(input) || input.length === 0)
+    return null;
+  const weeks = input as { zs?: unknown; rq?: unknown }[];
+  const first = weeks[0];
+  const startDate = /^\d{4}-\d{2}-\d{2}$/.exec(String(first?.rq ?? "").split("/")[0])?.[0];
+  if (String(first?.zs) !== "1" || !startDate || weekdayOf(startDate) !== 1)
+    return null;
+  const totalWeeks = weeks.length;
+  if (totalWeeks > 60 || weeks.some((w, i) => {
+    const range = String(w?.rq ?? "").split("/");
+    return Number(w?.zs) !== i + 1 || range[0] !== addDays(startDate, i * 7) || range[1] !== addDays(startDate, i * 7 + 6);
+  })) {
+    return null;
+  }
+  return { startDate, totalWeeks };
+}
+
+export interface ZfWeeklyTimetable {
+  weeks: unknown;
+  courses: ZfKb[];
+}
+
+/** 周课表逐周结果合并；查询周号直接作为真实周次。 */
+export function parseZfWeekly(input: ZfWeeklyTimetable): RuleOutput {
+  const meta = zfTermWeeks(input.weeks);
+  if (!meta)
+    return { courses: [], diagnostics: [{ level: "error", code: "BAD_TERM_WEEKS", message: "周次读取失败" }] };
+  const rows = input.courses.map((row) => ({ ...row, zcd: String(row.zcd ?? "") }));
+  const parsed = parseZfKbList(rows);
+  const grouped = new Map<string, RuleCourse>();
+  for (const course of parsed.courses) {
+    const key = JSON.stringify([course.name, course.teacher, course.location, course.weekday, course.startPeriod, course.endPeriod]);
+    const existing = grouped.get(key);
+    if (existing)
+      existing.weeks += `,${course.weeks}`;
+    else
+      grouped.set(key, { ...course });
+  }
+  return { courses: [...grouped.values()], diagnostics: parsed.diagnostics, semester: meta };
 }
 
 const XQM_NAME: Record<string, string> = { 3: "第 1 学期", 12: "第 2 学期", 16: "第 3 学期" };

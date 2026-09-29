@@ -1,5 +1,5 @@
-import CloseLine from "~icons/mingcute/close-line";
 import type { ClassMoment } from "../../domain/next-class";
+import CloseLine from "~icons/mingcute/close-line";
 import { CameraIcon } from "../ui";
 
 /* ---------------- 今天页：刚下课那一刻 ---------------- */

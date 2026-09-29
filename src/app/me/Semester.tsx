@@ -93,8 +93,8 @@ export function EduSyncGroup({ onLogin, heading = true }: { onLogin: () => void;
   const [busy, setBusy] = useState(eduSyncing);
   const [revealed, setRevealed] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
-  const touchX = useRef<number | null>(null);
-  const suppressClick = useRef(false);
+  const touchXRef = useRef<number | null>(null);
+  const suppressClickRef = useRef(false);
   if (!s)
     return null;
   const status = statusText(s);
@@ -148,14 +148,14 @@ export function EduSyncGroup({ onLogin, heading = true }: { onLogin: () => void;
         <div
           className="relative bg-(--c-surface) transition-transform duration-200"
           style={{ transform: revealed ? "translateX(-96px)" : "translateX(0)" }}
-          onTouchStart={(e) => { touchX.current = e.touches[0].clientX; }}
+          onTouchStart={(e) => { touchXRef.current = e.touches[0].clientX; }}
           onTouchEnd={(e) => {
-            if (touchX.current === null)
+            if (touchXRef.current === null)
               return;
-            const dx = e.changedTouches[0].clientX - touchX.current;
-            touchX.current = null;
+            const dx = e.changedTouches[0].clientX - touchXRef.current;
+            touchXRef.current = null;
             if (Math.abs(dx) > 35) {
-              suppressClick.current = true;
+              suppressClickRef.current = true;
               setRevealed(dx < 0);
             }
           }}
@@ -163,7 +163,7 @@ export function EduSyncGroup({ onLogin, heading = true }: { onLogin: () => void;
           <button
             type="button"
             onClick={() => {
-              if (suppressClick.current) { suppressClick.current = false; return; }
+              if (suppressClickRef.current) { suppressClickRef.current = false; return; }
               if (revealed) { setRevealed(false); return; }
               if (expired)
                 onLogin();

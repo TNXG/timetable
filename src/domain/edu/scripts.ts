@@ -8,7 +8,7 @@ export interface ProbeResult {
   title: string;
   /** 页面上有像课表的表格（表头带星期） */
   table: boolean;
-  /** 正方新版课表页的学年/学期下拉 */
+  /** 正方课表页的学年/学期选择；移动页使用隐藏字段 */
   zf: { xnm: string[]; xqm: string[]; sel: { xnm: string; xqm: string } } | null;
 }
 
@@ -25,28 +25,49 @@ if (xn && xq && xn.tagName === 'SELECT' && xq.tagName === 'SELECT') {
       .filter(function (v) { return v !== ''; });
   };
   r.zf = { xnm: opt(xn), xqm: opt(xq), sel: { xnm: String(xn.value || ''), xqm: String(xq.value || '') } };
+} else {
+  var mx = document.getElementById('xnm_hide'), mq = document.getElementById('xqm_hide');
+  if (mx && mq && mx.value && mq.value) {
+    var years = [];
+    for (var y = Number(mx.value); y >= Number(mx.value) - 1; y--) years.push(String(y));
+    r.zf = { xnm: years, xqm: ['3', '12', '16'], sel: { xnm: mx.value, xqm: mq.value } };
+  }
 }
 return r;
 `;
 
-/** 正方新版：POST 个人课表接口，只回传排课字段 */
-export function zfFetchJs(xnm: string, xqm: string): string {
-  const body = new URLSearchParams({ xnm, xqm, kzlx: "ck", xsdm: "", kclbdm: "", kclxdm: "" }).toString();
+/** 逐周读取移动端课表；周课表记录是实际排课的权威来源。 */
+export function zfWeeklyFetchJs(xnm: string, xqm: string): string {
+  const term = JSON.stringify({ xnm, xqm });
   return `
 var p = location.pathname, i = p.indexOf('/jwglxt/');
 var base = i >= 0 ? p.slice(0, i) : '';
-var res = await fetch(base + '/jwglxt/kbcx/xskbcx_cxXsgrkb.html?gnmkdm=N2151', {
-  method: 'POST', credentials: 'include',
-  headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json, text/javascript, */*; q=0.01' },
-  body: ${JSON.stringify(body)}
+var headers = { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json, text/javascript, */*; q=0.01' };
+var weekRes = await fetch(base + '/jwglxt/kbcx/xskbcxMobile_cxZc.html', {
+  method: 'POST', credentials: 'include', headers: headers, body: new URLSearchParams(${term})
 });
-if (res.status === 401 || res.status === 403 || res.status === 901 || /\\/(?:cas\\/login|[^/]*login[^/]*\\.(?:html?|jsp|aspx?))(?:[/?#]|$)/i.test(res.url)) throw new Error('登录已失效');
-if (!res.ok) throw new Error('HTTP ' + res.status);
-var text = await res.text();
-if (/^\\s*<(?:!doctype\\s+html|html)\\b/i.test(text) && /<form\\b[^>]*[\\s\\S]*?(?:name=["']?(?:username|password)|type=["']?password)/i.test(text)) throw new Error('登录已失效');
-var j = JSON.parse(text);
-if (!j || !Array.isArray(j.kbList)) throw new Error('课表接口没有返回 kbList');
-return j.kbList.map(function (c) { return { kcmc: c.kcmc, xm: c.xm, cdmc: c.cdmc, xqj: c.xqj, jcs: c.jcs, zcd: c.zcd }; });
+if (!weekRes.ok) throw new Error('周次读取失败');
+var weeks = await weekRes.json();
+if (!Array.isArray(weeks) || !weeks.length) throw new Error('周次读取失败');
+var courses = [];
+for (var wi = 0; wi < weeks.length; wi++) {
+  var z = String(weeks[wi].zs || '');
+  if (!/^\\d+$/.test(z)) throw new Error('周次读取失败');
+  var res = await fetch(base + '/jwglxt/kbcx/xskbcxMobile_cxXsKb.html', {
+    method: 'POST', credentials: 'include', headers: headers,
+    body: new URLSearchParams(${term}).toString() + '&zs=' + encodeURIComponent(z) + '&kblx=1&doType=app'
+  });
+  if (!res.ok) throw new Error('第 ' + z + ' 周课表读取失败');
+  var text = await res.text();
+  if (/^\\s*<(?:!doctype\\s+html|html)\\b/i.test(text)) throw new Error('登录已失效');
+  var data = JSON.parse(text);
+  if (!data || !Array.isArray(data.kbList)) throw new Error('课表接口没有返回 kbList');
+  for (var ci = 0; ci < data.kbList.length; ci++) {
+    var c = data.kbList[ci];
+    courses.push({ kcmc: c.kcmc, xm: c.xm, cdmc: c.cdmc, xqj: c.xqj, jcs: c.jcs, zcd: z });
+  }
+}
+return { weeks: weeks.map(function (w) { return { zs: w.zs, rq: w.rq }; }), courses: courses };
 `;
 }
 

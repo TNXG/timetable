@@ -1,7 +1,7 @@
-import CloseLine from "~icons/mingcute/close-line";
-import CheckLine from "~icons/mingcute/check-line";
 import type { CapturedPhoto, GalleryItem, PermissionStatus } from "../camera";
 import { useCallback, useEffect, useState } from "react";
+import CheckLine from "~icons/mingcute/check-line";
+import CloseLine from "~icons/mingcute/close-line";
 import { camera } from "../camera";
 import { Page, PrimaryButton } from "../ui";
 import { openAppSettings } from "../widgets";

@@ -1,7 +1,7 @@
-import ArrowRightLine from "~icons/mingcute/arrow-right-line";
 import type { ScheduleDraft } from "../domain/schedule";
 import type { Semester } from "../domain/types";
 import React, { useMemo, useRef, useState } from "react";
+import ArrowRightLine from "~icons/mingcute/arrow-right-line";
 import { fmtMinutes } from "../domain/dates";
 import {
   breakBefore,
