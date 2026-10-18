@@ -1,4 +1,3 @@
-import type { IcsSemester } from "../ics";
 import type { RuleCourse, RuleOutput } from "../importer";
 import type { Diagnostic, Semester } from "../types";
 import { weekdayOf, weekOf } from "../dates";
@@ -9,7 +8,9 @@ import { extractPhone } from "./dsl";
    - 时区：浮动时间按墙钟；UTC（Z）和带 TZID 的换算到设备时区；TZID 不认识的按墙钟
    - RRULE FREQ=WEEKLY（INTERVAL/UNTIL/COUNT）展开为周次，EXDATE 挖掉
    - 无 RRULE 的按单次事件，落在哪周就是哪周
-   - 课程表自己导出的文件头里带学期与节次表（X-TT-SEMESTER），按它对齐 */
+   - 带 X-TT-SEMESTER 元数据的文件按所附学期与节次表对齐 */
+
+type IcsSemester = Pick<Semester, "name" | "startDate" | "totalWeeks" | "timeGrid">;
 
 interface VEvent {
   summary?: string;

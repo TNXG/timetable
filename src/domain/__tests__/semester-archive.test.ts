@@ -2,7 +2,6 @@ import type { State } from "../store";
 import type { Semester } from "../types";
 import { describe, expect, it } from "vitest";
 import { guessSemesterName, semesterEnded, termEnd } from "../../app/semester";
-import { describeSemester } from "../ics";
 import { normalize } from "../importer";
 import { parseCsv } from "../importers/dsl";
 import { hydrate, memoryPersistence, Store, uid } from "../store";
@@ -85,8 +84,4 @@ describe("semester lifecycle", () => {
     expect(hydrate(raw).archives).toEqual([]);
   });
 
-  it("ics description carries semester metadata", () => {
-    expect(describeSemester({ name: sem.name, startDate: sem.startDate, totalWeeks: 20, timeGrid: sem.timeGrid }, 12))
-      .toBe("2025–2026 学年 第 1 学期，2025-09-01 开学，20 周，12 门课");
-  });
 });
