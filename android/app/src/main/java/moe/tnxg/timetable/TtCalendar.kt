@@ -107,6 +107,8 @@ class TtCalendar : Plugin() {
             return
         }
         val wanted = call.getArray("calendars", JSArray())!!
+        // Remember ownership before writing so later revocation cannot fake successful cleanup.
+        prefs.edit().putBoolean("has_managed_calendars", true).commit()
         val cr = context.contentResolver
         val written = HashMap<String, String>()
         val have = CalendarOps.findCalendars(context, written)
@@ -234,17 +236,19 @@ class TtCalendar : Plugin() {
     @PluginMethod
     fun removeAll(call: PluginCall) {
         if (!has()) {
-            call.resolve()
+            if (prefs.getBoolean("has_managed_calendars", false)) call.reject("日历权限已关闭，无法移除旧提醒")
+            else call.resolve()
             return
         }
-        val cr = context.contentResolver
-        for (id in CalendarOps.findCalendars(context, null).values) {
-            try {
-                cr.delete(CalendarOps.asSync(ContentUris.withAppendedId(Calendars.CONTENT_URI, id)), null, null)
-            } catch (ignored: Exception) {
+        try {
+            for (id in CalendarOps.findCalendars(context, null).values) {
+                context.contentResolver.delete(CalendarOps.asSync(ContentUris.withAppendedId(Calendars.CONTENT_URI, id)), null, null)
             }
+            prefs.edit().putBoolean("has_managed_calendars", false).commit()
+            call.resolve()
+        } catch (error: Exception) {
+            call.reject("系统日历清理失败", error)
         }
-        call.resolve()
     }
 
     /** 这台设备有没有能打开日历的应用 */

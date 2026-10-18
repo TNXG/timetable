@@ -1,10 +1,10 @@
 import type { Snapshot } from "../domain/engine";
 import type { WidgetStyle } from "../domain/types";
 /** 桌面小组件：四种样式的实时预览，点一下加到桌面 */
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { addDays, dateOf, fmtMinutes, weekOf } from "../domain/dates";
 import { occurrencesOn } from "../domain/engine";
-import { todayStr } from "./semester";
+import { useNowMinutes, useToday } from "./home/hooks";
 import { store } from "./store";
 import { BackButton, Page, StickyHead, tint, WD } from "./ui";
 import { addWidgetToHome, syncWidgets } from "./widgets";
@@ -49,10 +49,9 @@ export function WidgetPage({ snap, onBack }: { snap: Snapshot; onBack: () => voi
     void syncWidgets();
   }, []);
 
-  const today = todayStr();
+  const today = useToday();
   const tomorrow = addDays(today, 1);
-  const [now] = useState(() => new Date());
-  const nowMin = now.getHours() * 60 + now.getMinutes();
+  const nowMin = useNowMinutes();
 
   const list = useMemo(() => occurrencesOn(snap, today).filter(o => o.status !== "cancelled"), [snap, today]);
   const tlist = useMemo(() => occurrencesOn(snap, tomorrow).filter(o => o.status !== "cancelled"), [snap, tomorrow]);
@@ -95,7 +94,7 @@ export function WidgetPage({ snap, onBack }: { snap: Snapshot; onBack: () => voi
             <div className="text-[11.5px] font-bold text-(--c-ink3)">{cur ? "上课中" : "下一节"}</div>
             <div className="mt-1 flex items-baseline gap-1">
               <span className="text-[38px] leading-none font-semibold tracking-[-.035em] tabular-nums text-(--c-ink)">
-                {cur ? Math.max(1, cur.end - nowMin) : next ? Math.max(1, next.start - nowMin) : "—"}
+                {cur ? cur.end - nowMin : next ? next.start + (next.date === tomorrow ? 1440 : 0) - nowMin : "—"}
               </span>
               <span className="text-[13px] font-semibold text-(--c-ink3)">{cur ? "分钟后下课" : next ? "分钟后" : "没有课"}</span>
             </div>

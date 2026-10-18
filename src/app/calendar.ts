@@ -92,16 +92,14 @@ export async function calendarPermission(): Promise<CalendarPermission> {
   }
 }
 
-/** 弹系统权限框；拿到后立刻写入；系统已不再弹框时直接去设置 */
+/** 只申请系统权限；是否同步由单独保存的选择决定，系统已不再弹框时直接去设置 */
 export async function requestCalendarPermission(): Promise<CalendarPermission> {
   if (!calendarSupported())
     return "unsupported";
   try {
     const { status: s } = await TtCalendar.requestPermission();
     setStatus({ permission: s });
-    if (s === "granted")
-      await syncCalendar();
-    else if ((await TtCalendar.checkPermission()).status === "denied")
+    if (s !== "granted" && (await TtCalendar.checkPermission()).status === "denied")
       await openCalendarSettings();
     return s;
   } catch {
@@ -139,18 +137,44 @@ function chunks<T>(list: T[], n: number): T[][] {
 
 let running: Promise<void> | null = null;
 let again = false;
+let timer: number | null = null;
+let syncRevision = 0;
+let clearing: Promise<boolean> | null = null;
 
-async function doSync(): Promise<void> {
+function canSync(revision = syncRevision): boolean {
+  const prefs = store.state.prefs;
+  return calendarSupported() && prefs.reminderMethod === "calendar" && prefs.reminderSetupDone
+    && clearing === null && revision === syncRevision;
+}
+
+function cancelCalendarSync(): void {
+  syncRevision++;
+  again = false;
+  if (timer != null) {
+    window.clearTimeout(timer);
+    timer = null;
+  }
+}
+
+async function doSync(revision: number): Promise<void> {
+  if (!canSync(revision))
+    return;
   const perm = await calendarPermission();
-  if (perm !== "granted")
+  if (!canSync(revision) || perm !== "granted")
     return;
   setStatus({ syncing: true });
   try {
     const snap = store.snapshot();
     const desired = planCalendar(snap, store.state.tasks, store.state.prefs, new Date());
     const ended = !!snap && fromDate(new Date()) > dateOf(snap.semester, snap.semester.totalWeeks, 7);
+    if (!canSync(revision))
+      return;
     const { ids, archived = [] } = await TtCalendar.ensureCalendars({ calendars: withColors(calendarsFor(desired, snap), ended) });
+    if (!canSync(revision))
+      return;
     const { events: remote } = await TtCalendar.readAll();
+    if (!canSync(revision))
+      return;
 
     const skip = new Set(archived);
     const byKey = new Map<string, RemoteEvent>();
@@ -188,14 +212,29 @@ async function doSync(): Promise<void> {
         await TtCalendar.apply({ inserts, updates, deletes });
       } catch {
         // 整批失败就拆小批重试，让一条坏数据只影响它自己
-        for (const d of chunks(deletes, CHUNK)) await TtCalendar.apply({ inserts: [], updates: [], deletes: d }).catch(() => undefined);
-        for (const u of chunks(updates, CHUNK)) await TtCalendar.apply({ inserts: [], updates: u, deletes: [] }).catch(() => undefined);
-        for (const i of chunks(inserts, CHUNK)) await TtCalendar.apply({ inserts: i, updates: [], deletes: [] }).catch(() => undefined);
+        for (const d of chunks(deletes, CHUNK)) {
+          if (!canSync(revision))
+            return;
+          await TtCalendar.apply({ inserts: [], updates: [], deletes: d }).catch(() => undefined);
+        }
+        for (const u of chunks(updates, CHUNK)) {
+          if (!canSync(revision))
+            return;
+          await TtCalendar.apply({ inserts: [], updates: u, deletes: [] }).catch(() => undefined);
+        }
+        for (const i of chunks(inserts, CHUNK)) {
+          if (!canSync(revision))
+            return;
+          await TtCalendar.apply({ inserts: i, updates: [], deletes: [] }).catch(() => undefined);
+        }
       }
     }
+    if (!canSync(revision))
+      return;
     setStatus({ summary: summarize(desired), lastSyncAt: Date.now(), failed: false });
   } catch {
-    setStatus({ failed: true });
+    if (canSync(revision))
+      setStatus({ failed: true });
   } finally {
     setStatus({ syncing: false });
   }
@@ -203,51 +242,64 @@ async function doSync(): Promise<void> {
 
 /** 把 Store 里的当前状态写进系统日历；并发调用合并成一次，进行中再来一次就排队 */
 export function syncCalendar(): Promise<void> {
-  if (!calendarSupported())
+  if (!canSync())
     return Promise.resolve();
   if (running) {
     again = true;
     return running;
   }
+  const revision = syncRevision;
   running = (async () => {
     do {
       again = false;
-      await doSync();
-    } while (again);
+      await doSync(revision);
+    } while (again && canSync(revision));
   })().finally(() => { running = null; });
   return running;
 }
 
-let timer: number | null = null;
-
 /** Store 变化后延迟一小会再写，连续编辑只写一次 */
 export function scheduleCalendarSync(): void {
-  if (!calendarSupported())
-    return;
-  if (timer != null)
+  if (timer != null) {
     window.clearTimeout(timer);
+    timer = null;
+  }
+  if (!canSync())
+    return;
   timer = window.setTimeout(() => {
     timer = null;
     void syncCalendar();
   }, DEBOUNCE_MS);
 }
 
-/** 删掉应用在系统日历里建的全部日历（含已归档的） */
+/** 等待在途调用结束后，只删除原生桥管理的应用日历；清除期间不能再开始同步 */
+function removeCalendars(): Promise<boolean> {
+  if (clearing)
+    return clearing;
+  const pending = running;
+  clearing = (async () => {
+    if (pending)
+      await pending.catch(() => undefined);
+    if (calendarSupported()) {
+      try {
+        await TtCalendar.removeAll();
+      } catch {
+        setStatus({ failed: true });
+        return false;
+      }
+    }
+    setStatus({ syncing: false, summary: null, lastSyncAt: null, failed: false });
+    return true;
+  })().finally(() => { clearing = null; });
+  return clearing;
+}
+
+
+/** 删掉应用在系统日历里建的全部日历（含已归档的），不改 Store 课表与任务 */
 export async function clearCalendar(): Promise<void> {
-  if (!calendarSupported())
-    return;
-  if (timer != null) {
-    window.clearTimeout(timer);
-    timer = null;
-  }
-  if (running)
-    await running.catch(() => undefined);
-  try {
-    await TtCalendar.removeAll();
-  } catch {
-    /* 忽略 */
-  }
-  setStatus({ summary: null, lastSyncAt: null, failed: false });
+  cancelCalendarSync();
+  if (!await removeCalendars())
+    throw new Error("系统日历清理失败");
 }
 
 export async function openCalendarSettings(): Promise<void> {

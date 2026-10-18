@@ -224,7 +224,7 @@ function series(keyBase: string, items: SeriesItem[], tz: string): DesiredEvent[
   }];
 }
 
-function planCourses(snap: Snapshot, prefs: Prefs, tz: string): DesiredEvent[] {
+function planCourses(snap: Snapshot, prefs: Prefs, tz: string, expanded: boolean): DesiredEvent[] {
   const sem = snap.semester;
   let from = sem.startDate;
   let to = dateOf(sem, sem.totalWeeks, 7);
@@ -273,6 +273,8 @@ function planCourses(snap: Snapshot, prefs: Prefs, tz: string): DesiredEvent[] {
       } else if (o.muted) {
         // 这一次不提醒：从系列里挖出来，单独写一条没有提醒的
         out.push(single(`mu:${o.key}`, item, tz));
+      } else if (expanded) {
+        out.push(single(`c:${o.key}`, item, tz));
       } else {
         const base = o.ruleId ? `c:${o.ruleId}` : `e:${o.entryId ?? o.key}`;
         const list = groups.get(base);
@@ -351,13 +353,13 @@ function planTasks(tasks: Task[], courseName: Map<string, string>, prefs: Prefs,
 }
 
 /** 日历里应该有的全部事件 */
-export function planCalendar(snap: Snapshot | null, tasks: Task[], prefs: Prefs, now: Date): DesiredEvent[] {
+export function planCalendar(snap: Snapshot | null, tasks: Task[], prefs: Prefs, now: Date, expanded = false): DesiredEvent[] {
   const tz = localTz();
   const today = fromDate(now);
   const courseName = new Map(snap?.courses.map(c => [c.id, c.name]) ?? []);
   const out: DesiredEvent[] = [];
   if (snap)
-    out.push(...planCourses(snap, prefs, tz), ...planWeeks(snap, tz));
+    out.push(...planCourses(snap, prefs, tz, expanded), ...planWeeks(snap, tz));
   out.push(...planTasks(tasks, courseName, prefs, today, tz));
   return out;
 }
