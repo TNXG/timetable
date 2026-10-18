@@ -1,6 +1,8 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import Prototype from "./App";
+import Onboarding from "./app/Onboarding";
+import { ReminderSetupPage } from "./app/reminder";
 import { initStore } from "./app/store";
 import { initTheme } from "./app/theme";
 import { notifyWebReady } from "./app/widgets";
@@ -20,8 +22,11 @@ async function boot() {
       s.textContent = "*{animation:none!important;transition:none!important}";
       document.head.appendChild(s);
     }
-    const { default: Onboarding } = await import("./app/Onboarding");
-    root.render(<Onboarding initialStep={Number(onboardStep)} onDone={() => {}} />);
+    if (Number(onboardStep) === 2) {
+      root.render(<ReminderSetupPage root />);
+    } else {
+      root.render(<Onboarding initialStep={Number(onboardStep)} onDone={() => {}} />);
+    }
     return;
   }
   const { default: RealApp } = await import("./app/RealApp");

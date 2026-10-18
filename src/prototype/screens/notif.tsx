@@ -3,6 +3,7 @@ import CalendarLine from "~icons/mingcute/calendar-line";
 import LeftLine from "~icons/mingcute/left-line";
 import RightLine from "~icons/mingcute/right-line";
 import { Phone } from "../shared";
+import { Switch, TextAction, Tick } from "../../app/ui";
 
 /* ---------------- 09 notifications ---------------- */
 
@@ -99,9 +100,12 @@ export const notifPrefs: [string, [string, string][]][] = [
 ];
 
 export function NotifPrefScreen() {
+  const [selected, setSelected] = React.useState("off");
+  const [countdown, setCountdown] = React.useState(true);
+  const [refreshedAt, setRefreshedAt] = React.useState(0);
   return (
     <Phone>
-      <div className="flex-1 overflow-hidden pt-12">
+      <div className="flex-1 overflow-y-auto pt-12 scrollbar-none">
         <div className="px-5">
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-(--c-surface)">
             <LeftLine width="14" height="14" style={{ color: "var(--c-ink)" }} strokeLinecap="round" strokeLinejoin="round" />
@@ -109,18 +113,30 @@ export function NotifPrefScreen() {
           <h1 className="mt-4 text-[26px] font-extrabold tracking-[-.02em] text-(--c-ink)">提醒</h1>
         </div>
         <div className="mt-6 px-5">
-          <div className="flex items-center rounded-[18px] bg-(--c-surface) px-4 py-3.5">
-            <span className="flex-1 text-[14px] font-semibold text-(--c-ink)">已同步至系统日历</span>
-            <span className="text-[12.5px] font-bold text-(--c-accent)">打开日历</span>
+          <div className="rounded-[18px] bg-(--c-surface) px-4">
+            {([["off", "关闭", ""], ["calendar", "系统日历", "同步课程、作业和考试"], ["notification", "应用通知", "本机通知与课程实时状态"]] as const).map(([method, label, sub], i) => (
+              <button key={method} onClick={() => setSelected(method)} className={`flex w-full items-center py-3.5 text-left ${i ? "border-t border-(--c-surface2)" : ""}`}>
+                <span className="min-w-0 flex-1"><span className="block text-[14px] font-semibold text-(--c-ink)">{label}</span>{sub && <span className="mt-0.5 block text-[12px] font-medium text-(--c-ink4)">{sub}</span>}</span>
+                <Tick on={selected === method} />
+              </button>
+            ))}
           </div>
         </div>
+        {selected === "notification" && (
+          <div className="mx-5 mt-5 rounded-[18px] bg-(--c-surface) px-4">
+            <div className="flex min-h-14 items-center justify-between gap-3 py-3.5"><span className="text-[14px] font-semibold text-(--c-ink)">通知状态</span><span className="text-[12px] font-medium text-(--c-ink4)">已开启</span></div>
+            <div className="flex items-center justify-between gap-4 border-t border-(--c-surface2) py-3.5"><TextAction>通知设置</TextAction><TextAction onClick={() => setRefreshedAt(Date.now())}>刷新状态</TextAction></div>
+            <div role="status" className="flex min-h-9 items-center pb-3 text-[12px] text-(--c-ink4) tabular-nums">{refreshedAt ? `已刷新 · ${new Date(refreshedAt).toLocaleTimeString("zh-CN", { hour12: false })}` : "尚未检查"}</div>
+            <div className="flex items-center gap-4 border-t border-(--c-surface2) py-3.5"><div className="min-w-0 flex-1"><div className="text-[14px] font-semibold text-(--c-ink)">下课倒计时</div><div className="mt-0.5 text-[12px] text-(--c-ink4)">上课后在超级岛显示剩余时间</div></div><Switch on={countdown} onChange={setCountdown} /></div>
+          </div>
+        )}
         <div className="mt-5 px-5">
           {notifPrefs.map(([g, rows]) => (
             <div key={g} className="mt-5 first:mt-0">
-              <div className="px-0.5 text-[12px] font-bold tracking-[-.01em] text-(--c-ink4)">{g}</div>
+              <div className="px-0.5 text-[12px] font-bold tracking-[-.01em] text-(--c-ink5)">{g}</div>
               <div className="mt-2 rounded-[18px] bg-(--c-surface) px-4">
                 {rows.map(([k, v], i) => (
-                  <div key={k} className={`flex items-center py-3.5 ${i ? "border-t border-(--c-line2)" : ""}`}>
+                  <div key={k} className={`flex items-center py-3.5 ${i ? "border-t border-(--c-surface2)" : ""}`}>
                     <span className="flex-1 text-[14px] font-semibold text-(--c-ink)">{k}</span>
                     <span className="text-[12.5px] font-medium tabular-nums text-(--c-ink4)">{v}</span>
                     <RightLine width="13" height="13" style={{ color: "var(--c-ink5)" }} className="ml-2" />

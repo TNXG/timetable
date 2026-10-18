@@ -130,8 +130,13 @@ export interface Task {
 export const WIDGET_STYLES = ["today", "next", "twoDays", "week"] as const;
 export type WidgetStyle = (typeof WIDGET_STYLES)[number];
 
-/** 提醒与小组件偏好。提醒全部由系统日历发出，这里只是写进日历的提醒模板 */
+export type ReminderMethod = "off" | "calendar" | "notification";
+
+/** 提醒方式与提醒时机独立保存。 */
 export interface Prefs {
+  reminderMethod: ReminderMethod;
+  reminderSetupDone: boolean;
+  showDismissCountdown: boolean;
   classLead: Minutes; // 课前多久提醒
   earlyLead: Minutes; // 早课（08:30 前开始）再加一条更早的提醒，0 = 不加
   taskLeads: Minutes[]; // 作业截止前多久（可多个）；没写时刻的作业按当天 23:00 截止
@@ -157,6 +162,9 @@ export const EXAM_DAYS: number[] = [7, 3, 1, 0];
 
 export function defaultPrefs(): Prefs {
   return {
+    reminderMethod: "off",
+    reminderSetupDone: false,
+    showDismissCountdown: true,
     classLead: 15,
     earlyLead: 30,
     taskLeads: [24 * 60, 2 * 60],

@@ -55,6 +55,10 @@ function hydratePrefs(raw: unknown): Prefs {
   const p = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>;
   const nums = (v: unknown, fallback: number[]) => (Array.isArray(v) && v.every(x => typeof x === "number") ? (v as number[]) : fallback);
   return {
+    reminderMethod: p.reminderMethod === "calendar" || p.reminderMethod === "notification" || p.reminderMethod === "off"
+      ? p.reminderMethod : p.calendarSyncEnabled === true ? "calendar" : "off",
+    reminderSetupDone: typeof p.reminderSetupDone === "boolean" ? p.reminderSetupDone : p.calendarSyncSetupDone === true,
+    showDismissCountdown: typeof p.showDismissCountdown === "boolean" ? p.showDismissCountdown : d.showDismissCountdown,
     classLead: typeof p.classLead === "number" && p.classLead > 0 ? p.classLead : d.classLead,
     earlyLead: typeof p.earlyLead === "number" ? p.earlyLead : d.earlyLead,
     taskLeads: nums(p.taskLeads, d.taskLeads),

@@ -1,6 +1,6 @@
 /** 清除数据：本机课表、作业和系统日历里应用建的日历一并删掉，回到初始状态 */
 import { useState } from "react";
-import { clearCalendar } from "../calendar";
+import { clearReminders } from "../reminder-service";
 import { camera } from "../camera";
 import { logoutEduSync } from "../edu-sync";
 import { store } from "../store";
@@ -10,18 +10,25 @@ import { syncWidgets } from "../widgets";
 /* 清除数据：本机课表、作业和系统日历里应用建的日历一并删掉，回到初始状态 */
 export function ErasePage({ onBack, onDone }: { onBack: () => void; onDone: () => void }) {
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
   const run = async () => {
     if (busy)
       return;
     setBusy(true);
-    const s = store.state;
-    const paths = [...s.tasks.flatMap(t => t.photos?.map(p => p.path) ?? []), s.prefs.avatar, s.prefs.wall].filter(Boolean);
-    await clearCalendar();
-    await camera.remove(paths);
-    await logoutEduSync();
-    store.reset();
-    await syncWidgets();
-    onDone();
+    setError("");
+    try {
+      const s = store.state;
+      const paths = [...s.tasks.flatMap(t => t.photos?.map(p => p.path) ?? []), s.prefs.avatar, s.prefs.wall].filter(Boolean);
+      await clearReminders();
+      await camera.remove(paths);
+      await logoutEduSync();
+      store.reset();
+      await syncWidgets();
+      onDone();
+    } catch {
+      setError("清除失败，数据已保留");
+      setBusy(false);
+    }
   };
   return (
     <Page>
@@ -32,6 +39,7 @@ export function ErasePage({ onBack, onDone }: { onBack: () => void; onDone: () =
             <div key={t} className={`py-3.5 text-[14px] font-semibold text-(--c-ink) ${i ? "border-t border-(--c-surface2)" : ""}`}>{t}</div>
           ))}
         </div>
+        {error && <div role="alert" className="mt-3 text-[12px] text-(--c-rose)">{error}</div>}
       </div>
       <div className="flex-none px-5 pt-3 pb-[max(28px,env(safe-area-inset-bottom))]">
         <PrimaryButton tone="danger" busy={busy} onClick={() => void run()}>清除全部数据</PrimaryButton>

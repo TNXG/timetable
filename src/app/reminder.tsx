@@ -1,20 +1,13 @@
-import type { Minutes, Prefs } from "../domain/types";
+import type { Minutes, Prefs, ReminderMethod } from "../domain/types";
 import { useEffect, useRef, useState } from "react";
 import RightLine from "~icons/mingcute/right-line";
 import { CLASS_LEADS, EARLY_LEADS, TASK_LEADS } from "../domain/types";
-import {
-  calendarSupported,
-  openCalendarSettings,
-  openSystemCalendar,
-  requestCalendarPermission,
-  scheduleCalendarSync,
-  useCalendarStatus,
-} from "./calendar";
+import { REMINDER_METHODS, refreshReminderStatus, scheduleReminderSync, setReminderMethod, useReminderStatus } from "./reminder-service";
+import { openNotificationSettings } from "./notifications";
 import { store, useStore } from "./store";
-import { Page, PrimaryButton, Tick, TopBar } from "./ui";
-import { nativeToast } from "./widgets";
+import { Page, PrimaryButton, Switch, TextAction, Tick, TopBar } from "./ui";
 
-/* ---------------- 提醒（全部由手机日历发出） ---------------- */
+/* 提醒方式统一管理，提醒时机由两种通道共用。 */
 
 type PrefKey = "classLead" | "earlyLead" | "taskLeads" | "examDays";
 
@@ -26,12 +19,6 @@ interface Option {
 
 export const leadLabel = (m: Minutes) => (m % 1440 === 0 ? `${m / 1440} 天` : m % 60 === 0 ? `${m / 60} 小时` : `${m} 分钟`);
 
-/** 作业提醒摘要：按提前量从大到小 */
-export function taskLeadsText(leads: Minutes[]): string {
-  if (leads.length === 0)
-    return "不提醒";
-  return `截止前 ${[...leads].sort((a, b) => b - a).map(leadLabel).join("、")}`;
-}
 
 /** 「7 天、3 天、1 天及当天」 */
 const examDaysLabel = (days: number[]) => {
@@ -100,35 +87,53 @@ const Chevron = () => (
   <RightLine width="13" height="13" className="ml-2" style={{ color: "var(--c-ink5)" }} />
 );
 
-/** 顶部状态卡：已同步 / 未开启 / 权限被拒 */
-function CalendarCard({ onOpen }: { onOpen: () => void }) {
-  const cal = useCalendarStatus();
-  if (!calendarSupported())
-    return null;
-  const granted = cal.permission === "granted";
-  const denied = cal.permission === "denied";
+function MethodPicker({ selected, onSelect, disabled }: { selected: ReminderMethod; onSelect: (method: ReminderMethod) => void; disabled: boolean }) {
   return (
-    <button
-      onClick={() => void (granted ? onOpen() : denied ? openCalendarSettings() : requestCalendarPermission())}
-      className="mt-6 flex w-full items-center rounded-[18px] bg-(--c-surface) px-4 py-3.5 text-left transition-opacity active:opacity-60"
-    >
-      <span className="flex-1 text-[14px] font-semibold text-(--c-ink)">{granted ? "已同步至系统日历" : denied ? "日历权限已关闭" : "未同步至系统日历"}</span>
-      <span className="text-[12.5px] font-bold text-(--c-accent)">{granted ? "打开日历" : denied ? "去设置" : "开启同步"}</span>
-    </button>
+    <fieldset disabled={disabled} className="mt-6 rounded-[18px] bg-(--c-surface) px-4">
+      <legend className="sr-only">提醒方式</legend>
+      {REMINDER_METHODS.map(([method, label], i) => (
+        <button type="button" key={method} onClick={() => onSelect(method)} className={rowCls(i)} aria-pressed={selected === method}>
+          <span className="min-w-0 flex-1">
+            <span className="block text-[14px] font-semibold text-(--c-ink)">{label}</span>
+            {method !== "off" && <span className="mt-0.5 block text-[12px] font-medium text-(--c-ink4)">{method === "calendar" ? "同步课程、作业和考试" : "本机通知与课程实时状态"}</span>}
+          </span>
+          <Tick on={selected === method} />
+        </button>
+      ))}
+    </fieldset>
   );
 }
 
 export function NotifPrefPage({ onBack, onPick }: { onBack: () => void; onPick: (k: PrefKey) => void }) {
   const state = useStore();
-  const open = async () => {
-    if (!(await openSystemCalendar()))
-      nativeToast("没有找到日历应用");
-  };
+  const status = useReminderStatus();
+  useEffect(() => { void refreshReminderStatus(); }, []);
   return (
     <Page>
       <div className="flex-1 overflow-y-auto px-5 pb-32.5 scrollbar-none">
         <TopBar title="提醒" onBack={onBack} />
-        <CalendarCard onOpen={() => void open()} />
+        <MethodPicker selected={state.prefs.reminderMethod} disabled={status.busy} onSelect={method => void setReminderMethod(method)} />
+        {status.error && <div role="alert" className="mt-3 text-[12px] text-(--c-rose)">{status.error}</div>}
+        {state.prefs.reminderMethod === "notification" && (
+          <div className="mt-5 rounded-[18px] bg-(--c-surface) px-4">
+            <div className="flex min-h-14 items-center justify-between gap-3 py-3.5">
+              <span className="text-[14px] font-semibold text-(--c-ink)">通知状态</span>
+              <span className="text-[12px] font-medium text-(--c-ink4)">{!status.checked ? "待检查" : !status.notificationsEnabled ? "未获允许" : status.exactAlarms ? "已开启" : "可能延迟"}</span>
+              <span className="sr-only">{status.focusModuleActive ? "LSPosed 增强已生效" : "Live Updates"}</span>
+            </div>
+            <div className="flex items-center justify-between gap-4 border-t border-(--c-surface2) py-3.5">
+              <TextAction onClick={() => void openNotificationSettings()}>通知设置</TextAction>
+              <TextAction busy={status.refreshing} onClick={() => void refreshReminderStatus()}>刷新状态</TextAction>
+            </div>
+            <div role="status" aria-live="polite" className={`flex min-h-9 items-center pb-3 text-[12px] tabular-nums ${status.refreshError ? "text-(--c-rose)" : "text-(--c-ink4)"}`}>
+              {status.refreshing ? "正在检查通知权限" : status.refreshError || (status.refreshedAt ? `已刷新 · ${new Date(status.refreshedAt).toLocaleTimeString("zh-CN", { hour12: false })}` : "尚未检查")}
+            </div>
+            <div className="flex items-center gap-4 border-t border-(--c-surface2) py-3.5">
+              <div className="min-w-0 flex-1"><div className="text-[14px] font-semibold text-(--c-ink)">下课倒计时</div><div className="mt-0.5 text-[12px] text-(--c-ink4)">上课后在超级岛显示剩余时间</div></div>
+              <Switch on={state.prefs.showDismissCountdown} onChange={on => { store.setPrefs({ showDismissCountdown: on }); scheduleReminderSync(); }} />
+            </div>
+          </div>
+        )}
         <div className="mt-5">
           {GROUPS.map(([g, keys]) => (
             <div key={g} className="mt-5 first:mt-0">
@@ -165,7 +170,7 @@ export function PrefPickPage({ pref, onBack }: { pref: PrefKey; onBack: () => vo
                 key={o.label}
                 onClick={() => {
                   store.setPrefs(typeof o.patch === "function" ? o.patch(state.prefs) : o.patch);
-                  scheduleCalendarSync();
+                  scheduleReminderSync();
                   if (!multi)
                     onBack();
                 }}
@@ -182,59 +187,20 @@ export function PrefPickPage({ pref, onBack }: { pref: PrefKey; onBack: () => vo
   );
 }
 
-/* ---------------- 首次：加进手机日历（全屏内页） ---------------- */
-
-const KINDS: { color: string; label: string; lead: (p: Prefs) => string }[] = [
-  { color: "var(--c-accent)", label: "上课", lead: p => `提前 ${p.classLead} 分钟` },
-  { color: "var(--c-amber)", label: "作业", lead: p => (p.taskLeads.length > 0 ? `提前 ${[...p.taskLeads].sort((a, b) => b - a).map(leadLabel).join("、")}` : "不提醒") },
-  { color: "var(--c-rose)", label: "考试", lead: p => (p.examDays.length > 0 ? `提前 ${examDaysLabel(p.examDays)}` : "不提醒") },
-];
-
-export function CalendarIntroPage({ onDone }: { onDone: () => void }) {
+/** 首次只选择提醒方式，不重复完整提醒设置页。 */
+export function ReminderSetupPage({ root = false, onDone }: { root?: boolean; onDone?: () => void }) {
   const state = useStore();
-  const cal = useCalendarStatus();
-  const [busy, setBusy] = useState(false);
-  const denied = cal.permission === "denied";
-
-  const doneRef = useRef(false);
-  useEffect(() => {
-    if (doneRef.current || cal.permission !== "granted" || busy)
-      return;
-    doneRef.current = true;
-    onDone();
-  }, [cal.permission, busy, onDone]);
-
-  const go = async () => {
-    if (denied) {
-      await openCalendarSettings();
-      return;
-    }
-    setBusy(true);
-    const s = await requestCalendarPermission();
-    if (s === "granted") {
-      onDone();
-      return;
-    }
-    setBusy(false);
-  };
-
+  const status = useReminderStatus();
+  const [selected, setSelected] = useState<ReminderMethod>(state.prefs.reminderMethod);
   return (
-    <Page>
+    <Page root={root} className="pointer-events-auto">
       <div className="flex-1 overflow-y-auto px-5 pb-6 scrollbar-none">
-        <TopBar title="同步至系统日历" />
-        <div className="mt-6 rounded-[18px] bg-(--c-surface) px-4">
-          {KINDS.map((k, i) => (
-            <div key={k.label} className={`flex items-center py-3.5 ${i ? "border-t border-(--c-surface2)" : ""}`}>
-              <i className="mr-3 h-2.25 w-2.25 flex-none rounded-full" style={{ background: k.color }} />
-              <span className="flex-1 text-[14px] font-semibold text-(--c-ink)">{k.label}</span>
-              <span className="text-[12.5px] font-medium tabular-nums text-(--c-ink4)">{k.lead(state.prefs)}</span>
-            </div>
-          ))}
-        </div>
-        {denied && <div className="mt-3 px-1 text-[12px] leading-normal font-medium text-(--c-rose)">日历权限已关闭。</div>}
+        <TopBar title="提醒方式" />
+        <MethodPicker selected={selected} onSelect={setSelected} disabled={status.busy} />
+        {status.error && <div role="alert" className="mt-3 text-[12px] text-(--c-rose)">{status.error}</div>}
       </div>
       <div className="flex-none px-5 pt-2 pb-[max(22px,env(safe-area-inset-bottom))]">
-        <PrimaryButton busy={busy} onClick={() => void go()}>{denied ? "去系统设置允许" : "开启同步"}</PrimaryButton>
+        <PrimaryButton busy={status.busy} onClick={() => void setReminderMethod(selected).then(ok => { if (ok) onDone?.(); })}>完成</PrimaryButton>
       </div>
     </Page>
   );

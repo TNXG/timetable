@@ -2,6 +2,7 @@ import React from "react";
 import AddLine from "~icons/mingcute/add-line";
 import ArrowRightLine from "~icons/mingcute/arrow-right-line";
 import SubtractLine from "~icons/mingcute/subtract-line";
+import { PrimaryButton, Switch } from "../../app/ui";
 import { Phone, SubHead } from "../shared";
 
 /* ---------------- 作息时间：总节数 + 标准时长，每节只填开始，下课自动算；单节下课可单独改 ---------------- */
@@ -212,37 +213,30 @@ export function ScheduleTimeSheet() {
   );
 }
 
-/* ---------------- 首次：加进手机日历 ---------------- */
+/* ---------------- 可选的系统日历同步 ---------------- */
 
-export const calendarIntroRows: [string, string, string][] = [
+export const calendarSyncRows: [string, string, string][] = [
   ["var(--c-accent)", "上课", "提前 15 分钟"],
   ["var(--c-amber)", "作业", "提前 1 天、2 小时"],
   ["var(--c-rose)", "考试", "提前 7 天、3 天、1 天及当天"],
 ];
 
-export function CalendarIntroScreen() {
+export function ReminderSetupScreen() {
+  const [selected, setSelected] = React.useState("off");
   return (
     <Phone>
-      <div className="flex flex-1 flex-col pt-12">
-        <div className="px-5">
-          <h1 className="text-[26px] font-extrabold tracking-[-.02em] text-(--c-ink)">同步至系统日历</h1>
+      <div className="flex flex-1 flex-col overflow-y-auto px-5 pt-12 pb-6 scrollbar-none">
+        <h1 className="text-[26px] font-extrabold tracking-[-.02em] text-(--c-ink)">提醒方式</h1>
+        <div className="mt-6 rounded-[18px] bg-(--c-surface) px-4">
+          {([["off", "关闭", ""], ["calendar", "系统日历", "同步课程、作业和考试"], ["notification", "应用通知", "本机通知与课程实时状态"]] as const).map(([method, label, sub], i) => (
+            <button key={method} onClick={() => setSelected(method)} className={`flex w-full items-center py-3.5 text-left ${i ? "border-t border-(--c-surface2)" : ""}`}>
+              <span className="min-w-0 flex-1"><span className="block text-[14px] font-semibold text-(--c-ink)">{label}</span>{sub && <span className="mt-0.5 block text-[12px] font-medium text-(--c-ink4)">{sub}</span>}</span>
+              <span className="text-[14px] text-(--c-accent)">{selected === method ? "✓" : ""}</span>
+            </button>
+          ))}
         </div>
-        <div className="mt-6 px-5">
-          <div className="rounded-[18px] bg-(--c-surface) px-4">
-            {calendarIntroRows.map(([c, k, v], i) => (
-              <div key={k} className={`flex items-center py-3.5 ${i ? "border-t border-(--c-line2)" : ""}`}>
-                <i className="mr-3 h-2.25 w-2.25 flex-none rounded-full" style={{ background: c }} />
-                <span className="flex-1 text-[14px] font-semibold text-(--c-ink)">{k}</span>
-                <span className="text-[12.5px] font-medium tabular-nums text-(--c-ink4)">{v}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="mt-auto" />
       </div>
-      <div className="px-5 pb-6">
-        <button className="w-full rounded-[18px] bg-(--c-accent) py-3.75 text-[15px] font-bold text-white">开启同步</button>
-      </div>
+      <div className="flex-none px-5 pt-2 pb-[max(22px,env(safe-area-inset-bottom))]"><PrimaryButton>完成</PrimaryButton></div>
     </Phone>
   );
 }

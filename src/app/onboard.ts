@@ -8,8 +8,10 @@ const ONBOARD_KEY = "tt.onboarded.v1";
 export function useOnboard(opts: {
   /** 已有课：引导视为完成 */
   hasCourses: boolean;
-  /** 已有学期：snap 就绪 */
+  /** 已有学期：旧版升级不重复其他引导 */
   hasSemester: boolean;
+  /** 是否已完成提醒方式选择；旧版已选日历的不重复引导。 */
+  reminderSetupDone: boolean;
   /** 内页栈长度：非 0 时引导被内页盖住 */
   stackLen: number;
   /** 回到刚安装的样子：清栈回今天 */
@@ -17,21 +19,23 @@ export function useOnboard(opts: {
   push: (r: Route) => void;
   openEduLogin: () => void;
 }) {
-  const { hasCourses, hasSemester, stackLen, resetToHome, push, openEduLogin } = opts;
+  const { hasCourses, hasSemester, reminderSetupDone, stackLen, resetToHome, push, openEduLogin } = opts;
   const [onboarded, setOnboarded] = useState(() => {
     try {
-      return localStorage.getItem(ONBOARD_KEY) === "1" || hasCourses;
+      return localStorage.getItem(ONBOARD_KEY) === "1" || hasCourses || hasSemester;
     } catch {
-      return hasCourses;
+      return hasCourses || hasSemester;
     }
   });
+  const calendarSetupRoot = useRef(onboarded);
   /** 引导选了去向时：内页从右侧推入盖住引导；内页退回后有课才算完成，否则回到引导 */
   const [onboardUnder, setOnboardUnder] = useState(false);
-  /* 内页退回的同一帧就把引导隐藏（visibility），不等 effect，避免退场动画期间露出引导页 */
+  /* 内页退回同一帧完成引导判定；同步选择等内页栈清空后接续。 */
   const onboardDone = onboardUnder && stackLen === 0 && hasCourses;
   /** 完成判定：本地标记，或「内页退回且已有课」——后者在渲染期直接算，不在 effect 里同步落状态 */
   const onboardedNow = onboarded || onboardDone;
   const showOnboard = !onboardedNow || !hasSemester;
+  const showCalendarSetup = onboardedNow && hasSemester && stackLen === 0 && !reminderSetupDone;
   const onboardBackRef = useRef<() => boolean>(() => false);
 
   useEffect(() => {
@@ -73,9 +77,10 @@ export function useOnboard(opts: {
       /* 忽略 */
     }
     setOnboardUnder(false);
+    calendarSetupRoot.current = false;
     setOnboarded(false);
     resetToHome();
   };
 
-  return { onboarded: onboardedNow, onboardUnder, onboardDone, showOnboard, onboardBackRef, onOnboardDone, eraseDone };
+  return { onboardUnder, showOnboard, showCalendarSetup, calendarSetupRoot: calendarSetupRoot.current, onboardBackRef, onOnboardDone, eraseDone };
 }
