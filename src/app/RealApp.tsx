@@ -9,26 +9,24 @@ import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { DEFAULT_PLUGIN, hasDirectLogin } from "../domain/edu/plugin";
 import { uid } from "../domain/store";
-import { calendarPermission, calendarSupported, syncCalendar } from "./calendar";
 import { camera, nativeCamera } from "./camera";
 import { eduBack } from "./edu/EduBrowserPage";
-import { shareIcs } from "./files";
 import { useToday } from "./home/hooks";
 import { TodayView } from "./home/TodayView";
 import { WeekView } from "./home/WeekView";
 import { MeView } from "./me/MeView";
-import { SemesterPickSheet } from "./me/Semester";
 import { CourseMenu } from "./menu";
 import { useOnboard } from "./onboard";
 import Onboarding from "./Onboarding";
 import { rememberPhoto } from "./photo-src";
+import { ReminderSetupPage } from "./reminder";
 import { notShot, renderRoute } from "./routes";
 import { SearchPalette } from "./search/SearchPalette";
 import { defaultSemester, mondayOf } from "./semester";
 import { store, useStore } from "./store";
 import { useDataSync } from "./sync-effects";
 import { cameraLeave, ComposeOverlay, TodoView } from "./todo";
-import { closeTopSheet, Nav, SHEET, SLIDE } from "./ui";
+import { closeTopSheet, Nav, SHEET } from "./ui";
 import { nativeToast } from "./widgets";
 
 /* ---------------- 壳 ---------------- */
@@ -70,17 +68,9 @@ export default function RealApp() {
     else setMenu(null);
   };
   const [searching, setSearching] = useState(false);
-  const [sharing, setSharing] = useState(false);
-  /* 导出：有往期学期时先选学期，否则直接分享当前 */
-  const share = () => {
-    if (!store.state.semester) { nativeToast("先设置学期"); return; }
-    if (store.state.archives.length > 0)
-      setSharing(true);
-    else void shareIcs();
-  };
   const [compose, setCompose] = useState<{ courseId?: string } | null>(null);
 
-  /* 手机日历与小组件跟着数据走：Store 一变就重写、重画；回前台对时；深链与 .ics 进对应页 */
+  /* 已开启的手机日历与小组件跟随数据变化；回前台对时；深链与 .ics 进对应页。 */
   useDataSync(
     (nextTab, nextStack) => { setMenu(null); setTab(nextTab); setStack(nextStack); },
     (text) => { setMenu(null); setTab(3); setStack([{ k: "importRun", ruleId: "builtin-ics", text, auto: true }]); },
@@ -154,37 +144,21 @@ export default function RealApp() {
 
   /* 首次引导：完成条件、去向分发、清除后的重置 */
   const onboard = useOnboard({
-    hasCourses: state.courses.length > 0,
+    hasCourses: state.courses.length > 0 || state.entries.length > 0,
     hasSemester: !!snap,
+    reminderSetupDone: state.prefs.reminderSetupDone,
     stackLen: stack.length,
     resetToHome: backToTimetable,
     push,
     openEduLogin,
   });
-  const { onboarded, onboardUnder, onboardDone, showOnboard, onboardBackRef, onOnboardDone, eraseDone } = onboard;
-
-  /* 有课表、还没拿到日历权限：每次启动推一次「加进手机日历」，拿到后全自动 */
-  const calAskedRef = useRef(false);
-  useEffect(() => {
-    if (!onboarded || onboardUnder || stack.length > 0 || !calendarSupported() || calAskedRef.current)
-      return;
-    if (state.courses.length === 0)
-      return;
-    let alive = true;
-    void calendarPermission().then((p) => {
-      if (!alive)
-        return;
-      calAskedRef.current = true;
-      if (p === "granted")
-        void syncCalendar();
-      else setStack(s => (s.length === 0 ? [{ k: "calendarIntro" }] : s));
-    });
-    return () => { alive = false; };
-  }, [onboarded, onboardUnder, stack.length, state.courses.length]);
+  const { onboardUnder, showOnboard, showCalendarSetup, calendarSetupRoot, onboardBackRef, onOnboardDone, eraseDone } = onboard;
 
   /* 系统返回：先关浮层，再退内页，再回今天；引导期间退上一步 */
   const backRef = useRef<() => boolean>(() => false);
   backRef.current = () => {
+    if (showCalendarSetup)
+      return true;
     if (menu) { closeMenu(); return true; }
     if (compose) { setCompose(null); return true; }
     if (closeTopSheet())
@@ -268,25 +242,11 @@ export default function RealApp() {
               />
             )}
             {tab === 3 && (
-              <MeView onPage={(p) => {
-                if (p === "share")
-                  share(); else if (p === "import")
-                  push({ k: "eduStatus" }); else push({ k: p } as Route);
-              }}
-              />
+              <MeView onPage={p => push({ k: p })} />
             )}
           </motion.div>
         </AnimatePresence>
 
-        {sharing && snap && (
-          <SemesterPickSheet
-            title="分享哪个学期？"
-            action="分享"
-            options={[snap, ...[...store.state.archives].reverse()]}
-            onPick={s => void shareIcs(s)}
-            onClose={() => setSharing(false)}
-          />
-        )}
 
         {/* 搜索：盖在 Tab 上的浮层（淡入带一点上浮），位于内页之下：从搜索点进课程再返回，回到的是搜索 */}
         <AnimatePresence>
@@ -332,22 +292,21 @@ export default function RealApp() {
   return (
     <div ref={rootRef} className="relative mx-auto h-dvh w-full max-w-107.5 overflow-hidden bg-(--c-bg)">
       {renderApp(shellSnap)}
-      <AnimatePresence initial={false}>
-        {showOnboard && (
-          <motion.div
-            key="onboarding"
-            exit={onboardUnder ? { opacity: 1 } : { transform: "translateX(-28%)", opacity: 0 }}
-            transition={onboardUnder ? { duration: 0 } : SLIDE}
-            className={`absolute inset-0 ${onboardUnder ? "z-35" : "z-90"}`}
-            style={{ visibility: onboardDone ? "hidden" : "visible" }}
-          >
-            <Onboarding
-              backRef={onboardBackRef}
-              onDone={onOnboardDone}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {(showOnboard || (showCalendarSetup && !calendarSetupRoot)) && (
+        <div className={`absolute inset-0 ${onboardUnder || showCalendarSetup ? "z-35" : "z-90"}`}>
+          <Onboarding
+            backRef={onboardBackRef}
+            onDone={onOnboardDone}
+          />
+        </div>
+      )}
+      <div className="pointer-events-none absolute inset-0 z-90">
+        <AnimatePresence initial={false}>
+          {showCalendarSetup && (
+            <ReminderSetupPage key="reminder-setup" root={calendarSetupRoot} />
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   );
 }

@@ -35,6 +35,7 @@ import { ImportPage } from "./import/ImportPage";
 import { ImportRunPage } from "./import/ImportRunPage";
 import { RuleEditorPage } from "./import/RuleEditorPage";
 import { AboutPage } from "./me/AboutPage";
+import { AccountPage } from "./me/AccountPage";
 import { CompleteInfoPage, missingInfo } from "./me/CompleteInfo";
 import { EduStatusPage } from "./me/EduStatus";
 import { ErasePage } from "./me/ErasePage";
@@ -42,8 +43,9 @@ import { CoursesPage } from "./me/Library";
 import { ProfilePage } from "./me/ProfilePage";
 import { ArchivePage, NewSemesterPage, ScheduleAdjustmentPage, SemesterSettings } from "./me/Semester";
 import { StatsPage } from "./me/StatsPage";
+import { SettingsPage } from "./me/SettingsPage";
 import { ThemePage } from "./me/ThemePage";
-import { CalendarIntroPage, NotifPrefPage, PrefPickPage } from "./reminder";
+import { NotifPrefPage, PrefPickPage } from "./reminder";
 import { ScanPage } from "./scan";
 import { SchedulePage } from "./schedule";
 import { todayStr } from "./semester";
@@ -67,6 +69,7 @@ export type Route
     | { k: "eduBrowser"; startUrl?: string; plugin?: EduPlugin }
     | { k: "eduPreview"; out: RuleOutput; src: EduSyncSource; over?: boolean }
     | { k: "eduFail"; info: EduFailInfo }
+    | { k: "account" }
     | { k: "eduStatus" }
     | { k: "import" }
     | { k: "scan" }
@@ -81,7 +84,7 @@ export type Route
     | { k: "completeInfo" }
     | { k: "courses" }
     | { k: "notif" }
-    | { k: "calendarIntro" }
+    | { k: "settings" }
     | { k: "notifPick"; pref: PrefKey }
     | { k: "widget" }
     | { k: "theme" }
@@ -296,7 +299,7 @@ export function renderRoute(r: Route, i: number, ctx: RouteCtx): ReactNode {
     case "rule":
       return <RuleEditorPage key={key} rule={r.rule} onBack={pop} />;
     case "semester":
-      return <SemesterSettings key={key} sem={snap.semester} onBack={pop} onNew={() => push({ k: "newSemester" })} onArchive={id => push({ k: "archive", id })} onLogin={loginBoundSchool} onAdjustments={() => push({ k: "adjustments" })} />;
+      return <SemesterSettings key={key} sem={snap.semester} onBack={pop} onNew={() => push({ k: "newSemester" })} onArchive={id => push({ k: "archive", id })} onAdjustments={() => push({ k: "adjustments" })} />;
     case "adjustments":
       return <ScheduleAdjustmentPage key={key} sem={snap.semester} onBack={pop} />;
     case "archive": {
@@ -309,12 +312,14 @@ export function renderRoute(r: Route, i: number, ctx: RouteCtx): ReactNode {
       return <SchedulePage key={key} sem={snap.semester} onBack={pop} />;
     case "completeInfo":
       return <CompleteInfoPage key={key} onDone={backToTimetable} />;
+    case "account":
+      return <AccountPage key={key} onBack={pop} onEdu={() => getEduSync() ? push({ k: "eduStatus" }) : openEduLogin()} />;
     case "eduStatus":
       return <EduStatusPage key={key} onBack={pop} onLogin={loginBoundSchool} />;
     case "notif":
       return <NotifPrefPage key={key} onBack={pop} onPick={pref => push({ k: "notifPick", pref })} />;
-    case "calendarIntro":
-      return <CalendarIntroPage key={key} onDone={pop} />;
+    case "settings":
+      return <SettingsPage key={key} onBack={pop} onPage={p => push({ k: p })} />;
     case "notifPick":
       return <PrefPickPage key={key} pref={r.pref} onBack={pop} />;
     case "widget":

@@ -6,24 +6,73 @@ import { Nav, Phone, SubHead } from "../shared";
 /* ---------------- 08 me ---------------- */
 
 export const meGroups: [string, [string, string][]][] = [
+  ["", [
+    ["账号", ""],
+    ["设置", ""],
+    ["关于", ""],
+  ]],
+];
+
+const settingsGroups: [string, [string, string][]][] = [
   ["课表", [
-    ["当前课表", "2025 秋季学期"],
-    ["导入规则", "正方教务 通用规则 v2.3"],
+    ["学期", "2025 秋季学期，第 6 / 18 周"],
     ["作息时间", ""],
+    ["课程", "18 门"],
   ]],
   ["提醒", [
-    ["上课提醒", "课前 15 分钟"],
-    ["作业提醒", "截止前 1 天、2 小时"],
+    ["提醒", "关闭"],
   ]],
-  ["其他", [
-    ["外观", "跟随系统"],
-    ["分享课表", ""],
+  ["外观", [
+    ["主题", "跟随系统"],
+    ["桌面小组件", ""],
   ]],
   ["高级", [
-    ["关于", ""],
     ["清除数据", ""],
   ]],
 ];
+
+export function AccountScreen() {
+  return (
+    <Phone>
+      <div className="flex-1 overflow-y-auto pt-12 pb-10 scrollbar-none">
+        <SubHead title="账号" />
+        <div className="mt-6 px-5">
+          <div className="flex items-center rounded-[18px] bg-(--c-surface) px-4 py-3.5">
+            <span className="flex-1 text-[14px] font-semibold text-(--c-ink)">教务账号</span>
+            <span className="text-[12.5px] font-medium text-(--c-ink4)">未登录</span>
+            <RightLine width="13" height="13" className="ml-2 text-(--c-ink5)" />
+          </div>
+        </div>
+      </div>
+    </Phone>
+  );
+}
+
+export function SettingsScreen() {
+  return (
+    <Phone>
+      <div className="flex-1 overflow-y-auto pt-12 pb-10 scrollbar-none">
+        <SubHead title="设置" />
+        <div className="mt-6 space-y-5 px-5">
+          {settingsGroups.map(([group, rows]) => (
+            <div key={group}>
+              <div className="px-0.5 text-[12px] font-bold tracking-[-.01em] text-(--c-ink4)">{group}</div>
+              <div className="mt-2 rounded-[18px] bg-(--c-surface) px-4">
+                {rows.map(([title, value], i) => (
+                  <div key={title} className={`flex items-center py-3.5 ${i ? "border-t border-(--c-line2)" : ""}`}>
+                    <span className="flex-1 text-[14px] font-semibold text-(--c-ink)">{title}</span>
+                    <span className="text-[12.5px] font-medium text-(--c-ink4)">{value}</span>
+                    <RightLine width="13" height="13" style={{ color: "var(--c-ink5)" }} className="ml-2" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </Phone>
+  );
+}
 
 /* ---------------- 个人资料 / 统计 / 清除数据 ---------------- */
 
@@ -267,8 +316,8 @@ export function MeScreen() {
 
           {meGroups.map(([g, rows]) => (
             <div key={g} className="mt-5">
-              <div className="px-0.5 text-[12px] font-bold tracking-[-.01em] text-(--c-ink4)">{g}</div>
-              <div className="mt-2 rounded-[18px] bg-(--c-surface) px-4">
+              {g && <div className="px-0.5 text-[12px] font-bold tracking-[-.01em] text-(--c-ink4)">{g}</div>}
+              <div className={`${g ? "mt-2 " : ""}rounded-[18px] bg-(--c-surface) px-4`}>
                 {rows.map(([k, v], i) => (
                   <div key={k} className={`flex items-center py-3.5 ${i ? "border-t border-(--c-line2)" : ""}`}>
                     <span className="flex-1 text-[14px] font-semibold text-(--c-ink)">{k}</span>

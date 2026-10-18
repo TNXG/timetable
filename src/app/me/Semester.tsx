@@ -1,63 +1,22 @@
 import type { Snapshot } from "../../domain/engine";
 import type { SemesterArchive } from "../../domain/store";
 import type { ScheduleAdjustment, Semester } from "../../domain/types";
-/** 学期：设置、新学期、往期、分享选学期、教务自动更新 */
-import { useRef, useState } from "react";
-import RefreshLine from "~icons/mingcute/refresh-1-line";
-import RightLine from "~icons/mingcute/right-line";
+/** 学期：设置、新学期、往期 */
+import { useState } from "react";
 import { weekdayOf } from "../../domain/dates";
-import { termLabel } from "../../domain/edu/zhengfang";
 import { holidaysBetween } from "../../domain/holidays";
 import { uid } from "../../domain/store";
-import { eduSyncing, logoutEduSync, outcomeText, setEduSyncEnabled, statusText, syncNow, useEduSync } from "../edu-sync";
-import { shareIcs } from "../files";
 import { currentWeek } from "../Onboarding";
 import { guessSemesterName, mondayOf, semesterEnded, termEnd, todayStr } from "../semester";
 import { store, useStore } from "../store";
-import { DateInput, Field, Loader, md, Page, PrimaryButton, RadioRow, Row, Sheet, SheetClose, SheetHead, SubPage, Switch, TextInput, TopBar } from "../ui";
+import { DateInput, Field, md, Page, PrimaryButton, Row, SubPage, Switch, TextInput, TopBar } from "../ui";
 import { haptic, nativeConfirm, nativeToast, syncWidgets } from "../widgets";
 
 const WEEKDAYS = ["", "周一", "周二", "周三", "周四", "周五", "周六", "周日"] as const;
 const liveCount = (s: Snapshot) => s.courses.filter(c => !c.hidden && !c.removedByImport).length;
 
-/* 选学期：和教务导入的「导入哪个学期？」同一套单选样式，第一项默认选中 */
-export function SemesterPickSheet({ title, action, options, onPick, onClose }: {
-  title: string;
-  action: string;
-  options: Snapshot[];
-  onPick: (s: Snapshot) => void;
-  onClose: () => void;
-}) {
-  const [sel, setSel] = useState(0);
-  const dismissRef = useRef<(() => void) | null>(null);
-  return (
-    <Sheet
-      onClose={onClose}
-      dismissRef={dismissRef}
-      className="px-5 pb-1"
-      header={<SheetHead title={title} trail={<SheetClose onClick={() => dismissRef.current?.()} />} />}
-      footer={<div className="px-5 pt-2"><PrimaryButton onClick={() => { onPick(options[sel]); dismissRef.current?.(); }}>{action}</PrimaryButton></div>}
-    >
-      <div className="space-y-2 pt-1">
-        {options.map((s, i) => {
-          const on = i === sel;
-          return (
-            <RadioRow
-              key={s.semester.id}
-              on={on}
-              onClick={() => { haptic("selection"); setSel(i); }}
-              right={i === 0 ? "当前" : `${liveCount(s)} 门课`}
-            >
-              {s.semester.name}
-            </RadioRow>
-          );
-        })}
-      </div>
-    </Sheet>
-  );
-}
 
-/* 往期学期：只读内页，课程列表、底部分享；删除走和规则页一样的红色行 */
+/* 往期学期：只读内页，课程列表与删除入口 */
 export function ArchivePage({ a, onBack }: { a: SemesterArchive; onBack: () => void }) {
   const courses = a.courses.filter(c => !c.hidden && !c.removedByImport);
   const remove = async () => {
@@ -80,133 +39,12 @@ export function ArchivePage({ a, onBack }: { a: SemesterArchive; onBack: () => v
           <Row title="删除学期" danger onClick={() => void remove()} right={<span />} />
         </div>
       </div>
-      <div className="flex-none px-5 pt-2 pb-[max(22px,env(safe-area-inset-bottom))]">
-        <PrimaryButton onClick={() => void shareIcs(a)}>分享课表</PrimaryButton>
-      </div>
     </Page>
   );
 }
 
-/** 教务账号卡：点卡片检查课表，左滑退出；自动更新只控制后台检查。 */
-export function EduSyncGroup({ onLogin, heading = true }: { onLogin: () => void; heading?: boolean }) {
-  const s = useEduSync();
-  const [busy, setBusy] = useState(eduSyncing);
-  const [revealed, setRevealed] = useState(false);
-  const [loggingOut, setLoggingOut] = useState(false);
-  const touchXRef = useRef<number | null>(null);
-  const suppressClickRef = useRef(false);
-  if (!s)
-    return null;
-  const status = statusText(s);
-  const expired = s.lastResult === "expired";
-  const update = async () => {
-    if (busy || loggingOut)
-      return;
-    setBusy(true);
-    try {
-      const o = await syncNow();
-      if (o.result === "expired") {
-        onLogin();
-        return;
-      }
-      haptic(o.result === "ok" || o.result === "nochange" ? "success" : "error");
-      nativeToast(outcomeText(o));
-    } finally {
-      setBusy(false);
-    }
-  };
-  const logout = async () => {
-    if (loggingOut)
-      return;
-    const ok = await nativeConfirm({ title: "退出登录", message: `清除${s.school.name}的登录会话及保存的密码`, ok: "退出" });
-    if (!ok)
-      return;
-    setLoggingOut(true);
-    try {
-      await logoutEduSync();
-      haptic("warning");
-      nativeToast("已退出登录");
-    } catch (e) {
-      nativeToast(e instanceof Error ? e.message : "退出登录失败");
-    } finally {
-      setLoggingOut(false);
-    }
-  };
-  return (
-    <div className={heading ? "mt-7" : "mt-6"}>
-      {heading && <div className="mb-2 px-1 text-[12.5px] font-semibold text-(--c-ink4)">教务账号</div>}
-      <div className="relative overflow-hidden rounded-[18px] bg-(--c-surface)">
-        <button
-          type="button"
-          onClick={() => void logout()}
-          tabIndex={revealed ? 0 : -1}
-          aria-hidden={!revealed}
-          className="absolute inset-y-0 right-0 flex w-24 items-center justify-center bg-(--c-danger) text-[13px] font-bold text-white"
-        >
-          退出登录
-        </button>
-        <div
-          className="relative bg-(--c-surface) transition-transform duration-200"
-          style={{ transform: revealed ? "translateX(-96px)" : "translateX(0)" }}
-          onTouchStart={(e) => { touchXRef.current = e.touches[0].clientX; }}
-          onTouchEnd={(e) => {
-            if (touchXRef.current === null)
-              return;
-            const dx = e.changedTouches[0].clientX - touchXRef.current;
-            touchXRef.current = null;
-            if (Math.abs(dx) > 35) {
-              suppressClickRef.current = true;
-              setRevealed(dx < 0);
-            }
-          }}
-        >
-          <button
-            type="button"
-            onClick={() => {
-              if (suppressClickRef.current) { suppressClickRef.current = false; return; }
-              if (revealed) { setRevealed(false); return; }
-              if (expired)
-                onLogin();
-              else void update();
-            }}
-            aria-label={`${s.school.name}，${status.text}，${expired ? "重新登录" : "检查课表"}`}
-            className="flex w-full items-start gap-3 px-4 pt-4 pb-3 text-left transition-colors active:bg-(--c-surface2)"
-          >
-            <div className="min-w-0 flex-1">
-              <div className="truncate text-[15px] font-bold text-(--c-ink)">{s.school.name}</div>
-              {s.term && <div className="mt-1 text-[12px] font-medium text-(--c-ink4)">{termLabel(s.term)}</div>}
-              <div className={`mt-2 text-[12.5px] font-medium ${status.danger || s.lastResult === "error" ? "text-(--c-danger)" : "text-(--c-ink3)"}`}>{status.text}</div>
-              {(s.lastResult === "error" || expired) && s.lastMessage && <div className="mt-1 text-[11.5px] font-medium text-(--c-danger)">{s.lastMessage}</div>}
-            </div>
-            <div className="flex flex-none items-center gap-1 pt-0.5 text-[12px] font-semibold text-(--c-accent)">
-              {busy
-                ? <Loader size={17} />
-                : expired
-                  ? (
-                      <>
-                        重新登录
-                        <RightLine width={15} height={15} />
-                      </>
-                    )
-                  : (
-                      <>
-                        检查课表
-                        <RefreshLine width={15} height={15} />
-                      </>
-                    )}
-            </div>
-          </button>
-          <div className="mx-4 flex items-center border-t border-(--c-surface2) py-3">
-            <span className="min-w-0 flex-1 text-[12.5px] font-medium text-(--c-ink3)">{busy ? "正在更新课表" : "自动更新课表"}</span>
-            <Switch on={s.enabled} onChange={setEduSyncEnabled} />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
 
-export function SemesterSettings({ sem, onBack, onNew, onArchive, onLogin, onAdjustments }: { sem: Semester; onBack: () => void; onNew: () => void; onArchive: (id: string) => void; onLogin: () => void; onAdjustments: () => void }) {
+export function SemesterSettings({ sem, onBack, onNew, onArchive, onAdjustments }: { sem: Semester; onBack: () => void; onNew: () => void; onArchive: (id: string) => void; onAdjustments: () => void }) {
   const state = useStore();
   const [name, setName] = useState(sem.name);
   const [date, setDate] = useState(sem.startDate);
@@ -237,7 +75,6 @@ export function SemesterSettings({ sem, onBack, onNew, onArchive, onLogin, onAdj
       <div className="mt-2.5 overflow-hidden rounded-2xl bg-(--c-surface)">
         <Row title="开始新学期" desc={ended ? "当前学期移入往期" : undefined} onClick={onNew} />
       </div>
-      <EduSyncGroup onLogin={onLogin} />
       {archives.length > 0 && (
         <>
           <div className="mt-7 mb-2 px-1 text-[12.5px] font-semibold text-(--c-ink4)">往期学期</div>

@@ -1,45 +1,24 @@
 /** 我的：头图 + 概览 + 分组入口 */
 import { useRef } from "react";
 import { weekOf } from "../../domain/dates";
-import { statusText, useEduSync } from "../edu-sync";
-import { taskLeadsText } from "../reminder";
-import { semesterEnded, todayStr } from "../semester";
+import { todayStr } from "../semester";
 import { useStore } from "../store";
-import { THEME_LABEL, useTheme } from "../theme";
 import { Chevron, md, TopVeil, useVeilOpacity } from "../ui";
 import { usePhotoSrc } from "./photo";
 
-export type MePage = "semester" | "schedule" | "courses" | "import" | "share" | "notif" | "widget" | "theme" | "profile" | "stats" | "about" | "erase";
+export type MePage = "account" | "profile" | "stats" | "settings" | "about";
 
 export function MeView({ onPage }: { onPage: (p: MePage) => void }) {
   const state = useStore();
-  const theme = useTheme();
   const sem = state.semester;
   const live = state.courses.filter(c => !c.removedByImport);
-  const eduSync = useEduSync();
-  const eduStatus = eduSync ? statusText(eduSync) : { text: "未登录", danger: false };
   const week = sem ? weekOf(sem, todayStr()) : 0;
   const homework = state.tasks.filter(t => t.kind === "homework");
 
-  const groups: [string, [string, string, MePage][]][] = [
-    ["课表", [
-      ["学期", sem ? (semesterEnded(sem) ? `${sem.name}，已结束` : `${sem.name}，第 ${Math.max(0, Math.min(sem.totalWeeks, week))} / ${sem.totalWeeks} 周`) : "未设置", "semester"],
-      ["作息时间", "", "schedule"],
-      ["课程", `${live.length} 门`, "courses"],
-      ["教务账号", eduStatus.text, "import"],
-      ["分享课表", "", "share"],
-    ]],
-    ["提醒", [
-      ["上课提醒", `课前 ${state.prefs.classLead} 分钟`, "notif"],
-      ["作业提醒", taskLeadsText(state.prefs.taskLeads), "notif"],
-    ]],
-    ["外观", [
-      ["主题", THEME_LABEL[theme], "theme"],
-    ]],
-    ["高级", [
-      ["关于", "", "about"],
-      ["清除数据", "", "erase"],
-    ]],
+  const rows: [string, string, MePage][] = [
+    ["账号", "", "account"],
+    ["设置", "", "settings"],
+    ["关于", "", "about"],
   ];
   const avatar = usePhotoSrc(state.prefs.avatar, "/avatar.jpg");
   const wall = usePhotoSrc(state.prefs.wall, "/wall.jpg");
@@ -88,24 +67,19 @@ export function MeView({ onPage }: { onPage: (p: MePage) => void }) {
             ))}
           </button>
 
-          {groups.map(([g, rows]) => (
-            <div key={g} className="mt-5">
-              <div className="px-0.5 text-[12px] font-bold tracking-[-.01em] text-(--c-ink5)">{g}</div>
-              <div className="mt-2 rounded-[18px] bg-(--c-surface) px-4">
-                {rows.map(([k, v, page], i) => (
-                  <button
-                    key={k}
-                    onClick={() => onPage(page)}
-                    className={`flex w-full items-center py-3.5 text-left transition-opacity active:opacity-60 ${i ? "border-t border-(--c-surface2)" : ""}`}
-                  >
-                    <span className="flex-1 text-[14px] font-semibold text-(--c-ink)">{k}</span>
-                    <span className="text-[12.5px] font-medium text-(--c-ink4)">{v}</span>
-                    <Chevron className="ml-2" />
-                  </button>
-                ))}
-              </div>
-            </div>
-          ))}
+          <div className="mt-5 rounded-[18px] bg-(--c-surface) px-4">
+            {rows.map(([k, v, page], i) => (
+              <button
+                key={k}
+                onClick={() => onPage(page)}
+                className={`flex w-full items-center py-3.5 text-left transition-opacity active:opacity-60 ${i ? "border-t border-(--c-surface2)" : ""}`}
+              >
+                <span className="flex-1 text-[14px] font-semibold text-(--c-ink)">{k}</span>
+                <span className="text-[12.5px] font-medium text-(--c-ink4)">{v}</span>
+                <Chevron className="ml-2" />
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </>
