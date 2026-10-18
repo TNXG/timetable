@@ -6,7 +6,7 @@ import { appVersion } from "../edu/share";
 import { useStore } from "../store";
 import { Chevron, Page, TopBar } from "../ui";
 
-export type DebugPage = "debugOcr" | "debugEdu" | "debugData" | "debugEnv";
+export type DebugPage = "debugOcr" | "debugEdu" | "debugData" | "debugEnv" | "debugIsland";
 
 export function DebugHub({ onBack, onPage }: { onBack: () => void; onPage: (p: DebugPage) => void }) {
   const [version, setVersion] = useState("");
@@ -26,6 +26,7 @@ export function DebugHub({ onBack, onPage }: { onBack: () => void; onPage: (p: D
     ["识别", [["验证码识别", Capacitor.getPlatform() === "android" ? "本地 OCR" : "仅应用内", "debugOcr"]]],
     ["教务", [["会话与更新", eduSync ? statusText(eduSync).text : "未绑定", "debugEdu"]]],
     ["数据", [["本机数据", `${state.courses.length} 门课 · ${state.tasks.length} 项`, "debugData"]]],
+    ["通知", [["超级岛测试", "Live Updates · 手动测试", "debugIsland"]]],
     ["设备", [["运行环境", `${Capacitor.getPlatform()} ${version}`.trim(), "debugEnv"]]],
   ];
   return (

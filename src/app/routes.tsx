@@ -24,6 +24,7 @@ import { DataPage } from "./debug/DataPage";
 import { DebugHub } from "./debug/DebugHub";
 import { EduPage } from "./debug/EduPage";
 import { EnvPage } from "./debug/EnvPage";
+import { IslandPage } from "./debug/IslandPage";
 import { OcrPage } from "./debug/OcrPage";
 import { EDU_RULE, getEduSync, restoreEduSync } from "./edu-sync";
 import { EduBrowserPage } from "./edu/EduBrowserPage";
@@ -93,6 +94,7 @@ export type Route
     | { k: "debugOcr" }
     | { k: "debugEdu" }
     | { k: "debugData" }
+    | { k: "debugIsland" }
     | { k: "debugEnv" };
 
 /* 课程详情里点某条每周安排：找到这条规则在本周（或第一周）的那次课 */
@@ -339,6 +341,8 @@ export function renderRoute(r: Route, i: number, ctx: RouteCtx): ReactNode {
       return <DataPage key={key} onBack={pop} />;
     case "debugEnv":
       return <EnvPage key={key} onBack={pop} />;
+    case "debugIsland":
+      return <IslandPage key={key} onBack={pop} />;
     case "courses":
       return (
         <CoursesPage

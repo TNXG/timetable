@@ -27,6 +27,7 @@ class MainActivity : BridgeActivity() {
         registerPlugin(TtCredentials::class.java)
         registerPlugin(TtOcr::class.java)
         registerPlugin(TtDebug::class.java)
+        registerPlugin(TtIslandDebug::class.java)
         registerPlugin(TtReminders::class.java)
         super.onCreate(savedInstanceState)
         ReminderNotification.register(this)
